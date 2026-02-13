@@ -1,0 +1,73 @@
+%% Paper implementing score test framework for SCR :)
+
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{layout}
+%\geometry{papersize={297mm, 490mm}, left=15mm, right=15mm, top=5mm, bottom=5mm,
+%  headheight=5mm, marginpar=5mm}
+\usepackage{blindtext}
+\usepackage{amsmath}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{multicol}
+%\usepackage{subfig}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage[parfill]{parskip} % Want line break between paragraphs instead of indentation
+\usepackage{setspace} % For line spacing
+\usepackage{lineno,xcolor} % For numbering lines
+
+%% Bibliography, reference
+\usepackage[backend=biber,citestyle=authoryear,uniquename=false,maxcitenames=2,
+mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibliography
+\addbibresource{../../../../../PhDReferences_Zotero.bib} % Bibliography
+
+%% Referencing stuff
+\makeatletter
+\newcommand{\apamaxcitenames}{2}
+
+ \oddsidemargin  -10mm
+ \evensidemargin -10mm
+ \headheight -4mm
+ \headsep -3mm
+\textheight 250mm
+\textwidth 180mm
+\topmargin -4mm
+\topskip -10mm
+
+\title{Using score tests for model selection in spatial capture-recapture}
+
+\begin{document}
+
+\maketitle
+
+% Setting double spacing
+\doublespacing
+% Adding line numbering
+\linenumbers
+
+\section{Introduction}
+\label{sec:introduction}
+
+Model selection is an extremely valuable and important step for any
+statistical analysis, allowing the practitioner to confirm their
+chosen model and any resulting conclusions are likely
+reliable. However, it is also a potentially fraught step of
+statistical analyses, especially when dealing with
+models that require substantial resources and time to fit, such as
+spatial capture-recapture models. In such instances, fitting
+every candidate model and carrying out model selection using
+likelihood ratio tests (LRTs) or comparing AIC values, for example, can be
+impractical and unrealistic. A lack of viable alternatives when working with
+non-traditional data sets and sophisticated models mean these
+traditional model selection methods are often the only option, compromising the practitioner's
+ability to confidently select an appropriate model for their analysis.
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
