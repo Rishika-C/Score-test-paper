@@ -59,10 +59,36 @@ models that require substantial resources and time to fit, such as
 spatial capture-recapture models. In such instances, fitting
 every candidate model and carrying out model selection using
 likelihood ratio tests (LRTs) or comparing AIC values, for example, can be
-impractical and unrealistic. A lack of viable alternatives when working with
+impractical and unrealistic. An absence of viable alternatives when working with
 non-traditional data sets and sophisticated models mean these
 traditional model selection methods are often the only option, compromising the practitioner's
 ability to confidently select an appropriate model for their analysis.
+
+To address this issue, \textcite{catchpoleMorgan1996} propose a
+framework utilising score tests for model selection, focusing on
+the field of capture-recapture. The framework
+greatly reduces the number of candidate models that need to be fitted
+to reliably select a final model for the data. To date, it has
+been applied extensively to capture-recapture models, e.g. \textcite{mccreaMorgan2011},
+\textcite{mccreaMorganBreg2012} and \textcite{mccreaMorganGim2017}. 
+
+The candidate set is organised into levels
+\parencite{mccreaMorgan2011}. The most basic model makes up Level
+0. Level 1 contains all models that have one added parameter dependency compared
+to the Level 0 model; Level 2 contains all models with yet another
+parameter dependency, and so on. We begin with the null hypothesis
+that the Level 0 model is \textbf{adequate(?)} for the data. Our
+alternative hypotheses are that each Level 1 model is
+\textbf{adequate}. We conduct score tests to compare the null
+hypotheses to each alternative hypothesis. The test with the smallest significant
+p-value identifies the Level 1 model defining the new null
+hypothesis. Score tests are used to
+compare this Level 1 model to the relevant Level 2 models (models
+under which the Level 1 model is nested). The process
+continues until we no longer see any significant p-values.
+
+[For score tests -- describe how we calculate stat. And therefore why
+we only fit few models.] 
 
 
 \end{document}
