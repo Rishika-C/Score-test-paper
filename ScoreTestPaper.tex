@@ -51,44 +51,99 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibl
 \label{sec:introduction}
 
 Model selection is an extremely valuable and important step for any
-statistical analysis, allowing the practitioner to confirm their
-chosen model and any resulting conclusions are likely
-reliable. However, it is also a potentially fraught step of
-statistical analyses, especially when dealing with
-models that require substantial resources and time to fit, such as
-spatial capture-recapture models. In such instances, fitting
-every candidate model and carrying out model selection using
-likelihood ratio tests (LRTs) or comparing AIC values, for example, can be
-impractical and unrealistic. An absence of viable alternatives when working with
-non-traditional data sets and sophisticated models mean these
-traditional model selection methods are often the only option, compromising the practitioner's
+statistical analysis, allowing the practitioner to confirm the
+reliability of their chosen model and any resulting
+conclusions. However, it is also a potentially fraught step of 
+statistical analyses, especially when dealing with sophisticated
+models that require substantial resources and time to fit. In such
+instances, fitting every candidate model and carrying 
+out model selection using likelihood ratio tests (LRTs) or comparing
+AIC values, for example, can be impractical and unrealistic. An
+absence of viable alternatives when working with non-traditional data
+sets and elaborate models mean these traditional model selection
+methods are often the only option, compromising the practitioner’s
 ability to confidently select an appropriate model for their analysis.
 
 To address this issue, \textcite{catchpoleMorgan1996} propose a
-framework utilising score tests for model selection, focusing on
-the field of capture-recapture. The framework
-greatly reduces the number of candidate models that need to be fitted
-to reliably select a final model for the data. To date, it has
-been applied extensively to capture-recapture models, e.g. \textcite{mccreaMorgan2011},
+framework harnessing score tests for model selection, greatly reducing
+the number of candidate models that need to be fitted 
+to select an appropriate model for the data. To date, it has
+been applied extensively to the field of capture-recapture, e.g. \textcite{mccreaMorgan2011},
 \textcite{mccreaMorganBreg2012} and \textcite{mccreaMorganGim2017}. 
 
-The candidate set is organised into levels
-\parencite{mccreaMorgan2011}. The most basic model makes up Level
-0. Level 1 contains all models that have one added parameter dependency compared
-to the Level 0 model; Level 2 contains all models with yet another
-parameter dependency, and so on. We begin with the null hypothesis
-that the Level 0 model is \textbf{adequate(?)} for the data. Our
+To implement the score test framework, the candidate set is organised into levels
+\parencite{mccreaMorgan2011} and, beginning with the simplest
+models, score tests define a path through these levels to
+the final model. We begin by identifying the
+most basic model in the set -- this model 
+makes up Level 0. Level 1 contains all models with one added parameter dependency relative
+to the Level 0 model. We begin with the null hypothesis
+that the Level 0 model is \textbf{adequate} for the data. Our
 alternative hypotheses are that each Level 1 model is
-\textbf{adequate}. We conduct score tests to compare the null
-hypotheses to each alternative hypothesis. The test with the smallest significant
-p-value identifies the Level 1 model defining the new null
-hypothesis. Score tests are used to
-compare this Level 1 model to the relevant Level 2 models (models
-under which the Level 1 model is nested). The process
-continues until we no longer see any significant p-values.
+\textbf{adequate}. We conduct score tests comparing this null
+hypotheses to each alternative hypothesis. The alternative hypothesis
+(Level 1 model) for the test with the smallest significant
+p-value defines the new null hypothesis. Level 2 is then constructed,
+consisting of all models with one additional parameter dependency
+compared to this new null model, and the process is repeated. We stop
+when none of the score tests produce significant p-values. At this
+point, the null hypothesis specifies the final chosen model.
 
-[For score tests -- describe how we calculate stat. And therefore why
-we only fit few models.] 
+As we discuss later, to calculate the score test statistics, we
+use estimates from the null hypothesis models. However, we only
+require gradients -- specifically the score vector and information
+matrix -- from the models specified under each alternative hypothesis. No
+estimates are needed. So at
+each step of the process, only the models specified under each null
+hypothesis need to be fitted. Furthermore, the stepwise nature of the
+framework enhances the convenience of any model-fitting -- the Maximum
+Likelihood Estimates (MLEs) from a chosen null model may provide
+appropriate starting values for fitting the next null model
+\parencite{mccreaMorgan2011}. The issue of choosing a model from a 
+potentially vast candidate set of complicated models is reduced to the
+task of calculating score statistics and fitting a few, potentially
+relatively simple, models.
+
+However, despite these benefits, the application of the framework has
+not extended beyond capture-recapture models. The reason is likely
+two-fold. Firstly, depending on the likelihood equations for the models
+being considered, it may seem prohibitively inconvenient to
+obtain the required score vectors and information matrices via
+numerical approximations or exact calculations. Previous infrastructure
+likely made model-fitting, and therefore traditional model selection
+techniques, appear more convenient. Secondly, depending on the
+nature of the models being appraised, it may be unclear how to
+organise models into levels as described above. There may be a lack of
+a clear nesting structure for certain groups of models in the
+candidate set.
+
+For example, although it appears a natural extension to previous capture-recapture
+applications, the score test framework has not yet been applied to
+spatial capture-recapture models. Likelihood equations for these
+models can be quite sophisticated -- any gradients cannot be found
+symbolically, statistical software must be employed. Additionally,
+not all spatial capture-recapture
+models can be organised into a clear nested structure. Depending on
+the parameter dependencies present in the candidate set, it may not be possible
+to build the model levels as described above. \textbf{Such issues are
+common} and pose significant obstacles to the widespread use of this
+seemingly convenient and helpful approach for model selection.
+
+In this paper, we address these issues. We investigate the use of the
+R package `RTMB' to conveniently obtain exact gradients for all models
+being considered when implementing the score test framework. We also
+propose an extension to the framework, allowing for its use when the
+candidate set lacks a clear nested structure. We present these
+novel findings via an illustrative example -- we will implement the
+score test framework using the ovenbird spatial capture-recapture data
+set, available in the `secr' package.
+
+As with the potential difficulties of model selection, our insights
+are not specific to any one field of research. They may be 
+extended and applied to a vast range of models. Our findings aid in
+enhancing the utility of the score test framework, and therefore
+enhance the accessibility of model selection, in general. 
+
 
 
 \end{document}
