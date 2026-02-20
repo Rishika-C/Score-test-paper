@@ -59,9 +59,9 @@ models that require substantial resources and time to fit. In such
 instances, fitting every candidate model and carrying 
 out model selection using likelihood ratio tests (LRTs) or comparing
 AIC values, for example, can be impractical and unrealistic. An
-absence of viable alternatives when working with non-traditional data
-sets and elaborate models mean these traditional model selection
-methods are often the only option, compromising the practitioner’s
+absence of viable alternatives when working with elaborate models
+often means these traditional model selection 
+methods are the only option, compromising the practitioner’s
 ability to confidently select an appropriate model for their analysis.
 
 To address this issue, \textcite{catchpoleMorgan1996} propose a
@@ -73,32 +73,32 @@ been applied extensively to the field of capture-recapture, e.g. \textcite{mccre
 
 To implement the score test framework, the candidate set is organised into levels
 \parencite{mccreaMorgan2011} and, beginning with the simplest
-models, score tests define a path through these levels to
+models, score tests define a path through these levels to select
 the final model. We begin by identifying the
-most basic model in the set -- this model 
-makes up Level 0. Level 1 contains all models with one added parameter dependency relative
-to the Level 0 model. We begin with the null hypothesis
-that the Level 0 model is \textbf{adequate} for the data. Our
-alternative hypotheses are that each Level 1 model is
-\textbf{adequate}. We conduct score tests comparing this null
-hypotheses to each alternative hypothesis. The alternative hypothesis
-(Level 1 model) for the test with the smallest significant
-p-value defines the new null hypothesis. Level 2 is then constructed,
+most basic model -- this model 
+makes up Level 0 of the candidate set. Level 1 contains all models
+with one added parameter dependency. We begin with the null hypothesis
+that the Level 0 model is adequate for the data. Therefore, we refer to
+the Level 0 model as the `$H_0$ model'. Our
+alternative hypotheses are that each Level 1 model provides a
+significantly better fit, and we refer to these models as `$H_1$ models'. We conduct
+score tests comparing the null hypothesis to each alternative
+hypothesis, i.e. comparing the $H_0$ model to each $H_1$ model. The $H_1$ model for the 
+test with the smallest significant 
+p-value defines the new null hypothesis -- that is, it becomes the new
+$H_0$ model. Level 2 is then constructed,
 consisting of all models with one additional parameter dependency
-compared to this new null model, and the process is repeated. We stop
+relative to this model, and the process is repeated. We stop
 when none of the score tests produce significant p-values. At this
-point, the null hypothesis specifies the final chosen model.
+point, the $H_0$ model is the final chosen model.
 
-As we discuss later, to calculate the score test statistics, we
-use estimates from the null hypothesis models. However, we only
-require gradients -- specifically the score vector and information
-matrix -- from the models specified under each alternative hypothesis. No
-estimates are needed. So at
-each step of the process, only the models specified under each null
-hypothesis need to be fitted. Furthermore, the stepwise nature of the
-framework enhances the convenience of any model-fitting -- the Maximum
-Likelihood Estimates (MLEs) from a chosen null model may provide
-appropriate starting values for fitting the next null model
+When conducting a score test comparing two nested models, only the simpler
+of the two models needs to be fitted \textbf{(cite)}. So at
+each step of the process, only the $H_0$ model needs to be
+fitted. Furthermore, the stepwise nature of the 
+framework enhances the convenience of any model-fitting -- the MLEs
+from a given $H_0$ model may provide 
+appropriate starting values for fitting the next $H_0$ model
 \parencite{mccreaMorgan2011}. The issue of choosing a model from a 
 potentially vast candidate set of complicated models is reduced to the
 task of calculating score statistics and fitting a few, potentially
@@ -107,30 +107,29 @@ relatively simple, models.
 However, despite these benefits, the application of the framework has
 not extended beyond capture-recapture models. The reason is likely
 two-fold. Firstly, depending on the likelihood equations for the models
-being considered, it may seem prohibitively inconvenient to
+being considered, it may appear prohibitively inconvenient to
 obtain the required score vectors and information matrices via
-numerical approximations or exact calculations. Previous infrastructure
+exact calculations or numerical approximations. Previous infrastructure
 likely made model-fitting, and therefore traditional model selection
-techniques, appear more convenient. Secondly, depending on the
-nature of the models being appraised, it may be unclear how to
-organise models into levels as described above. There may be a lack of
-a clear nesting structure for certain groups of models in the
-candidate set.
+techniques, more attractive in comparison. Secondly, depending on the
+nature of the models being appraised, there may be a lack of a clear
+nesting structure in the candidate set, making it unclear how to
+organise models into levels as described above.
 
-For example, although it appears a natural extension to previous capture-recapture
-applications, the score test framework has not yet been applied to
+For example, although a natural extension of the previous applications to
+capture-recapture, the score test framework has not yet been applied to
 spatial capture-recapture models. Likelihood equations for these
 models can be quite sophisticated -- any gradients cannot be found
 symbolically, statistical software must be employed. Additionally,
 not all spatial capture-recapture
 models can be organised into a clear nested structure. Depending on
 the parameter dependencies present in the candidate set, it may not be possible
-to build the model levels as described above. \textbf{Such issues are
-common} and pose significant obstacles to the widespread use of this
-seemingly convenient and helpful approach for model selection.
+to build the model levels as described above. Such issues are
+common and pose significant obstacles to the widespread use of this
+seemingly convenient and helpful tool for model selection.
 
-In this paper, we address these issues. We investigate the use of the
-R package `RTMB' to conveniently obtain exact gradients for all models
+In this paper, we address these issues. We propose the use of the
+ `RTMB' R package to conveniently obtain exact gradients for all models
 being considered when implementing the score test framework. We also
 propose an extension to the framework, allowing for its use when the
 candidate set lacks a clear nested structure. We present these
@@ -140,9 +139,9 @@ set, available in the `secr' package.
 
 As with the potential difficulties of model selection, our insights
 are not specific to any one field of research. They may be 
-extended and applied to a vast range of models. Our findings aid in
-enhancing the utility of the score test framework, and therefore
-enhance the accessibility of model selection, in general. 
+applied to a vast range of models. Our findings aid in
+enhancing the general utility of the score test framework, thereby
+enhancing the accessibility of model selection, in general. 
 
 
 
