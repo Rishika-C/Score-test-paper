@@ -71,10 +71,10 @@ to select an appropriate model for the data. To date, it has
 been applied extensively to the field of capture-recapture, e.g. \textcite{mccreaMorgan2011},
 \textcite{mccreaMorganBreg2012} and \textcite{mccreaMorganGim2017}. 
 
-To implement the score test framework, the candidate set is organised into levels
-\parencite{mccreaMorgan2011} and, beginning with the simplest
-models, score tests define a path through these levels to select
-the final model. We begin by identifying the
+To implement the score test framework, the candidate set is organised
+into levels and, beginning with the simplest models, score tests
+define a path through these levels to select the
+final model \parencite{mccreaMorgan2011}. We begin by identifying the 
 most basic model -- this model 
 makes up Level 0 of the candidate set. Level 1 contains all models
 with one added parameter dependency. We begin with the null hypothesis
@@ -118,10 +118,10 @@ organise models into levels as described above.
 
 For example, although a natural extension of the previous applications to
 capture-recapture, the score test framework has not yet been applied to
-spatial capture-recapture models. Likelihood equations for these
+spatial capture-recapture (SCR) models. Likelihood equations for these
 models can be quite sophisticated -- any gradients cannot be found
 symbolically, statistical software must be employed. Additionally,
-not all spatial capture-recapture
+not all SCR
 models can be organised into a clear nested structure. Depending on
 the parameter dependencies present in the candidate set, it may not be possible
 to build the model levels as described above. Such issues are
@@ -141,7 +141,56 @@ As with the potential difficulties of model selection, our insights
 are not specific to any one field of research. They may be 
 applied to a vast range of models. Our findings aid in
 enhancing the general utility of the score test framework, thereby
-enhancing the accessibility of model selection, in general. 
+enhancing the accessibility of model selection, in general.
+
+\section{Illustrative data set: ovenbirds}
+\label{sec:ovenbirds}
+
+In \textcite{borchersEfford2008}, alongside introducing SCR models,
+the authors illustrate a potential approach 
+for SCR model selection. Using data
+collected from a mist-netting survey on the Patuxent Research Refuge
+in Maryland, USA by C.S. Robbins from 1961 to 1972, a variety of SCR
+models are fitted and the final model is selected via AIC.
+
+Since this research was published, there has been some exploration
+into alternative model selection methods for SCR. However, model
+selection via AIC remains an accessible, and therefore common, approach.
+
+For easy comparison to the standard set by such a well-known example, we
+work with a similar data set. The `ovenbird' data
+set, available via the `secr' R package, contains SCR data from a
+mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
+Research Refuge in Maryland, USA by D. K. Dawson and M. G. Efford. As
+described in the package documentation, the forest in the area has
+changed little since the previous survey conducted by C.S. Robbins
+\textbf{(cite)}. 
+
+Forty four mist nets were passively operated for 9 or
+10 non-consecutive days in late May and June of each year. The data
+set consists of all adult ovenbirds that were caught, with one bird
+ killed by a predator while in a net in 2009 \textbf{(cite)}. For
+our analysis, we removed this loss from the data set. We retain any
+records of individual birds being captured more than once in a day. As
+is standard when model fitting, we treat each annual sample as if
+from an independent closed population \textbf{(cite -- Borchers
+  and Efford 2008 or the book.)}
+
+Our candidate model set contains all SCR models that share parameter
+dependencies considered in
+\textcite{borchersEfford2008}. The latter candidate set contains
+fifteen models. By considering all possible combinations of the
+parameter dependencies presented, our set contains forty five models. 
+
+To construct an accurate picture of the potential benefits afforded by
+the score test framework, we fit all models in our candidate set using
+the `secr' R package and select the best model via AIC. Then, we
+implement the score test framework to select the final model. We
+compare features of both approaches, including the time taken and any
+differences in the chosen model.
+
+\textbf{(Are not mentioning that 1961-1972 data set focused on
+  Red-eyed vireo, not ovenbirds. Doesn't seem relevant. Okay?)}
 
 
 
