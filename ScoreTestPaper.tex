@@ -113,16 +113,16 @@ exact calculations or numerical approximations. Previous infrastructure
 likely made model-fitting, and therefore traditional model selection
 techniques, more attractive in comparison. Secondly, depending on the
 nature of the models being appraised, there may be a lack of a clear
-nesting structure in the candidate set, making it unclear how to
-organise models into levels as described above.
+nesting structure in the candidate set appropriate for score tests,
+making it unclear how to organise models into levels as described above.
 
 For example, although a natural extension of the previous applications to
 capture-recapture, the score test framework has not yet been applied to
 spatial capture-recapture (SCR) models. Likelihood equations for these
 models can be quite sophisticated -- any gradients cannot be found
-symbolically, statistical software must be employed. Additionally,
-not all SCR
-models can be organised into a clear nested structure. Depending on
+symbolically, statistical software must be employed. Additionally, not all SCR
+models can be organised into a clear nested structure that is
+suitable for score tests. Depending on
 the parameter dependencies present in the candidate set, it may not be possible
 to build the model levels as described above. Such issues are
 common and pose significant obstacles to the widespread use of this
@@ -132,7 +132,7 @@ In this paper, we address these issues. We propose the use of the
  `RTMB' R package to conveniently obtain exact gradients for all models
 being considered when implementing the score test framework. We also
 propose an extension to the framework, allowing for its use when the
-candidate set lacks a clear nested structure. We present these
+candidate set lacks an appropriate nested structure. We present these
 novel findings via an illustrative example -- we will implement the
 score test framework using the ovenbird spatial capture-recapture data
 set, available in the `secr' package.
@@ -148,14 +148,15 @@ enhancing the accessibility of model selection, in general.
 
 In \textcite{borchersEfford2008}, alongside introducing SCR models,
 the authors illustrate a potential approach 
-for SCR model selection. Using data
-collected from a mist-netting survey on the Patuxent Research Refuge
-in Maryland, USA by C.S. Robbins from 1961 to 1972, a variety of SCR
+for SCR model selection. The data set consists of captures of birds
+(red-eyed vireos) from a mist-netting survey on the Patuxent Research Refuge 
+in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. For
+model selection, a variety of SCR
 models are fitted and the final model is selected via AIC.
 
 Since this research was published, there has been some exploration
 into alternative model selection methods for SCR. However, model
-selection via AIC remains an accessible, and therefore common, approach.
+selection via AIC remains an accessible and common approach.
 
 For easy comparison to the standard set by such a well-known example, we
 work with a similar data set. The `ovenbird' data
@@ -164,11 +165,11 @@ mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
 Research Refuge in Maryland, USA by D. K. Dawson and M. G. Efford. As
 described in the package documentation, the forest in the area has
 changed little since the previous survey conducted by C.S. Robbins
-\textbf{(cite)}. 
+\textbf{(cite)}.
 
 Forty four mist nets were passively operated for 9 or
 10 non-consecutive days in late May and June of each year. The data
-set consists of all adult ovenbirds that were caught, with one bird
+set consists of adult ovenbird captures, with one bird
  killed by a predator while in a net in 2009 \textbf{(cite)}. For
 our analysis, we removed this loss from the data set. We retain any
 records of individual birds being captured more than once in a day. As
@@ -180,18 +181,82 @@ Our candidate model set contains all SCR models that share parameter
 dependencies considered in
 \textcite{borchersEfford2008}. The latter candidate set contains
 fifteen models. By considering all possible combinations of the
-parameter dependencies presented, our set contains forty five models. 
+parameter dependencies presented in \textcite{borchersEfford2008}, our
+set contains forty five models. See \textbf{Table (results)} for a
+description of the models considered. 
 
-To construct an accurate picture of the potential benefits afforded by
-the score test framework, we fit all models in our candidate set using
-the `secr' R package and select the best model via AIC. Then, we
-implement the score test framework to select the final model. We
-compare features of both approaches, including the time taken and any
-differences in the chosen model.
+To construct an accurate picture of the benefits afforded by
+the score test framework, alongside implementing this framework, we
+fit all models in our candidate set using the `secr' R package and
+select the final model via AIC. We compare a new, more efficient,
+approach to model selection with a widely-used traditional approach,
+in the context of an example that would be familiar to practitioners.
 
-\textbf{(Are not mentioning that 1961-1972 data set focused on
-  Red-eyed vireo, not ovenbirds. Doesn't seem relevant. Okay?)}
+\section{Implementing the score test framework}
+\label{sec:implementing}
 
+Working with forty five candidate SCR models, we extend the score test
+framework presented by \textcite{catchpoleMorgan1996}, applying it
+to a comprehensive candidate set in which all models do not fit neatly
+into a nested structure appropriate for score tests.
+
+\subsection{Calculating score test statistics with RTMB}
+\label{sec:calculating-stats-rtmb}
+
+{Explanation of how to calculate score test statistics. Then go into
+  benefits of RTMB.}
+
+\subsection{Issues with nesting}
+\label{sec:nesting-issues}
+
+In our example, issues with nesting arise as we consider models that allow for individual
+heterogeneity. As shown in \textbf{Table (results)}, our candidate set
+contains models that a two-class finite mixture model for $g_0$ and/or
+$\sigma$. These models allow individuals in the population to belong to
+one of two classes, where each class is defined by its corresponding estimate of $g_0$
+and/or $\sigma$ \textbf{(cite -- SECR book)}. The probability of
+belonging to either class is estimated by the model. We refer to this
+probability estimate as $\hat{p}$.
+
+For two models to be nested appropriately for score tests, it must be
+possible to obtain the simpler model from the more complex one by
+placing fixed equality constraints on any additional parameters. Any small changes in
+the values of these constrained parameters must change the
+likelihood. This ensures the $H_1$ log-likelihoods have curvature at any
+$H_0$ estimates, allowing us to calculate the required gradients. 
+
+
+
+% For two models to be nested appropriately for score tests, we must be
+% able to obtain the simpler model from the more complex one by placing fixed
+% constraints on each of the latter model's parameters. 
+
+% Due to their nature, when conducting score tests, models with mixture
+% models can only be compared to models with matching mixture
+% components.  
+
+% For two models to be nested, it must be possible to obtain
+% the simpler model from the more complex one by placing constraints on
+% the latter model's parameters. More specifically, there must be a
+% point in the parameter space for both models that returns the same
+% likelihood value.
+
+% Therefore, models with mixture
+% components can only be nested under, and therefore compared to,
+% models with matching mixture components. Consider the example where
+% our $H_0$ model has no mixture component 
+% and our $H_1$ model has a mixture component for $g_0$. 
+
+% there must be a
+% point in the parameter space for both models that provides the same
+% likelihood value. In other words, there must be a point in the
+% parameter space at which the larger model (the model specified under
+% $H_1$) has the same parameter restrictions as the smaller model (the
+% model under $H_0$). 
+
+% For example, say our
+% $H_0$ model has no mixture component and our $H_1$ model has a mixture
+% component for $g_0$. 
 
 
 \end{document}
