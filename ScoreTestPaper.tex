@@ -203,60 +203,70 @@ into a nested structure appropriate for score tests.
 \subsection{Calculating score test statistics with RTMB}
 \label{sec:calculating-stats-rtmb}
 
-{Explanation of how to calculate score test statistics. Then go into
+{Explanation of how to calculate score test statistics. Include
+  intuitive explanations of what gradients tell us, how they
+  inflate/deflate statistics, what we are looking for overall
+  (distance between H0 MLE vec and H1 peak). Then go into
   benefits of RTMB.}
 
 \subsection{Issues with nesting}
 \label{sec:nesting-issues}
 
-In our example, issues with nesting arise as we consider models that allow for individual
+% For two models to be nested appropriately for score tests, it must be
+% possible to obtain the simpler model from the more complex one by
+% placing fixed constraints on any additional parameters. Any small changes in
+% the values of these constrained parameters must change the
+% likelihood. This ensures the $H_1$ log-likelihood has curvature at the
+% $H_0$ estimates, allowing us to calculate the required gradients.
+
+% From ChatGPT (for own understanding):
+% For a score test, we only need the likelihood to have curvature in the
+% directions of the parameters being tested under H_0 (psi), because the
+% test measures the sensitivity of the likelihood to changes in those
+% parameters. Curvature in other parameters is not required — it does
+% not affect the calculation of the score statistic or its chi-square
+% distribution.
+% The score test looks only at the change in likelihood if we move the
+% additional parameters psi away from their null values (constrained values under
+% H_0).
+
+\textbf{(Perhaps refine with lambda and psi notation, if used in
+  section above?)}
+
+For two nested models to be appropriate for a score test, it must be
+possible to obtain the simpler model (the $H_0$ model) from the more
+complex one (the $H_1$ model) via fixed constraints on any additional
+parameters, $\boldsymbol{\psi}$. All parameters in
+$\boldsymbol{\psi}$ must be identifiable 
+in the context of the $H_0$ model -- i.e. when identifying the point on the
+$H_1$ likelihood surface equivalent to the $H_0$ MLE vector,
+there must be only one choice. When this holds, any small deviations
+from this point cause a
+change in the likelihood, ensuring the $H_1$ log-likelihood 
+at the $H_0$ MLE vector has the required curvature in the direction of
+all parameters in $\boldsymbol{\psi}$. Without this curvature, it is no longer clear how
+far the $H_0$ MLE vector is from the peak of the $H_1$ log-likelihood
+-- that is, it is unclear how much the additional parameters
+in $\boldsymbol{\psi}$ improve fit. Any 
+score statistics are degenerate and the 
+asymptotic Chi-squared distribution gives unusable
+p-values. 
+
+In our example, issues arise as we consider models that allow for individual
 heterogeneity. As shown in \textbf{Table (results)}, our candidate set
-contains models that a two-class finite mixture model for $g_0$ and/or
+contains models that have a two-class finite mixture dependency for $g_0$ and/or
 $\sigma$. These models allow individuals in the population to belong to
 one of two classes, where each class is defined by its corresponding estimate of $g_0$
 and/or $\sigma$ \textbf{(cite -- SECR book)}. The probability of
 belonging to either class is estimated by the model. We refer to this
 probability estimate as $\hat{p}$.
 
-For two models to be nested appropriately for score tests, it must be
-possible to obtain the simpler model from the more complex one by
-placing fixed equality constraints on any additional parameters. Any small changes in
-the values of these constrained parameters must change the
-likelihood. This ensures the $H_1$ log-likelihoods have curvature at any
-$H_0$ estimates, allowing us to calculate the required gradients. 
-
-
-
-% For two models to be nested appropriately for score tests, we must be
-% able to obtain the simpler model from the more complex one by placing fixed
-% constraints on each of the latter model's parameters. 
-
 % Due to their nature, when conducting score tests, models with mixture
 % models can only be compared to models with matching mixture
 % components.  
-
-% For two models to be nested, it must be possible to obtain
-% the simpler model from the more complex one by placing constraints on
-% the latter model's parameters. More specifically, there must be a
-% point in the parameter space for both models that returns the same
-% likelihood value.
-
-% Therefore, models with mixture
-% components can only be nested under, and therefore compared to,
-% models with matching mixture components. Consider the example where
+% Consider the example where
 % our $H_0$ model has no mixture component 
 % and our $H_1$ model has a mixture component for $g_0$. 
-
-% there must be a
-% point in the parameter space for both models that provides the same
-% likelihood value. In other words, there must be a point in the
-% parameter space at which the larger model (the model specified under
-% $H_1$) has the same parameter restrictions as the smaller model (the
-% model under $H_0$). 
-
-% For example, say our
-% $H_0$ model has no mixture component and our $H_1$ model has a mixture
-% component for $g_0$. 
 
 
 \end{document}
