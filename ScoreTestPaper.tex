@@ -172,8 +172,9 @@ Forty four mist nets were passively operated for 9 or
 set consists of adult ovenbird captures, with one bird
  killed by a predator while in a net in 2009 \textbf{(cite)}. For
 our analysis, we removed this loss from the data set. We retain any
-records of individual birds being captured more than once in a day. As
-is standard when model fitting, we treat each annual sample as if
+records of individual birds being captured more than once in a
+day. In the context of SCR, each year represents one session. As
+is standard when fitting multi-session SCR models, we treat samples from each session as if
 from an independent closed population \textbf{(cite -- Borchers
   and Efford 2008 or the book.)}
 
@@ -182,8 +183,9 @@ dependencies considered in
 \textcite{borchersEfford2008}. The latter candidate set contains
 fifteen models. By considering all possible combinations of the
 parameter dependencies presented in \textcite{borchersEfford2008}, our
-set contains forty five models. See \textbf{Table (results)} for a
-description of the models considered. 
+set contains forty five models. See Section \ref{sec:candidate-models} for a
+description of the models considered, and \textbf{Table (results)} for
+the full list of models. 
 
 To construct an accurate picture of the benefits afforded by
 the score test framework, alongside implementing this framework, we
@@ -195,19 +197,64 @@ in the context of an example that would be familiar to practitioners.
 \section{Implementing the score test framework}
 \label{sec:implementing}
 
-Working with forty five candidate SCR models, we extend the score test
+\subsection{Candidate models}
+\label{sec:candidate-models}
+
+Working with forty five SCR models, we extend the score test
 framework presented by \textcite{catchpoleMorgan1996}, applying it
 to a comprehensive candidate set in which all models do not fit neatly
 into a nested structure appropriate for score tests.
 
+Following the example set by \textcite{borchersEfford2008}, and in
+parlance used by the `secr' R package, we
+consider models with the dependencies shown in Table
+\ref{table:dependencies}. As described in 
+\textbf{(cite SECR book)}, the parameter $D$ describes population
+density, while $g_0$ and $\sigma$ describe the probability of
+individuals being caught during the survey.
+
+\begin{table}[h!]
+  \centering
+\begin{tabular} { |c|c|c|c|  }
+  \hline
+  $D$ dependencies & $\sigma$ dependencies &
+                                             \multicolumn{2}{|c|}{$g_0$ dependencies}
+  \\
+  \hline
+  $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim b$ \\
+  \hline
+  $D \sim \text{session}$ & $\sigma \sim \text{session}$ & $g_0 \sim
+                                                           \text{session}$
+             &  $g_0 \sim \text{session} + b$ \\
+  \hline
+  $D \sim \text{Session}$ & $\sigma \sim \text{h2}$ & $g_0 \sim
+                                                      \text{h2}$ & \\
+  \hline
+\end{tabular}
+\caption{All parameter dependencies considered in our candidate set.}
+\label{table:dependencies}
+\end{table}
+
+In Table 1:
+\begin{itemize}
+  \item Brief description of each dependency, e.g. 1 means constant
+    across all sessions
+\end{itemize}
+
+
+% {Description of candidate model set, dependencies.}
+
 \subsection{Calculating score test statistics with RTMB}
 \label{sec:calculating-stats-rtmb}
 
-{Explanation of how to calculate score test statistics. Include
-  intuitive explanations of what gradients tell us, how they
-  inflate/deflate statistics, what we are looking for overall
-  (distance between H0 MLE vec and H1 peak). Then go into
-  benefits of RTMB.}
+To calculate score test statistics, we use the following formula:
+
+
+% {Explanation of how to calculate score test statistics. Include
+%   intuitive explanations of what gradients tell us, how they
+%   inflate/deflate statistics, what we are looking for overall
+%   (distance between H0 MLE vec and H1 peak). Then go into
+%   benefits of RTMB.}
 
 \subsection{Issues with nesting}
 \label{sec:nesting-issues}
@@ -253,7 +300,7 @@ asymptotic Chi-squared distribution gives unusable
 p-values. 
 
 In our example, issues arise as we consider models that allow for individual
-heterogeneity. As shown in \textbf{Table (results)}, our candidate set
+heterogeneity. As mentioned in Section \ref{sec:candidate-models}, our candidate set
 contains models that have a two-class finite mixture dependency for $g_0$ and/or
 $\sigma$. These models allow individuals in the population to belong to
 one of two classes, where each class is defined by its corresponding estimate of $g_0$
