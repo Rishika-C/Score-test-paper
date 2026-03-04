@@ -165,18 +165,20 @@ mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
 Research Refuge in Maryland, USA by D. K. Dawson and M. G. Efford. As
 described in the package documentation, the forest in the area has
 changed little since the previous survey conducted by C.S. Robbins
-\textbf{(cite)}.
+\parencite{secr-pkg}.
 
-Forty four mist nets were passively operated for 9 or
-10 non-consecutive days in late May and June of each year. The data
+Forty four mist nets were passively operated for nine or
+ten non-consecutive days in late May and June of each year. The data
 set consists of adult ovenbird captures, with one bird
- killed by a predator while in a net in 2009 \textbf{(cite)}. For
+ killed by a predator while in a net in 2009 \parencite{secr-pkg}. For
 our analysis, we removed this loss from the data set. We retain any
 records of individual birds being captured more than once in a
-day. In the context of SCR, each year represents one session. As
-is standard when fitting multi-session SCR models, we treat samples from each session as if
-from an independent closed population \textbf{(cite -- Borchers
-  and Efford 2008 or the book.)}
+day. In the context of SCR, populations separated by space, time (e.g.
+years) or attributes such as sex are referred to as `sessions'
+\parencite{effordBook2009}. Therefore, our 
+data set contains five sessions, each with nine or ten sampling occasions. As
+is standard when fitting multi-session SCR models, we each session as
+if from an independent closed population \parencite{effordBook2009}. 
 
 Our candidate model set contains all SCR models that share parameter
 dependencies considered in
@@ -200,32 +202,40 @@ in the context of an example that would be familiar to practitioners.
 \subsection{Candidate models}
 \label{sec:candidate-models}
 
-Working with forty five SCR models, we extend the score test
-framework presented by \textcite{catchpoleMorgan1996}, applying it
-to a comprehensive candidate set in which all models do not fit neatly
-into a nested structure appropriate for score tests.
-
-Following the example set by \textcite{borchersEfford2008}, and in
-parlance used by the `secr' R package, we
+Following the example set by \textcite{borchersEfford2008}, we
 consider models with the dependencies shown in Table
-\ref{table:dependencies}. As described in 
-\textbf{(cite SECR book)}, the parameter $D$ describes population
-density, while $g_0$ and $\sigma$ describe the probability of
-individuals being caught during the survey.
+\ref{table:dependencies}. We specify these dependencies using the
+parlance of the `secr' R package. 
+
+When fitting an SCR model, it is standard to
+specify the detection function to use, and any dependencies for
+$D$ and the detection function parameters. We only consider SCR
+models with a half-normal detection function. Although
+\textcite{borchersEfford2008} consider SCR models with half-normal and
+hazard rate detection functions, we only consider models with a
+half-normal detection function. Hazard rate detection
+functions are seldom used and generally not recommended due to their
+long tail \parencite{secr-pkg}. Therefore, when fitting our models, we
+specify dependencies for $D$ 
+and detection function parameters $g_0$ and $\sigma$. As described in 
+\textcite{effordBook2009}, the parameter $D$ describes population
+density, while $g_0$ and $\sigma$ describe the capture probability for
+individuals in the survey population.
 
 \begin{table}[h!]
   \centering
 \begin{tabular} { |c|c|c|c|  }
   \hline
-  $D$ dependencies & $\sigma$ dependencies &
-                                             \multicolumn{2}{|c|}{$g_0$ dependencies}
+  \textbf{$D$ dependencies} & \textbf{$\sigma$ dependencies} &
+                                             \multicolumn{2}{|c|}{\textbf{$g_0$
+                                                               dependencies}} 
   \\
   \hline
-  $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim b$ \\
+  $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim \text{b}$ \\
   \hline
   $D \sim \text{session}$ & $\sigma \sim \text{session}$ & $g_0 \sim
                                                            \text{session}$
-             &  $g_0 \sim \text{session} + b$ \\
+             &  $g_0 \sim \text{session} + \text{b}$ \\
   \hline
   $D \sim \text{Session}$ & $\sigma \sim \text{h2}$ & $g_0 \sim
                                                       \text{h2}$ & \\
@@ -235,14 +245,42 @@ individuals being caught during the survey.
 \label{table:dependencies}
 \end{table}
 
-In Table 1:
+In Table 1 (see \textcite{secr-pkg} for further detail):
 \begin{itemize}
-  \item Brief description of each dependency, e.g. 1 means constant
-    across all sessions
+  \item `$\sim 1$' represents a parameter being held pooled across
+    sessions. For example, with $D \sim 1$, we have only one
+    estimate of $D$ and use it for all sessions;
+  \item `$\sim \text{session}$' means a parameter has session-specific
+    levels. If we specify $D \sim \text{session}$, we have a separate estimate
+    of $D$ for each session;
+  \item `$\sim \text{Session}$' represents a trend across
+    sessions. With `$D \sim \text{Session}$', we  have $D(y) =
+    exp(\beta_0 + \beta_1 y)$, 
+    where $y$ is the session number \parencite{borchersEfford2008}. In
+    our case, $y=1,...,5$;
+  \item `$\sim \text{h2}$' denotes a
+    two-class finite mixture model. For example, with `$\sigma \sim \text{h2}$', we assume
+    there are two groups in the population: Group 1 uses $\sigma_1$ in its
+    detection function,  while Group 2 uses $\sigma_2$. An
+    individual falls in Group 1 with probability $p$ and in Group 2
+    with probability $(1-p)$. Estimates are pooled across sessions; 
+  \item `$\sim \text{b}$' represents a trap response. With $g_0 \sim
+    \text{b}$, we have two estimates of $g_0$: one for individuals
+    captured on previous sampling occasions, and one for individuals
+    that have not yet been captured in a session. Estimates are pooled
+    across sessions;
+  \item `$\sim \text{session} + \text{b}$' means we have
+    session-specific levels and a trap response -- e.g. with $g_0 \sim \text{session} +
+    \text{b}$, we fit a model with two separate estimates of $g_0$ for
+    each session: one for previously captured individuals, and one for
+    individuals that have not been caught yet. 
 \end{itemize}
 
-
-% {Description of candidate model set, dependencies.}
+By considering all combinations of these parameter dependencies, we
+have forty five SCR models in our candidate set. We extend the score test
+framework presented by \textcite{catchpoleMorgan1996}, applying it
+to a comprehensive candidate set in which all models do not fit neatly
+into a nested structure appropriate for score tests.
 
 \subsection{Calculating score test statistics with RTMB}
 \label{sec:calculating-stats-rtmb}
@@ -315,6 +353,7 @@ probability estimate as $\hat{p}$.
 % our $H_0$ model has no mixture component 
 % and our $H_1$ model has a mixture component for $g_0$. 
 
+\printbibliography
 
 \end{document}
 
