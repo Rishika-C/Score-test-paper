@@ -1,10 +1,18 @@
 %% Paper implementing score test framework for SCR :)
 
+%% Uncomment to knit for Ben and Rachel:
+% \documentclass[14pt]{extarticle}
+% \usepackage{geometry}
+% \geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
+%  headheight=5mm, marginpar=5mm}
+
+%% Uncomment to knit for writing: 
 \documentclass{article}
 \usepackage{geometry}
+\geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
+ headheight=5mm, marginpar=5mm}
+
 \usepackage{layout}
-%\geometry{papersize={297mm, 490mm}, left=15mm, right=15mm, top=5mm, bottom=5mm,
-%  headheight=5mm, marginpar=5mm}
 \usepackage{blindtext}
 \usepackage{amsmath}
 \usepackage[dvipsnames]{xcolor}
@@ -27,14 +35,6 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibl
 \makeatletter
 \newcommand{\apamaxcitenames}{2}
 
- \oddsidemargin  -10mm
- \evensidemargin -10mm
- \headheight -4mm
- \headsep -3mm
-\textheight 250mm
-\textwidth 180mm
-\topmargin -4mm
-\topskip -10mm
 
 \title{Using score tests for model selection in spatial capture-recapture}
 
@@ -50,13 +50,29 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibl
 \section{Introduction}
 \label{sec:introduction}
 
-Model selection is an extremely valuable and important step for any
+Model selection is an important step for
 statistical analysis, allowing the practitioner to confirm the
 reliability of their chosen model and any resulting
 conclusions. However, it is also a potentially fraught step of 
 statistical analyses, especially when dealing with sophisticated
-models that require substantial resources and time to fit. In such
-instances, fitting every candidate model and carrying 
+models that require substantial resources and time to fit.
+
+Well-known model selection methods, widely
+used across many fields, include comparing
+models using likelihood ratio tests (LRTs), AIC values and score
+tests. These methods have their own advantages. To compare two models via
+LRTs or AIC values, both models simply need to be fitted and quick
+calculations performed using their log-likelihood values. To compare
+two models using a score test, only the simpler of the two models
+needs to be fitted. However, gradients from the more complicated model
+are required to calculate the score test statistic. Therefore, despite
+its clear benefits, the score test is often seen as the less
+practical option.   
+
+
+
+
+In such instances, fitting every candidate model and carrying 
 out model selection using likelihood ratio tests (LRTs) or comparing
 AIC values, for example, can be impractical and unrealistic. An
 absence of viable alternatives when working with elaborate models
