@@ -36,7 +36,7 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibl
 \newcommand{\apamaxcitenames}{2}
 
 
-\title{Using score tests for model selection in spatial capture-recapture}
+\title{Harnessing score tests for model selection}
 
 \begin{document}
 
@@ -50,26 +50,76 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibl
 \section{Introduction}
 \label{sec:introduction}
 
+\textbf{Rethink structure for better, easier flow? Maybe want to
+  introduce AD tools later on, and say something like 'In this paper,
+  we are proposing the use of AD tools -- specifically the `RTMB' R
+  package -- to harness score tests for model selection, via the
+  framework introduced by \textcite{catchpoleMorgan1996}.}
+
 Model selection is an important step for
 statistical analysis, allowing the practitioner to confirm the
 reliability of their chosen model and any resulting
-conclusions. However, it is also a potentially fraught step of 
-statistical analyses, especially when dealing with sophisticated
-models that require substantial resources and time to fit.
-
-Well-known model selection methods, widely
+conclusions. Well-known model selection methods, widely
 used across many fields, include comparing
 models using likelihood ratio tests (LRTs), AIC values and score
-tests. These methods have their own advantages. To compare two models via
+tests. Each method has its own advantages. To compare two models via
 LRTs or AIC values, both models simply need to be fitted and quick
 calculations performed using their log-likelihood values. To compare
 two models using a score test, only the simpler of the two models
-needs to be fitted. However, gradients from the more complicated model
+needs to be fitted. However, log-likelihood gradients from the more complicated model
 are required to calculate the score test statistic. Therefore, despite
 its clear benefits, the score test is often seen as the less
-practical option.   
+practical option.
+
+Despite its importance, model selection is a potentially fraught step of
+statistical analyses. When considering many potential models for a data set,
+comparing models via LRTs or AIC values can be impractical as every
+model in the candidate set must be fitted. When dealing with
+sophisticated models, this can require an unrealistic amount of time
+and resources. 
+
+Recent developments in automatic differentiation (AD) tools address this
+issue. With these tools, it is now possible to conveniently obtain
+exact gradients for log-likelihoods of varying complexity. Although
+traditionally used for optimisation and Laplace approximations,
+repurposing these tools to calculate gradients removes
+previous hurdles discouraging the use of score tests. The convenience
+of only having to fit one of the two models being compared may be
+harnessed to meaningfully enhance the accessibility and convenience of
+model selection.
+
+When considering multiple potential models, a method for navigating
+through a model candidate set using score tests is required. The framework
+introduced by \textcite{catchpoleMorgan1996}, and later developed by
+\textcite{mccreaMorgan2011} answers this question. The framework amplifies
+the benefits of using score tests for model selection. By imposing a
+tree structure on the candidate set, the issue of choosing a model from a 
+potentially vast candidate set of complicated models is reduced to the
+task of calculating score statistics and fitting a few models. This
+framework previously has not been widely-applied, likely due to 
+the obstacle of the gradients required to calculate the score test
+statistics.
+
+In this paper, we propose the use of the `RTMB'
+R package, an AD tool, to conveniently compute the gradients required
+to harness score tests for model selection, through the lens of the framework
+introduced by \textcite{catchpoleMorgan1996}. We will do so via an
+illustrative example. Specifically, we will implement score tests to
+select a model for the `ovenbird' spatial capture-recapture data set
+from the `secr' package.
+
+\textit{{Details on SCR, why this example is appropriate. And also
+    want to foreshadow issues with nesting here.} }
+
+As with the potential difficulties of model selection, our insights
+are not specific to any one field of research. They may be 
+applied to a vast range of models. Our findings aid in
+enhancing the general utility of the score test framework, thereby
+enhancing the accessibility of model selection, in general.
 
 
+
+\newpage
 
 
 In such instances, fitting every candidate model and carrying 
