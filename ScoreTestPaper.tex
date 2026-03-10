@@ -50,374 +50,343 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibl
 \section{Introduction}
 \label{sec:introduction}
 
-\textbf{Rethink structure for better, easier flow? Maybe want to
-  introduce AD tools later on, and say something like 'In this paper,
-  we are proposing the use of AD tools -- specifically the `RTMB' R
-  package -- to harness score tests for model selection, via the
-  framework introduced by \textcite{catchpoleMorgan1996}.}
+% \textbf{Rethink structure for better, easier flow? Maybe want to
+%   introduce AD tools later on, and say something like 'In this paper,
+%   we are proposing the use of AD tools -- specifically the `RTMB' R
+%   package -- to harness score tests for model selection, via the
+%   framework introduced by \textcite{catchpoleMorgan1996}.}
 
 Model selection is an important step for
 statistical analysis, allowing the practitioner to confirm the
 reliability of their chosen model and any resulting
-conclusions. Well-known model selection methods, widely
-used across many fields, include comparing
+conclusions. Well-known model selection methods include comparing
 models using likelihood ratio tests (LRTs), AIC values and score
-tests. Each method has its own advantages. To compare two models via
-LRTs or AIC values, both models simply need to be fitted and quick
-calculations performed using their log-likelihood values. To compare
-two models using a score test, only the simpler of the two models
-needs to be fitted. However, log-likelihood gradients from the more complicated model
-are required to calculate the score test statistic. Therefore, despite
-its clear benefits, the score test is often seen as the less
-practical option.
+tests. When comparing two nested models, each method has its own advantages and
+disadvantages. It is straightforward to perform the
+calculations required to compare models via LRTs or AIC values. However, both
+models must be fitted. To conduct score tests, only the simpler of the
+two models needs to be fitted. However, log-likelihood gradients from
+the more complicated model are required to calculate the score test
+statistic -- specifically, the score vector and information matrix of
+the larger of the two models. This has often acted as a
+deterrent for conducting these tests.
 
-Despite its importance, model selection is a potentially fraught step of
-statistical analyses. When considering many potential models for a data set,
-comparing models via LRTs or AIC values can be impractical as every
-model in the candidate set must be fitted. When dealing with
-sophisticated models, this can require an unrealistic amount of time
-and resources. 
+Historically, LRTs and AIC values have been widely-used methods
+of model selection. Although, when the models under comparison require
+considerable time and resources to fit, these methods of comparison can
+become inconvenient. This issue is only amplified when considering
+multiple potential models for a data set -- every single model in the
+candidate set must be fitted, potentially rendering model selection
+impractical, despite its value.
 
-Recent developments in automatic differentiation (AD) tools address this
-issue. With these tools, it is now possible to conveniently obtain
-exact gradients for log-likelihoods of varying complexity. Although
-traditionally used for optimisation and Laplace approximations,
-repurposing these tools to calculate gradients removes
-previous hurdles discouraging the use of score tests. The convenience
-of only having to fit one of the two models being compared may be
-harnessed to meaningfully enhance the accessibility and convenience of
-model selection.
+In such cases, turning to score tests would be
+beneficial. Having to fit fewer models in the process of selecting a
+final model for the data could only make model selection more
+practical and accessible. Meaningfully contributing to this
+practicality and accessibility requires a straightforward way of
+calculating the gradients required by the score test
+statistic. Traditionally, options for calculating these gradients
+included manual calculations and numeric approximations. The former
+can quickly become unrealistic as model complexity grows, while the
+latter often produces unstable and inaccurate
+results. In this paper, we propose the use of automatic
+differentiation (AD) tools to solve this issue.
 
-When considering multiple potential models, a method for navigating
-through a model candidate set using score tests is required. The framework
-introduced by \textcite{catchpoleMorgan1996}, and later developed by
-\textcite{mccreaMorgan2011} answers this question. The framework amplifies
-the benefits of using score tests for model selection. By imposing a
-tree structure on the candidate set, the issue of choosing a model from a 
-potentially vast candidate set of complicated models is reduced to the
-task of calculating score statistics and fitting a few models. This
-framework previously has not been widely-applied, likely due to 
-the obstacle of the gradients required to calculate the score test
-statistics.
+Employing the chain rule of differentiation, AD tools produce exact
+gradients of any specified function. Using these tools often
+only requires translating the desired function into an
+appropriate coding language. For statistical models, these tools are
+mainly used for optimisation 
+(model-fitting), or calculating approximations such
+as Laplace approximations. Utilising the side-effects of these
+capabilities, by repurposing their ability to calculate
+exact gradients, facilities a newly
+convenient implementation of score tests.
 
-In this paper, we propose the use of the `RTMB'
-R package, an AD tool, to conveniently compute the gradients required
-to harness score tests for model selection, through the lens of the framework
-introduced by \textcite{catchpoleMorgan1996}. We will do so via an
-illustrative example. Specifically, we will implement score tests to
-select a model for the `ovenbird' spatial capture-recapture data set
-from the `secr' package.
+This approach can greatly assist with model selection in fields such
+as spatial capture-recapture (SCR). Model selection is often fraught
+for SCR models. Likelihood equations for SCR models can be quite
+sophisticated, involving products of two-dimensional spatial
+integrals. Model-fitting, and therefore using AIC values to compare
+models, is often resource-intensive,
+especially when many models are being considered. Due 
+to the difficulties in manually calculating or numerically 
+approximating gradients, score tests have not generally been
+used. Alternative approaches have been explored, but there are 
+no well-established methods of model selection. Removing the barriers
+to conducting score tests 
+presents a new and potentially impactful solution to this issue. 
 
-\textit{{Details on SCR, why this example is appropriate. And also
-    want to foreshadow issues with nesting here.} }
-
-As with the potential difficulties of model selection, our insights
-are not specific to any one field of research. They may be 
-applied to a vast range of models. Our findings aid in
-enhancing the general utility of the score test framework, thereby
-enhancing the accessibility of model selection, in general.
-
-
-
-\newpage
-
-
-In such instances, fitting every candidate model and carrying 
-out model selection using likelihood ratio tests (LRTs) or comparing
-AIC values, for example, can be impractical and unrealistic. An
-absence of viable alternatives when working with elaborate models
-often means these traditional model selection 
-methods are the only option, compromising the practitioner’s
-ability to confidently select an appropriate model for their analysis.
-
-To address this issue, \textcite{catchpoleMorgan1996} propose a
-framework harnessing score tests for model selection, greatly reducing
-the number of candidate models that need to be fitted 
-to select an appropriate model for the data. To date, it has
-been applied extensively to the field of capture-recapture, e.g. \textcite{mccreaMorgan2011},
-\textcite{mccreaMorganBreg2012} and \textcite{mccreaMorganGim2017}. 
-
-To implement the score test framework, the candidate set is organised
-into levels and, beginning with the simplest models, score tests
-define a path through these levels to select the
-final model \parencite{mccreaMorgan2011}. We begin by identifying the 
-most basic model -- this model 
-makes up Level 0 of the candidate set. Level 1 contains all models
-with one added parameter dependency. We begin with the null hypothesis
-that the Level 0 model is adequate for the data. Therefore, we refer to
-the Level 0 model as the `$H_0$ model'. Our
-alternative hypotheses are that each Level 1 model provides a
-significantly better fit, and we refer to these models as `$H_1$ models'. We conduct
-score tests comparing the null hypothesis to each alternative
-hypothesis, i.e. comparing the $H_0$ model to each $H_1$ model. The $H_1$ model for the 
-test with the smallest significant 
-p-value defines the new null hypothesis -- that is, it becomes the new
-$H_0$ model. Level 2 is then constructed,
-consisting of all models with one additional parameter dependency
-relative to this model, and the process is repeated. We stop
-when none of the score tests produce significant p-values. At this
-point, the $H_0$ model is the final chosen model.
-
-When conducting a score test comparing two nested models, only the simpler
-of the two models needs to be fitted \textbf{(cite)}. So at
-each step of the process, only the $H_0$ model needs to be
-fitted. Furthermore, the stepwise nature of the 
-framework enhances the convenience of any model-fitting -- the MLEs
-from a given $H_0$ model may provide 
-appropriate starting values for fitting the next $H_0$ model
-\parencite{mccreaMorgan2011}. The issue of choosing a model from a 
-potentially vast candidate set of complicated models is reduced to the
+We will explore the gains of conducting score tests using AD tools
+via the framework introduced by \textcite{catchpoleMorgan1996}, and
+later developed by \textcite{mccreaMorgan2011}. Following the
+convention of organising the
+candidate set into a tree structure, the framework provides an efficient way of
+navigating through the set using score tests, 
+amplifying the benefits of score tests for model selection. The issue
+of choosing a model from a   
+potentially vast candidate set of models of varying complexity is reduced to the
 task of calculating score statistics and fitting a few, potentially
-relatively simple, models.
+relatively simple, models. 
 
-However, despite these benefits, the application of the framework has
-not extended beyond capture-recapture models. The reason is likely
-two-fold. Firstly, depending on the likelihood equations for the models
-being considered, it may appear prohibitively inconvenient to
-obtain the required score vectors and information matrices via
-exact calculations or numerical approximations. Previous infrastructure
-likely made model-fitting, and therefore traditional model selection
-techniques, more attractive in comparison. Secondly, depending on the
-nature of the models being appraised, there may be a lack of a clear
-nesting structure in the candidate set appropriate for score tests,
-making it unclear how to organise models into levels as described above.
-
-For example, although a natural extension of the previous applications to
-capture-recapture, the score test framework has not yet been applied to
-spatial capture-recapture (SCR) models. Likelihood equations for these
-models can be quite sophisticated -- any gradients cannot be found
-symbolically, statistical software must be employed. Additionally, not all SCR
-models can be organised into a clear nested structure that is
-suitable for score tests. Depending on
-the parameter dependencies present in the candidate set, it may not be possible
-to build the model levels as described above. Such issues are
-common and pose significant obstacles to the widespread use of this
-seemingly convenient and helpful tool for model selection.
-
-In this paper, we address these issues. We propose the use of the
- `RTMB' R package to conveniently obtain exact gradients for all models
-being considered when implementing the score test framework. We also
-propose an extension to the framework, allowing for its use when the
-candidate set lacks an appropriate nested structure. We present these
-novel findings via an illustrative example -- we will implement the
-score test framework using the ovenbird spatial capture-recapture data
-set, available in the `secr' package.
-
-As with the potential difficulties of model selection, our insights
-are not specific to any one field of research. They may be 
-applied to a vast range of models. Our findings aid in
-enhancing the general utility of the score test framework, thereby
-enhancing the accessibility of model selection, in general.
-
-\section{Illustrative data set: ovenbirds}
-\label{sec:ovenbirds}
-
-In \textcite{borchersEfford2008}, alongside introducing SCR models,
-the authors illustrate a potential approach 
-for SCR model selection. The data set consists of captures of birds
-(red-eyed vireos) from a mist-netting survey on the Patuxent Research Refuge 
-in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. For
-model selection, a variety of SCR
-models are fitted and the final model is selected via AIC.
-
-Since this research was published, there has been some exploration
-into alternative model selection methods for SCR. However, model
-selection via AIC remains an accessible and common approach.
-
-For easy comparison to the standard set by such a well-known example, we
-work with a similar data set. The `ovenbird' data
-set, available via the `secr' R package, contains SCR data from a
-mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
-Research Refuge in Maryland, USA by D. K. Dawson and M. G. Efford. As
-described in the package documentation, the forest in the area has
-changed little since the previous survey conducted by C.S. Robbins
-\parencite{secr-pkg}.
-
-Forty four mist nets were passively operated for nine or
-ten non-consecutive days in late May and June of each year. The data
-set consists of adult ovenbird captures, with one bird
- killed by a predator while in a net in 2009 \parencite{secr-pkg}. For
-our analysis, we removed this loss from the data set. We retain any
-records of individual birds being captured more than once in a
-day. In the context of SCR, populations separated by space, time (e.g.
-years) or attributes such as sex are referred to as `sessions'
-\parencite{effordBook2009}. Therefore, our 
-data set contains five sessions, each with nine or ten sampling occasions. As
-is standard when fitting multi-session SCR models, we each session as
-if from an independent closed population \parencite{effordBook2009}. 
-
-Our candidate model set contains all SCR models that share parameter
-dependencies considered in
-\textcite{borchersEfford2008}. The latter candidate set contains
-fifteen models. By considering all possible combinations of the
-parameter dependencies presented in \textcite{borchersEfford2008}, our
-set contains forty five models. See Section \ref{sec:candidate-models} for a
-description of the models considered, and \textbf{Table (results)} for
-the full list of models. 
-
-To construct an accurate picture of the benefits afforded by
-the score test framework, alongside implementing this framework, we
-fit all models in our candidate set using the `secr' R package and
-select the final model via AIC. We compare a new, more efficient,
-approach to model selection with a widely-used traditional approach,
-in the context of an example that would be familiar to practitioners.
-
-\section{Implementing the score test framework}
-\label{sec:implementing}
-
-\subsection{Candidate models}
-\label{sec:candidate-models}
-
-Following the example set by \textcite{borchersEfford2008}, we
-consider models with the dependencies shown in Table
-\ref{table:dependencies}. We specify these dependencies using the
-parlance of the `secr' R package. 
-
-When fitting an SCR model, it is standard to
-specify the detection function to use, and any dependencies for
-$D$ and the detection function parameters. We only consider SCR
-models with a half-normal detection function. Although
-\textcite{borchersEfford2008} consider SCR models with half-normal and
-hazard rate detection functions, we only consider models with a
-half-normal detection function. Hazard rate detection
-functions are seldom used and generally not recommended due to their
-long tail \parencite{secr-pkg}. Therefore, when fitting our models, we
-specify dependencies for $D$ 
-and detection function parameters $g_0$ and $\sigma$. As described in 
-\textcite{effordBook2009}, the parameter $D$ describes population
-density, while $g_0$ and $\sigma$ describe the capture probability for
-individuals in the survey population.
-
-\begin{table}[h!]
-  \centering
-\begin{tabular} { |c|c|c|c|  }
-  \hline
-  \textbf{$D$ dependencies} & \textbf{$\sigma$ dependencies} &
-                                             \multicolumn{2}{|c|}{\textbf{$g_0$
-                                                               dependencies}} 
-  \\
-  \hline
-  $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim \text{b}$ \\
-  \hline
-  $D \sim \text{session}$ & $\sigma \sim \text{session}$ & $g_0 \sim
-                                                           \text{session}$
-             &  $g_0 \sim \text{session} + \text{b}$ \\
-  \hline
-  $D \sim \text{Session}$ & $\sigma \sim \text{h2}$ & $g_0 \sim
-                                                      \text{h2}$ & \\
-  \hline
-\end{tabular}
-\caption{All parameter dependencies considered in our candidate set.}
-\label{table:dependencies}
-\end{table}
-
-In Table 1 (see \textcite{secr-pkg} for further detail):
-\begin{itemize}
-  \item `$\sim 1$' represents a parameter being held pooled across
-    sessions. For example, with $D \sim 1$, we have only one
-    estimate of $D$ and use it for all sessions;
-  \item `$\sim \text{session}$' means a parameter has session-specific
-    levels. If we specify $D \sim \text{session}$, we have a separate estimate
-    of $D$ for each session;
-  \item `$\sim \text{Session}$' represents a trend across
-    sessions. With `$D \sim \text{Session}$', we  have $D(y) =
-    exp(\beta_0 + \beta_1 y)$, 
-    where $y$ is the session number \parencite{borchersEfford2008}. In
-    our case, $y=1,...,5$;
-  \item `$\sim \text{h2}$' denotes a
-    two-class finite mixture model. For example, with `$\sigma \sim \text{h2}$', we assume
-    there are two groups in the population: Group 1 uses $\sigma_1$ in its
-    detection function,  while Group 2 uses $\sigma_2$. An
-    individual falls in Group 1 with probability $p$ and in Group 2
-    with probability $(1-p)$. Estimates are pooled across sessions; 
-  \item `$\sim \text{b}$' represents a trap response. With $g_0 \sim
-    \text{b}$, we have two estimates of $g_0$: one for individuals
-    captured on previous sampling occasions, and one for individuals
-    that have not yet been captured in a session. Estimates are pooled
-    across sessions;
-  \item `$\sim \text{session} + \text{b}$' means we have
-    session-specific levels and a trap response -- e.g. with $g_0 \sim \text{session} +
-    \text{b}$, we fit a model with two separate estimates of $g_0$ for
-    each session: one for previously captured individuals, and one for
-    individuals that have not been caught yet. 
-\end{itemize}
-
-By considering all combinations of these parameter dependencies, we
-have forty five SCR models in our candidate set. We extend the score test
-framework presented by \textcite{catchpoleMorgan1996}, applying it
-to a comprehensive candidate set in which all models do not fit neatly
-into a nested structure appropriate for score tests.
-
-\subsection{Calculating score test statistics with RTMB}
-\label{sec:calculating-stats-rtmb}
-
-To calculate score test statistics, we use the following formula:
+We will use the `RTMB' R package -- a widely-used AD tool --
+to implement score tests for model selection via this framework. We
+present our findings using an illustrative example. We will use
+the ovenbird SCR data set, available in the `secr' R
+package. Considering a range of candidate models, we explore how
+to extend the aforementioned framework to accommodate models that aren't
+nested. Compared to traditional approaches, we examine how our
+approach potentially enhances the convenience and accessibility of
+model selection, in general. As with the possible difficulties of model
+selection, our insights are not specific to any one field of
+research. They may be applied to a vast range of models.
 
 
-% {Explanation of how to calculate score test statistics. Include
-%   intuitive explanations of what gradients tell us, how they
-%   inflate/deflate statistics, what we are looking for overall
-%   (distance between H0 MLE vec and H1 peak). Then go into
-%   benefits of RTMB.}
+% MOVE to details of score test framework in next section: 
 
-\subsection{Issues with nesting}
-\label{sec:nesting-issues}
+% To implement the score test framework, the candidate set is organised
+% into levels and, beginning with the simplest models, score tests
+% define a path through these levels to select the
+% final model \parencite{mccreaMorgan2011}. We begin by identifying the 
+% most basic model -- this model 
+% makes up Level 0 of the candidate set. Level 1 contains all models
+% with one added parameter dependency. We begin with the null hypothesis
+% that the Level 0 model is adequate for the data. Therefore, we refer to
+% the Level 0 model as the `$H_0$ model'. Our
+% alternative hypotheses are that each Level 1 model provides a
+% significantly better fit, and we refer to these models as `$H_1$ models'. We conduct
+% score tests comparing the null hypothesis to each alternative
+% hypothesis, i.e. comparing the $H_0$ model to each $H_1$ model. The $H_1$ model for the 
+% test with the smallest significant 
+% p-value defines the new null hypothesis -- that is, it becomes the new
+% $H_0$ model. Level 2 is then constructed,
+% consisting of all models with one additional parameter dependency
+% relative to this model, and the process is repeated. We stop
+% when none of the score tests produce significant p-values. At this
+% point, the $H_0$ model is the final chosen model.
 
-% For two models to be nested appropriately for score tests, it must be
-% possible to obtain the simpler model from the more complex one by
-% placing fixed constraints on any additional parameters. Any small changes in
-% the values of these constrained parameters must change the
-% likelihood. This ensures the $H_1$ log-likelihood has curvature at the
-% $H_0$ estimates, allowing us to calculate the required gradients.
+% When conducting a score test comparing two nested models, only the simpler
+% of the two models needs to be fitted \textbf{(cite)}. So at
+% each step of the process, only the $H_0$ model needs to be
+% fitted. Furthermore, the stepwise nature of the 
+% framework enhances the convenience of any model-fitting -- the MLEs
+% from a given $H_0$ model may provide 
+% appropriate starting values for fitting the next $H_0$ model
+% \parencite{mccreaMorgan2011}. The issue of choosing a model from a 
+% potentially vast candidate set of complicated models is reduced to the
+% task of calculating score statistics and fitting a few, potentially
+% relatively simple, models.
 
-% From ChatGPT (for own understanding):
-% For a score test, we only need the likelihood to have curvature in the
-% directions of the parameters being tested under H_0 (psi), because the
-% test measures the sensitivity of the likelihood to changes in those
-% parameters. Curvature in other parameters is not required — it does
-% not affect the calculation of the score statistic or its chi-square
-% distribution.
-% The score test looks only at the change in likelihood if we move the
-% additional parameters psi away from their null values (constrained values under
-% H_0).
 
-\textbf{(Perhaps refine with lambda and psi notation, if used in
-  section above?)}
+% \section{Illustrative data set: ovenbirds}
+% \label{sec:ovenbirds}
 
-For two nested models to be appropriate for a score test, it must be
-possible to obtain the simpler model (the $H_0$ model) from the more
-complex one (the $H_1$ model) via fixed constraints on any additional
-parameters, $\boldsymbol{\psi}$. All parameters in
-$\boldsymbol{\psi}$ must be identifiable 
-in the context of the $H_0$ model -- i.e. when identifying the point on the
-$H_1$ likelihood surface equivalent to the $H_0$ MLE vector,
-there must be only one choice. When this holds, any small deviations
-from this point cause a
-change in the likelihood, ensuring the $H_1$ log-likelihood 
-at the $H_0$ MLE vector has the required curvature in the direction of
-all parameters in $\boldsymbol{\psi}$. Without this curvature, it is no longer clear how
-far the $H_0$ MLE vector is from the peak of the $H_1$ log-likelihood
--- that is, it is unclear how much the additional parameters
-in $\boldsymbol{\psi}$ improve fit. Any 
-score statistics are degenerate and the 
-asymptotic Chi-squared distribution gives unusable
-p-values. 
+% In \textcite{borchersEfford2008}, alongside introducing SCR models,
+% the authors illustrate a potential approach 
+% for SCR model selection. The data set consists of captures of birds
+% (red-eyed vireos) from a mist-netting survey on the Patuxent Research Refuge 
+% in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. For
+% model selection, a variety of SCR
+% models are fitted and the final model is selected via AIC.
 
-In our example, issues arise as we consider models that allow for individual
-heterogeneity. As mentioned in Section \ref{sec:candidate-models}, our candidate set
-contains models that have a two-class finite mixture dependency for $g_0$ and/or
-$\sigma$. These models allow individuals in the population to belong to
-one of two classes, where each class is defined by its corresponding estimate of $g_0$
-and/or $\sigma$ \textbf{(cite -- SECR book)}. The probability of
-belonging to either class is estimated by the model. We refer to this
-probability estimate as $\hat{p}$.
+% Since this research was published, there has been some exploration
+% into alternative model selection methods for SCR. However, model
+% selection via AIC remains an accessible and common approach.
 
-% Due to their nature, when conducting score tests, models with mixture
-% models can only be compared to models with matching mixture
-% components.  
-% Consider the example where
-% our $H_0$ model has no mixture component 
-% and our $H_1$ model has a mixture component for $g_0$. 
+% For easy comparison to the standard set by such a well-known example, we
+% work with a similar data set. The `ovenbird' data
+% set, available via the `secr' R package, contains SCR data from a
+% mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
+% Research Refuge in Maryland, USA by D. K. Dawson and M. G. Efford. As
+% described in the package documentation, the forest in the area has
+% changed little since the previous survey conducted by C.S. Robbins
+% \parencite{secr-pkg}.
+
+% Forty four mist nets were passively operated for nine or
+% ten non-consecutive days in late May and June of each year. The data
+% set consists of adult ovenbird captures, with one bird
+%  killed by a predator while in a net in 2009 \parencite{secr-pkg}. For
+% our analysis, we removed this loss from the data set. We retain any
+% records of individual birds being captured more than once in a
+% day. In the context of SCR, populations separated by space, time (e.g.
+% years) or attributes such as sex are referred to as `sessions'
+% \parencite{effordBook2009}. Therefore, our 
+% data set contains five sessions, each with nine or ten sampling occasions. As
+% is standard when fitting multi-session SCR models, we each session as
+% if from an independent closed population \parencite{effordBook2009}. 
+
+% Our candidate model set contains all SCR models that share parameter
+% dependencies considered in
+% \textcite{borchersEfford2008}. The latter candidate set contains
+% fifteen models. By considering all possible combinations of the
+% parameter dependencies presented in \textcite{borchersEfford2008}, our
+% set contains forty five models. See Section \ref{sec:candidate-models} for a
+% description of the models considered, and \textbf{Table (results)} for
+% the full list of models. 
+
+% To construct an accurate picture of the benefits afforded by
+% the score test framework, alongside implementing this framework, we
+% fit all models in our candidate set using the `secr' R package and
+% select the final model via AIC. We compare a new, more efficient,
+% approach to model selection with a widely-used traditional approach,
+% in the context of an example that would be familiar to practitioners.
+
+% \section{Implementing the score test framework}
+% \label{sec:implementing}
+
+% \subsection{Candidate models}
+% \label{sec:candidate-models}
+
+% Following the example set by \textcite{borchersEfford2008}, we
+% consider models with the dependencies shown in Table
+% \ref{table:dependencies}. We specify these dependencies using the
+% parlance of the `secr' R package. 
+
+% When fitting an SCR model, it is standard to
+% specify the detection function to use, and any dependencies for
+% $D$ and the detection function parameters. We only consider SCR
+% models with a half-normal detection function. Although
+% \textcite{borchersEfford2008} consider SCR models with half-normal and
+% hazard rate detection functions, we only consider models with a
+% half-normal detection function. Hazard rate detection
+% functions are seldom used and generally not recommended due to their
+% long tail \parencite{secr-pkg}. Therefore, when fitting our models, we
+% specify dependencies for $D$ 
+% and detection function parameters $g_0$ and $\sigma$. As described in 
+% \textcite{effordBook2009}, the parameter $D$ describes population
+% density, while $g_0$ and $\sigma$ describe the capture probability for
+% individuals in the survey population.
+
+% \begin{table}[h!]
+%   \centering
+% \begin{tabular} { |c|c|c|c|  }
+%   \hline
+%   \textbf{$D$ dependencies} & \textbf{$\sigma$ dependencies} &
+%                                              \multicolumn{2}{|c|}{\textbf{$g_0$
+%                                                                dependencies}} 
+%   \\
+%   \hline
+%   $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim \text{b}$ \\
+%   \hline
+%   $D \sim \text{session}$ & $\sigma \sim \text{session}$ & $g_0 \sim
+%                                                            \text{session}$
+%              &  $g_0 \sim \text{session} + \text{b}$ \\
+%   \hline
+%   $D \sim \text{Session}$ & $\sigma \sim \text{h2}$ & $g_0 \sim
+%                                                       \text{h2}$ & \\
+%   \hline
+% \end{tabular}
+% \caption{All parameter dependencies considered in our candidate set.}
+% \label{table:dependencies}
+% \end{table}
+
+% In Table 1 (see \textcite{secr-pkg} for further detail):
+% \begin{itemize}
+%   \item `$\sim 1$' represents a parameter being held pooled across
+%     sessions. For example, with $D \sim 1$, we have only one
+%     estimate of $D$ and use it for all sessions;
+%   \item `$\sim \text{session}$' means a parameter has session-specific
+%     levels. If we specify $D \sim \text{session}$, we have a separate estimate
+%     of $D$ for each session;
+%   \item `$\sim \text{Session}$' represents a trend across
+%     sessions. With `$D \sim \text{Session}$', we  have $D(y) =
+%     exp(\beta_0 + \beta_1 y)$, 
+%     where $y$ is the session number \parencite{borchersEfford2008}. In
+%     our case, $y=1,...,5$;
+%   \item `$\sim \text{h2}$' denotes a
+%     two-class finite mixture model. For example, with `$\sigma \sim \text{h2}$', we assume
+%     there are two groups in the population: Group 1 uses $\sigma_1$ in its
+%     detection function,  while Group 2 uses $\sigma_2$. An
+%     individual falls in Group 1 with probability $p$ and in Group 2
+%     with probability $(1-p)$. Estimates are pooled across sessions; 
+%   \item `$\sim \text{b}$' represents a trap response. With $g_0 \sim
+%     \text{b}$, we have two estimates of $g_0$: one for individuals
+%     captured on previous sampling occasions, and one for individuals
+%     that have not yet been captured in a session. Estimates are pooled
+%     across sessions;
+%   \item `$\sim \text{session} + \text{b}$' means we have
+%     session-specific levels and a trap response -- e.g. with $g_0 \sim \text{session} +
+%     \text{b}$, we fit a model with two separate estimates of $g_0$ for
+%     each session: one for previously captured individuals, and one for
+%     individuals that have not been caught yet. 
+% \end{itemize}
+
+% By considering all combinations of these parameter dependencies, we
+% have forty five SCR models in our candidate set. We extend the score test
+% framework presented by \textcite{catchpoleMorgan1996}, applying it
+% to a comprehensive candidate set in which all models do not fit neatly
+% into a nested structure appropriate for score tests.
+
+% \subsection{Calculating score test statistics with RTMB}
+% \label{sec:calculating-stats-rtmb}
+
+% To calculate score test statistics, we use the following formula:
+
+
+% % {Explanation of how to calculate score test statistics. Include
+% %   intuitive explanations of what gradients tell us, how they
+% %   inflate/deflate statistics, what we are looking for overall
+% %   (distance between H0 MLE vec and H1 peak). Then go into
+% %   benefits of RTMB.}
+
+% \subsection{Issues with nesting}
+% \label{sec:nesting-issues}
+
+% % For two models to be nested appropriately for score tests, it must be
+% % possible to obtain the simpler model from the more complex one by
+% % placing fixed constraints on any additional parameters. Any small changes in
+% % the values of these constrained parameters must change the
+% % likelihood. This ensures the $H_1$ log-likelihood has curvature at the
+% % $H_0$ estimates, allowing us to calculate the required gradients.
+
+% % From ChatGPT (for own understanding):
+% % For a score test, we only need the likelihood to have curvature in the
+% % directions of the parameters being tested under H_0 (psi), because the
+% % test measures the sensitivity of the likelihood to changes in those
+% % parameters. Curvature in other parameters is not required — it does
+% % not affect the calculation of the score statistic or its chi-square
+% % distribution.
+% % The score test looks only at the change in likelihood if we move the
+% % additional parameters psi away from their null values (constrained values under
+% % H_0).
+
+% \textbf{(Perhaps refine with lambda and psi notation, if used in
+%   section above?)}
+
+% For two nested models to be appropriate for a score test, it must be
+% possible to obtain the simpler model (the $H_0$ model) from the more
+% complex one (the $H_1$ model) via fixed constraints on any additional
+% parameters, $\boldsymbol{\psi}$. All parameters in
+% $\boldsymbol{\psi}$ must be identifiable 
+% in the context of the $H_0$ model -- i.e. when identifying the point on the
+% $H_1$ likelihood surface equivalent to the $H_0$ MLE vector,
+% there must be only one choice. When this holds, any small deviations
+% from this point cause a
+% change in the likelihood, ensuring the $H_1$ log-likelihood 
+% at the $H_0$ MLE vector has the required curvature in the direction of
+% all parameters in $\boldsymbol{\psi}$. Without this curvature, it is no longer clear how
+% far the $H_0$ MLE vector is from the peak of the $H_1$ log-likelihood
+% -- that is, it is unclear how much the additional parameters
+% in $\boldsymbol{\psi}$ improve fit. Any 
+% score statistics are degenerate and the 
+% asymptotic Chi-squared distribution gives unusable
+% p-values. 
+
+% In our example, issues arise as we consider models that allow for individual
+% heterogeneity. As mentioned in Section \ref{sec:candidate-models}, our candidate set
+% contains models that have a two-class finite mixture dependency for $g_0$ and/or
+% $\sigma$. These models allow individuals in the population to belong to
+% one of two classes, where each class is defined by its corresponding estimate of $g_0$
+% and/or $\sigma$ \textbf{(cite -- SECR book)}. The probability of
+% belonging to either class is estimated by the model. We refer to this
+% probability estimate as $\hat{p}$.
+
+% % Due to their nature, when conducting score tests, models with mixture
+% % models can only be compared to models with matching mixture
+% % components.  
+% % Consider the example where
+% % our $H_0$ model has no mixture component 
+% % and our $H_1$ model has a mixture component for $g_0$. 
 
 \printbibliography
 
