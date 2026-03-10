@@ -1,16 +1,16 @@
 %% Paper implementing score test framework for SCR :)
 
 %% Uncomment to knit for Ben and Rachel:
-% \documentclass[14pt]{extarticle}
-% \usepackage{geometry}
-% \geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
-%  headheight=5mm, marginpar=5mm}
+\documentclass[14pt]{extarticle}
+\usepackage{geometry}
+\geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
+ headheight=5mm, marginpar=5mm}
 
 %% Uncomment to knit for writing: 
-\documentclass{article}
-\usepackage{geometry}
-\geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
- headheight=5mm, marginpar=5mm}
+% \documentclass{article}
+% \usepackage{geometry}
+% \geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
+%  headheight=5mm, marginpar=5mm}
 
 \usepackage{layout}
 \usepackage{blindtext}
@@ -68,7 +68,7 @@ models must be fitted. To conduct score tests, only the simpler of the
 two models needs to be fitted. However, log-likelihood gradients from
 the more complicated model are required to calculate the score test
 statistic -- specifically, the score vector and information matrix of
-the larger of the two models. This has often acted as a
+this model. This has often acted as a 
 deterrent for conducting these tests.
 
 Historically, LRTs and AIC values have been widely-used methods
@@ -81,7 +81,7 @@ impractical, despite its value.
 
 In such cases, turning to score tests would be
 beneficial. Having to fit fewer models in the process of selecting a
-final model for the data could only make model selection more
+final model could only make model selection more
 practical and accessible. Meaningfully contributing to this
 practicality and accessibility requires a straightforward way of
 calculating the gradients required by the score test
@@ -89,25 +89,25 @@ statistic. Traditionally, options for calculating these gradients
 included manual calculations and numeric approximations. The former
 can quickly become unrealistic as model complexity grows, while the
 latter often produces unstable and inaccurate
-results. In this paper, we propose the use of automatic
+results \parencite{ADMBpaper}. In this paper, we propose the use of automatic
 differentiation (AD) tools to solve this issue.
 
 Employing the chain rule of differentiation, AD tools produce exact
-gradients of any specified function. Using these tools often
+gradients of any specified function \parencite{ADMBpaper}. Using these tools often
 only requires translating the desired function into an
-appropriate coding language. For statistical models, these tools are
-mainly used for optimisation 
-(model-fitting), or calculating approximations such
-as Laplace approximations. Utilising the side-effects of these
+appropriate coding language \parencite{TMBpaper}. For statistical models, these tools are
+mainly used for model-fitting or calculating 
+the Laplace approximation. Utilising the side-effects of these
 capabilities, by repurposing their ability to calculate
-exact gradients, facilities a newly
+exact log-likelihood gradients, facilities a newly
 convenient implementation of score tests.
 
 This approach can greatly assist with model selection in fields such
 as spatial capture-recapture (SCR). Model selection is often fraught
 for SCR models. Likelihood equations for SCR models can be quite
 sophisticated, involving products of two-dimensional spatial
-integrals. Model-fitting, and therefore using AIC values to compare
+integrals \parencite{borchersEfford2008}. Model-fitting, and therefore
+using AIC values to compare 
 models, is often resource-intensive,
 especially when many models are being considered. Due 
 to the difficulties in manually calculating or numerically 
@@ -130,14 +130,15 @@ task of calculating score statistics and fitting a few, potentially
 relatively simple, models. 
 
 We will use the `RTMB' R package -- a widely-used AD tool --
-to implement score tests for model selection via this framework. We
+to implement score tests for model selection using this framework. We
 present our findings using an illustrative example. We will use
 the ovenbird SCR data set, available in the `secr' R
-package. Considering a range of candidate models, we explore how
-to extend the aforementioned framework to accommodate models that aren't
-nested. Compared to traditional approaches, we examine how our
+package \parencite{secr-pkg}. Compared to traditional approaches, we examine how our
 approach potentially enhances the convenience and accessibility of
-model selection, in general. As with the possible difficulties of model
+model selection, in general. Considering a range of candidate models,
+we also explore how
+to extend the aforementioned framework to accommodate models that aren't
+nested. As with the possible difficulties of model
 selection, our insights are not specific to any one field of
 research. They may be applied to a vast range of models.
 
