@@ -75,9 +75,9 @@ Each method has its own advantages and
 disadvantages. It is straightforward to perform the
 calculations required to compare models via LRTs or AIC values. However, both
 models must be fitted. To conduct score tests, only the simpler of the
-two models needs to be fitted. However, the gradients required can be
-challenging to obtain, often acting as a deterrent for conducting
-these tests. 
+two models needs to be fitted \parencite{rao2005}. However, the
+gradients required can be challenging to obtain, often acting as a
+deterrent for conducting these tests. 
 
 Historically, LRTs and AIC values have been widely-used methods
 of model selection. Although, when the models under comparison require
@@ -111,15 +111,12 @@ capabilities -- repurposing their ability to calculate
 exact log-likelihood gradients -- facilities a newly
 convenient implementation of score tests.
 
-% , for example. Due to their complexity, these
-% models often require considerable effort to fit, rendering LRTs and
-% AIC values inappropriate. Additionally, gradients are often
-% intractable, previously making score tests impractical. 
-
 This can assist with model selection for random effects models, for
 example. These models are well-known for requiring considerable effort
-to fit, rendering LRTs/AIC values inappropriate, while also having
-intractable gradients, thus previously making score tests
+to fit \parencite{wang2022}, rendering LRTs/AIC values
+inappropriate. They also have
+intractable likelihoods \parencite{skaug2002}, resulting in gradients
+with no closed form, thus previously making score tests  
 impractical. Therefore, to
 illustrate the benefits of score tests 
 and AD tools, we will focus on the class of random effects models known as
@@ -150,15 +147,14 @@ task of calculating score statistics and fitting a few, potentially
 relatively simple, models. 
 
 We will use the `RTMB' R package -- a widely-used AD tool --
-to implement score tests for model selection using this framework. We
+to implement score tests for model selection. We
 present our findings using an illustrative example. We will use
 the ovenbird SCR data set, available in the `secr' R
-package \parencite{secr-pkg}. Compared to traditional approaches, we examine how our
-approach potentially enhances the convenience and accessibility of
-model selection, in general. Considering a range of candidate models,
-we also explore how
-to extend the aforementioned framework to accommodate models that aren't
-nested. As with the possible difficulties of model
+package \parencite{secr-pkg}. Compared to traditional methods, we examine how our
+approach enhances the convenience and accessibility of
+model selection. By considering a range of candidate models, we also
+explore how to accommodate models that aren't
+nested, a potentially common issue. As with the possible difficulties of model
 selection, our insights are not specific to any one field of
 research or class of model. They may be applied to a vast range of models.
 
@@ -204,32 +200,32 @@ research or class of model. They may be applied to a vast range of models.
 
 % In \textcite{borchersEfford2008}, alongside introducing SCR models,
 % the authors illustrate a potential approach 
-% for SCR model selection. The data set consists of captures of birds
+% for SCR model selection. The data set used consists of captures of birds
 % (red-eyed vireos) from a mist-netting survey on the Patuxent Research Refuge 
-% in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. For
-% model selection, a variety of SCR
+% in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. A variety of SCR
 % models are fitted and the final model is selected via AIC.
 
-% Since this research was published, there has been some exploration
-% into alternative model selection methods for SCR. However, model
-% selection via AIC remains an accessible and common approach.
+% Since this research was published, there has been further exploration
+% into alternative model selection methods for SCR. As mentioned
+% previously, no established methods have emerged. Model
+% selection via AIC values remains a common approach.
 
 % For easy comparison to the standard set by such a well-known example, we
 % work with a similar data set. The `ovenbird' data
-% set, available via the `secr' R package, contains SCR data from a
+% set, available via the `secr' R package, contains adult captures from a
 % mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
-% Research Refuge in Maryland, USA by D. K. Dawson and M. G. Efford. As
-% described in the package documentation, the forest in the area has
+% Research Refuge by D. K. Dawson and M. G. Efford. As
+% described in the documentation, the forest in the area has
 % changed little since the previous survey conducted by C.S. Robbins
-% \parencite{secr-pkg}.
+% \parencite{secr-pkg}. One bird was killed by a predator while in a net
+% in 2009 \parencite{secr-pkg}, and for our analysis we remove this loss
+% from the data set. We retain any 
+% records of individual birds being captured more than once in a
+% day. 
 
 % Forty four mist nets were passively operated for nine or
-% ten non-consecutive days in late May and June of each year. The data
-% set consists of adult ovenbird captures, with one bird
-%  killed by a predator while in a net in 2009 \parencite{secr-pkg}. For
-% our analysis, we removed this loss from the data set. We retain any
-% records of individual birds being captured more than once in a
-% day. In the context of SCR, populations separated by space, time (e.g.
+% ten non-consecutive days in late May and June of each year. In the
+% context of SCR, populations separated by space, time (e.g. 
 % years) or attributes such as sex are referred to as `sessions'
 % \parencite{effordBook2009}. Therefore, our 
 % data set contains five sessions, each with nine or ten sampling occasions. As
@@ -241,14 +237,13 @@ research or class of model. They may be applied to a vast range of models.
 % \textcite{borchersEfford2008}. The latter candidate set contains
 % fifteen models. By considering all possible combinations of the
 % parameter dependencies presented in \textcite{borchersEfford2008}, our
-% set contains forty five models. See Section \ref{sec:candidate-models} for a
-% description of the models considered, and \textbf{Table (results)} for
-% the full list of models. 
+% set contains forty five models. %See Section \ref{sec:candidate-models} for a
+% %description of the models considered, and \textbf{Table (results)} for
+% %the full list of models. 
 
-% To construct an accurate picture of the benefits afforded by
-% the score test framework, alongside implementing this framework, we
-% fit all models in our candidate set using the `secr' R package and
-% select the final model via AIC. We compare a new, more efficient,
+% To construct an accurate picture of the benefits afforded by model
+% selection via score tests and AD tools, we implement model selection
+% via AIC values alongside our proposed approach. We compare a new, more efficient,
 % approach to model selection with a widely-used traditional approach,
 % in the context of an example that would be familiar to practitioners.
 
