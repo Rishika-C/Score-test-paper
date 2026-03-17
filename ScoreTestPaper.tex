@@ -60,37 +60,46 @@ Model selection is an important step for
 statistical analysis, allowing the practitioner to confirm the
 reliability of their chosen model and any resulting
 conclusions. Well-known model selection methods include comparing
-models using likelihood ratio tests (LRTs), AIC values and score
-tests. When comparing two nested models, each method has its own advantages and
+models using likelihood ratio tests (LRTs), AIC values, and score
+tests. Comparing two nested models via LRTs requires twice the
+difference of each model's maximised log-likelihood
+\parencite{neymanPearson}. Using the AIC means applying a penalty
+reflecting model complexity to
+each maximised log-likelihood, and comparing the results
+\parencite{akaike1973}. To conduct a score test,  
+log-likelihood gradients from the more complicated model are required
+to calculate the score test statistic -- specifically, the score
+vector and information matrix \parencite{rao1948}. 
+
+Each method has its own advantages and
 disadvantages. It is straightforward to perform the
 calculations required to compare models via LRTs or AIC values. However, both
 models must be fitted. To conduct score tests, only the simpler of the
-two models needs to be fitted. However, log-likelihood gradients from
-the more complicated model are required to calculate the score test
-statistic -- specifically, the score vector and information matrix of
-this model. This has often acted as a 
-deterrent for conducting these tests.
+two models needs to be fitted. However, the gradients required can be
+challenging to obtain, often acting as a deterrent for conducting
+these tests. 
 
 Historically, LRTs and AIC values have been widely-used methods
 of model selection. Although, when the models under comparison require
 considerable time and resources to fit, these methods of comparison can
-become inconvenient. This issue is only amplified when considering
+become inconvenient. This issue is amplified when considering
 multiple potential models for a data set -- every single model in the
 candidate set must be fitted, potentially rendering model selection
-impractical, despite its value.
+impractical.
 
 In such cases, turning to score tests would be
-beneficial. Having to fit fewer models in the process of selecting a
-final model could only make model selection more
-practical and accessible. Meaningfully contributing to this
-practicality and accessibility requires a straightforward way of
+beneficial. Fitting fewer models makes model selection more
+practical. However, for usability, we require a straightforward way of
 calculating the gradients required by the score test
-statistic. Traditionally, options for calculating these gradients
-included manual calculations and numeric approximations. The former
+statistic. Traditionally, options for obtaining these gradients
+included symbolic differentiation and numeric approximations. The former
 can quickly become unrealistic as model complexity grows, while the
 latter often produces unstable and inaccurate
-results \parencite{ADMBpaper}. In this paper, we propose the use of automatic
-differentiation (AD) tools to solve this issue.
+results \parencite{ADMBpaper}. In this paper, we demonstrate that
+due to recent developments in statistical software, this issue is
+solved -- it is now easier than
+ever to implement score tests. Automatic differentiation (AD) tools 
+allow for convenient procurement of the necessary gradients. 
 
 Employing the chain rule of differentiation, AD tools produce exact
 gradients of any specified function \parencite{ADMBpaper}. Using these tools often
@@ -98,26 +107,37 @@ only requires translating the desired function into an
 appropriate coding language \parencite{TMBpaper}. For statistical models, these tools are
 mainly used for model-fitting or calculating 
 the Laplace approximation. Utilising the side-effects of these
-capabilities, by repurposing their ability to calculate
-exact log-likelihood gradients, facilities a newly
+capabilities -- repurposing their ability to calculate
+exact log-likelihood gradients -- facilities a newly
 convenient implementation of score tests.
 
-This approach can greatly assist with model selection in fields such
-as spatial capture-recapture (SCR). Model selection is often fraught
+% , for example. Due to their complexity, these
+% models often require considerable effort to fit, rendering LRTs and
+% AIC values inappropriate. Additionally, gradients are often
+% intractable, previously making score tests impractical. 
+
+This can assist with model selection for random effects models, for
+example. These models are well-known for requiring considerable effort
+to fit, rendering LRTs/AIC values inappropriate, while also having
+intractable gradients, thus previously making score tests
+impractical. Therefore, to
+illustrate the benefits of score tests 
+and AD tools, we will focus on the class of random effects models known as
+spatial capture-recapture (SCR) models. Model selection is often difficult 
 for SCR models. Likelihood equations for SCR models can be quite
 sophisticated, involving products of two-dimensional spatial
 integrals \parencite{borchersEfford2008}. Model-fitting, and therefore
 using AIC values to compare 
 models, is often resource-intensive,
 especially when many models are being considered. Due 
-to the difficulties in manually calculating or numerically 
+to the difficulties in symbolic differentiation or numerically 
 approximating gradients, score tests have not generally been
 used. Alternative approaches have been explored, but there are 
 no well-established methods of model selection. Removing the barriers
 to conducting score tests 
 presents a new and potentially impactful solution to this issue. 
 
-We will explore the gains of conducting score tests using AD tools
+We will explore the newfound gains of conducting score tests using AD tools
 via the framework introduced by \textcite{catchpoleMorgan1996}, and
 later developed by \textcite{mccreaMorgan2011}. Following the
 convention of organising the
@@ -140,7 +160,7 @@ we also explore how
 to extend the aforementioned framework to accommodate models that aren't
 nested. As with the possible difficulties of model
 selection, our insights are not specific to any one field of
-research. They may be applied to a vast range of models.
+research or class of model. They may be applied to a vast range of models.
 
 
 % MOVE to details of score test framework in next section: 
