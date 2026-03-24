@@ -66,17 +66,19 @@ difference of each model's maximised log-likelihood
 \parencite{neymanPearson}. Using the AIC means applying a penalty
 reflecting model complexity to
 each maximised log-likelihood, and comparing the results
-\parencite{akaike1973}. To conduct a score test,  
-log-likelihood gradients from the more complicated model are required
-to calculate the score test statistic -- specifically, the score
-vector and information matrix \parencite{rao1948}. 
+\parencite{akaike1973}. To conduct a score test, a score test
+statistic is calculated using log-likelihood gradients from the 
+more complicated model -- specifically, the score
+vector and information matrix \parencite{rao1948}. See
+\textcite{rao2005} for an overview and recent developments of score
+tests. 
 
 Each method has its own advantages and
 disadvantages. It is straightforward to perform the
 calculations required to compare models via LRTs or AIC values. However, both
 models must be fitted. To conduct score tests, only the simpler of the
-two models needs to be fitted \parencite{rao2005}. However, the
-gradients required can be challenging to obtain, often acting as a
+two models needs to be fitted \parencite{rao2005}. However, the required
+gradients can be challenging to obtain, often acting as a
 deterrent for conducting these tests. 
 
 Historically, LRTs and AIC values have been widely-used methods
@@ -111,21 +113,30 @@ capabilities -- repurposing their ability to calculate
 exact log-likelihood gradients -- facilities a newly
 convenient implementation of score tests.
 
-This can assist with model selection for random effects models, for
-example. These models are well-known for requiring considerable effort
-to fit \parencite{wang2022}, rendering LRTs/AIC values
-inappropriate. They also have
-intractable likelihoods \parencite{skaug2002}, resulting in gradients
-with no closed form, thus previously making score tests  
-impractical. Therefore, to
-illustrate the benefits of score tests 
+This is especially valuable for random effects models, for example. Intractable
+likelihoods involving potentially high 
+dimensional integrals produce gradients with no closed form, resulting in
+a host of challenges. Model fitting previously required tailored
+software, even for relatively simple random effects models such as
+Generalised Linear Mixed Models (GLMMs) \parencite{lme4-pkg}. However,
+gradients remained elusive. \textcite{wang2022}
+solved this issue for GLMMs, presenting extensive derivations
+to obtain GLMM gradients. There remain many
+classes of random effects models for which such solutions and
+derivations don't exist and are impractical, rendering AD a key
+advancement in the use of these models \parencite{skaug2002,
+  ADMBpaper, TMBpaper}. The ease with which AD fits models and
+supplies gradients makes previously unfeasible tasks, such as model selection via score 
+tests, viable in a way previously unseen. 
+
+Therefore, to illustrate the benefits of score tests 
 and AD tools, we will focus on the class of random effects models known as
 spatial capture-recapture (SCR) models. Model selection is often difficult 
 for SCR models. Likelihood equations for SCR models can be quite
 sophisticated, involving products of two-dimensional spatial
 integrals \parencite{borchersEfford2008}. Model-fitting, and therefore
 using AIC values to compare 
-models, is often resource-intensive,
+models, is often resource intensive,
 especially when many models are being considered. Due 
 to the difficulties in symbolic differentiation or numerically 
 approximating gradients, score tests have not generally been
@@ -146,9 +157,9 @@ potentially vast candidate set of models of varying complexity is reduced to the
 task of calculating score statistics and fitting a few, potentially
 relatively simple, models. 
 
-We will use the `RTMB' R package -- a widely-used AD tool --
-to implement score tests for model selection. We
-present our findings using an illustrative example. We will use
+We present our findings using an illustrative example. We will employ
+the `RTMB' R package -- a widely-used AD tool -- 
+to implement score tests for SCR model selection using
 the ovenbird SCR data set, available in the `secr' R
 package \parencite{secr-pkg}. Compared to traditional methods, we examine how our
 approach enhances the convenience and accessibility of
@@ -169,11 +180,6 @@ for SCR model selection. The data set used consists of captures of birds
 in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. A variety of SCR
 models are fitted and the final model is selected via AIC.
 
-Since this research was published, there has been further exploration
-into alternative model selection methods for SCR. As mentioned
-previously, no established methods have emerged. Model
-selection via AIC values remains a common approach.
-
 For easy comparison to the standard set by such a well-known example, we
 work with a similar data set. The `ovenbird' data
 set, available via the `secr' R package, contains adult captures from a
@@ -183,20 +189,20 @@ described in the documentation, the forest in the area has
 changed little since the previous survey conducted by C.S. Robbins
 \parencite{secr-pkg}. One bird was killed by a predator while in a net
 in 2009 \parencite{secr-pkg}, and for our analysis we remove this loss
-from the data set. As in \textcite{borchersEfford2008}, our models do
-not consider any changes in 
-population size over time due to births/deaths, etc. We retain any 
+from the data set. We retain any 
 records of individual birds being captured more than once in a
 day. 
 
 Forty four mist nets were passively operated for nine or
 ten non-consecutive days in late May and June of each year. In the
-context of SCR, populations separated by space, time (e.g. 
-years) or attributes such as sex are referred to as `sessions'
+context of SCR, populations separated by time (e.g. 
+years) are referred to as `sessions'
 \parencite{effordBook2009}. Therefore, our 
 data set contains five sessions, each with nine or ten sampling occasions. As
 is standard when fitting multi-session SCR models, we each session as
-if from an independent closed population \parencite{effordBook2009}. 
+if from an independent closed population
+\parencite{effordBook2009}. Using closed populations means we do not consider any changes in
+population size each year due to births, deaths, etc. 
 
 Our candidate model set contains all SCR models that share parameter
 dependencies considered in
@@ -218,10 +224,30 @@ in the context of an example that would be familiar to practitioners.
 \label{sec:candidate-set}
 
 Please refer to Section \ref{sec:overview-candidate-models} of the Appendix
-for a brief overview of SCR models and a description of the models
-comprising our candidate set. By considering all combinations of the parameter dependencies
-considered in \textcite{borchersEfford2008}, we
-have forty five SCR models in our candidate set. 
+for a brief overview of the parametrisation of SCR models and
+description of the forty five models comprising our candidate set.
+
+Using score tests via RTMB can greatly
+enhance the convenience of model selection for a comprehensive
+candidate set like ours. SCR models do not fit the description of a
+`standard' random effects model. Evaluating
+the likelihood of each model in the candidate set requires a
+product of two-dimensional integrals, where each integral is an infinite
+sum over the random effects in the model -- the observed animals' home
+range centers \parencite{borchersEfford2008} -- 
+adding a layer of complexity that further amplifies the challenges of working with a
+sophisticated class of models. Model fitting becomes resource
+intensive, hindering the utility of traditional model selection
+approaches such as LRTs and AIC values.
+
+Regardless, model selection via AIC values remains a common approach
+for SCR model selection. Although SCR models are useful for estimating
+animal abundance and therefore popular in the field of statistical
+ecology, these models aren't widely used enough for there to be
+established methods for finding derivatives or tailored approaches for
+convenient model selection. As we see below, our general-use,
+straightforward method significantly enhances the
+accessibility of model selection with little cost.  
 
 \subsection{Calculating score test statistics with RTMB}
 \label{sec:calculating-stats-rtmb}
