@@ -35,6 +35,13 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibl
 \makeatletter
 \newcommand{\apamaxcitenames}{2}
 
+%% Notation stuff
+\newcommand{\thetaZero}{\boldsymbol{\theta}_0}
+\newcommand{\thetaZeroMLE}{\hat{\boldsymbol{\theta}}_0}
+\newcommand{\thetaOne}{\boldsymbol{\theta}_1}
+\newcommand{\thetaOneTilde}{\tilde{\boldsymbol{\theta}}_1}
+\newcommand{\thetaOneMLE}{\hat{\boldsymbol{\theta}}_1}
+
 
 \title{Harnessing score tests for model selection}
 
@@ -124,8 +131,8 @@ solved this issue for GLMMs, presenting extensive derivations
 to obtain GLMM gradients. There remain many
 classes of random effects models for which such solutions and
 derivations don't exist and are impractical, rendering AD a key
-advancement in the use of these models \parencite{skaug2002,
-  ADMBpaper, TMBpaper}. The ease with which AD fits models and
+advancement in the use of these models \parencite{skaug2002}. The ease
+with which AD fits models and 
 supplies gradients makes previously unfeasible tasks, such as model selection via score 
 tests, viable in a way previously unseen. 
 
@@ -224,8 +231,15 @@ in the context of an example that would be familiar to practitioners.
 \label{sec:candidate-set}
 
 Please refer to Section \ref{sec:overview-candidate-models} of the Appendix
-for a brief overview of the parametrisation of SCR models and
-description of the forty five models comprising our candidate set.
+for a brief overview of the parametrisation of the models
+comprising our candidate set. The key idea is that in our SCR models,
+we have three parameters: $D$, $g_0$ and $\sigma$. $D$
+describes animal density, while $g_0$ and $\sigma$ describe 
+the probability of being captured. For each of these parameters, we
+consider dependencies presented in
+\textcite{borchersEfford2008}. Considering all possible combinations
+of these dependencies gives the forty five models in our candidate
+set. 
 
 Using score tests via RTMB can greatly
 enhance the convenience of model selection for a comprehensive
@@ -233,7 +247,7 @@ candidate set like ours. SCR models do not fit the description of a
 `standard' random effects model. Evaluating
 the likelihood of each model in the candidate set requires a
 product of two-dimensional integrals, where each integral is an infinite
-sum over the random effects in the model -- the observed animals' home
+sum over the random effects in the model -- the captured animals' home
 range centers \parencite{borchersEfford2008} -- 
 adding a layer of complexity that further amplifies the challenges of working with a
 sophisticated class of models. Model fitting becomes resource
@@ -245,20 +259,71 @@ for SCR model selection. Although SCR models are useful for estimating
 animal abundance and therefore popular in the field of statistical
 ecology, these models aren't widely used enough for there to be
 established methods for finding derivatives or tailored approaches for
-convenient model selection. As we see below, our general-use,
+convenient model selection. As we see below, our general-use,d
 straightforward method significantly enhances the
 accessibility of model selection with little cost.  
 
 \subsection{Calculating score test statistics with RTMB}
 \label{sec:calculating-stats-rtmb}
 
-To calculate score test statistics, we use the following formula:
+When comparing two nested models using a score test, our null hypothesis
+is that the simpler model is adequate. Therefore, we will refer to the
+simpler model as the $H_0$ model, and the larger model as the $H_1$
+model. We label the parameter vector for the $H_0$ model as $\thetaZero$,
+and the parameter vector for the $H_1$ model as $\thetaOne$. The steps are as follows:
+\begin{enumerate}
+\item Fit the $H_0$ model, extract the MLE vector
+  $\thetaZeroMLE$;
+\item Translate $\thetaZeroMLE$ into a $\thetaOne$ vector --
+  i.e. identify a $\thetaOne$ vector that shares the constraints of
+  the $H_0$ model and uses the estimates of $\thetaZeroMLE$. We
+  label the resulting vector $\thetaOneTilde$;
+\item Calculate:
+  \begin{equation}
+    \boldsymbol{u}_1 (\thetaOneTilde)^T \mathcal{I}_1
+    (\thetaOneTilde) \boldsymbol{u}_1 (\thetaOneTilde)
+  \end{equation}
+  where $\boldsymbol{u}_1 (\thetaOneTilde)$ is the score vector of
+  the $H_1$ model evaluated at $\thetaOneTilde$, and $\mathcal{I}_1
+  (\thetaOneTilde)$ is the information matrix of the $H_1$ model
+  evaluated at the same. This gives the score test
+  statistic;
+\item Compare this statistic to a Chi-squared distribution where
+  the degrees of freedom is equal to the difference in the number
+  of parameters for the $H_0$ and $H_1$ model. 
+\end{enumerate}
 
-% {Explanation of how to calculate score test statistics. Include
-%   intuitive explanations of what gradients tell us, how they
-%   inflate/deflate statistics, what we are looking for overall
-%   (distance between H0 MLE vec and H1 peak). Then go into
-%   benefits of RTMB.}
+Note that we focus on the use of the observed information matrix
+in Step 3. See the Discussion for more details. Intuitively, the
+formula in Step 3 means the score test statistic summarises the
+distance between $\thetaOneTilde$ and the unconstrained $H_1$ model
+MLE vector, $\thetaOneMLE$. If this distance were large, the
+difference in fit between the $H_0$ and $H_1$ model would likely be
+significant enough for the $H_1$ model to be preferable despite its
+added complexity, and vice versa.
+
+By giving the gradient of the $H_1$ model
+log-likelihood at $\thetaOneTilde$, $\boldsymbol{u}_1
+(\thetaOneTilde)$ gives a rough idea of the distance between
+$\thetaOneTilde$ and $\thetaOneMLE$. Also taking into account the curvature
+at $\thetaOneTilde$ via $\mathcal{I}_1 (\thetaOneTilde)$, creates an
+accurate picture of this distance. For example, as we take the inverse
+of the information matrix, low
+curvature at $\thetaOneTilde$ means
+the score test statistic becomes inflated. A heavier penalty is placed on the
+gradient, as even a small gradient could relate to a large distance
+between $\thetaOneTilde$ and $\thetaOneMLE$.
+
+Previously, the obstacle in implementing score tests was obtaining the
+score vector and information matrix to evaluate. Making use of recent software advancements, we use
+the RTMB R package, a commonly-used AD tool, to implement this. By
+writing the log-likelihood for all $H_0$ and $H_1$ models of interest
+as R functions, it is straightforward to extract the score vector
+and information matrix for our models. Note that due to the speed and
+accuracy of AD, we also use RTMB to fit our $H_0$ models as needed. Refer to
+section \ref{sec:score-test-example} of the Appendix for a simple
+illustrative example of implementing a score test using RTMB. 
+    
 
 \subsection{Implementing the score test framework}
 \label{sec:implementing-framework}
@@ -390,19 +455,24 @@ Poisson process \parencite{secr-book}. Specifically, following the
 example of \parencite{borchersEfford2008}, we use a
 homogeneous Poisson process, so animals are assumed to be
 distributed uniformly across the survey area. Using the state model,
-we estimate the parameter $D$ (animal density in the area).
+we estimate the parameter $D$, animal density in the area of interest.
 
 To specify the observation process, we select a detection function for
-our SCR models. This describes how each animal's probability of detection
-changes, as a function of their distance from a detector. The choice
-of function dictates the `detection' parameters to be estimated
-\parencite{secr-book}. Although \textcite{borchersEfford2008} consider
-SCR models with half-normal and 
-hazard rate detection functions, we only consider models with a
+our SCR models. This describes how an animal's probability of detection
+changes as a function of the distance between their activity centre and a
+detector. An animal's activity centre is the centre of their home
+range \parencite{secr-book}.
+
+The choice of detection function dictates the `detection' parameters
+to be estimated. Although \textcite{borchersEfford2008} consider
+SCR models with half-normal and hazard rate detection functions, we only consider models with a
 half-normal detection function. Therefore, our detection
 parameters are $g_0$ and $\sigma$. Hazard rate detection
 functions are seldom used and generally not recommended due to their
 long tail \parencite{secr-pkg}.
+
+Refer to texts such as \textcite{secr-book} for further details on
+state models and observation models. 
 
 When fitting a SCR model, along with the
 state/observation models, it is standard to specify any dependencies for $D$
@@ -467,7 +537,14 @@ In Table 1 (see \textcite{secr-book} for further detail):
 \end{itemize}
 
 We construct our candidate set by considering all possible
-combinations of these dependencies, resulting in forty five models.   
+combinations of these dependencies, resulting in forty five models.
+
+\subsection{Score test examples}
+\label{sec:score-test-example}
+
+{Insert simple example here :) -- calculate score test statistic
+  then RTMB implementation.}
+
 
 
 \printbibliography
