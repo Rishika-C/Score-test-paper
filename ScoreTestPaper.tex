@@ -236,13 +236,68 @@ comprising our candidate set. The key idea is that in our SCR models,
 we have three parameters: $D$, $g_0$ and $\sigma$. $D$
 describes animal density, while $g_0$ and $\sigma$ describe 
 the probability of being captured. For each of these parameters, we
-consider dependencies presented in
-\textcite{borchersEfford2008}. Considering all possible combinations
-of these dependencies gives the forty five models in our candidate
-set. 
+consider the dependencies presented in
+\textcite{borchersEfford2008}, and shown in Table
+\ref{table:dependencies}. In this table, we specify these dependencies using the
+parlance of the `secr' R package. Considering all possible combinations of
+these dependencies gives the forty five models in our candidate set.
 
-Using score tests via RTMB can greatly
-enhance the convenience of model selection for a comprehensive
+\begin{table}[h!]
+  \centering
+\begin{tabular} { |c|c|c|c|  }
+  \hline
+  \textbf{$D$ dependencies} & \textbf{$\sigma$ dependencies} &
+                                             \multicolumn{2}{|c|}{\textbf{$g_0$
+                                                               dependencies}} 
+  \\
+  \hline
+  $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim \text{b}$ \\
+  \hline
+  $D \sim \text{session}$ & $\sigma \sim \text{session}$ & $g_0 \sim
+                                                           \text{session}$
+             &  $g_0 \sim \text{session} + \text{b}$ \\
+  \hline
+  $D \sim \text{Session}$ & $\sigma \sim \text{h2}$ & $g_0 \sim
+                                                      \text{h2}$ & \\
+  \hline
+\end{tabular}
+\caption{All parameter dependencies considered in our candidate set.}
+\label{table:dependencies}
+\end{table}
+
+In Table \ref{table:dependencies} (see \textcite{secr-book} for further detail):
+\begin{itemize}
+  \item `$\sim 1$' represents a parameter being held pooled across
+    sessions. For example, with $D \sim 1$, we have only one
+    estimate of $D$ and use it for all sessions;
+  \item `$\sim \text{session}$' means a parameter has session-specific
+    levels. If we specify $D \sim \text{session}$, we have a separate estimate
+    of $D$ for each session;
+  \item `$\sim \text{Session}$' represents a trend across
+    sessions. With `$D \sim \text{Session}$', we  have $D(y) =
+    exp(\beta_0 + \beta_1 y)$, 
+    where $y$ is the session number \parencite{borchersEfford2008}. In
+    our case, $y=1,...,5$;
+  \item `$\sim \text{h2}$' denotes a
+    two-class finite mixture model. For example, with `$\sigma \sim \text{h2}$', we assume
+    there are two groups in the population: Group 1 uses $\sigma_1$,
+    while Group 2 uses $\sigma_2$. An 
+    individual falls in Group 1 with probability $p$ and in Group 2
+    with probability $(1-p)$. These estimates are pooled across sessions; 
+  \item `$\sim \text{b}$' represents a trap response. With $g_0 \sim
+    \text{b}$, we have two estimates of $g_0$: one for individuals
+    captured on previously in a session, and one for individuals
+    that have not yet been captured in a session. These estimates are pooled
+    across sessions;
+  \item `$\sim \text{session} + \text{b}$' means we have
+    session-specific levels and a trap response -- e.g. with $g_0 \sim \text{session} +
+    \text{b}$, we fit a model with two separate estimates of $g_0$ for
+    each session: one for previously captured individuals, and one for
+    individuals that have not been caught yet. 
+\end{itemize}
+
+Using score tests via RTMB greatly
+enhances the convenience of model selection for a comprehensive
 candidate set like ours. SCR models do not fit the description of a
 `standard' random effects model. Evaluating
 the likelihood of each model in the candidate set requires a
@@ -259,7 +314,7 @@ for SCR model selection. Although SCR models are useful for estimating
 animal abundance and therefore popular in the field of statistical
 ecology, these models aren't widely used enough for there to be
 established methods for finding derivatives or tailored approaches for
-convenient model selection. As we see below, our general-use,d
+convenient model selection. As we see below, our general use,
 straightforward method significantly enhances the
 accessibility of model selection with little cost.  
 
@@ -275,12 +330,13 @@ model'. We label the parameter vector for the $H_0$ model as $\thetaZero$,
 and the parameter vector for the $H_1$ model as $\thetaOne$. The
 steps are as follows:
 \begin{enumerate}
-\item Fit the $H_0$ model, extract the MLE vector
-  $\thetaZeroMLE$;
+\item Fit the $H_0$ model, extract the Maximum Likelihood Estiamte
+  (MLE) vector $\thetaZeroMLE$; 
 \item Translate $\thetaZeroMLE$ into a $\thetaOne$ vector --
   i.e. identify a $\thetaOne$ vector that shares the constraints of
   the $H_0$ model and uses the estimates of $\thetaZeroMLE$. We
-  label the resulting vector $\thetaOneTilde$;
+  label the resulting vector $\thetaOneTilde$. Plugging
+  $\thetaOneTilde$ into the $H_1$ model returns the $H_0$ model;
 \item Calculate:
   \begin{equation}
     \boldsymbol{u}_1 (\thetaOneTilde)^T \mathcal{I}_1
@@ -300,7 +356,9 @@ Note that we focus on the use of the observed information matrix
 in Step 3. See section (\textbf{insert number}) of the Discussion for
 more details. Intuitively, the 
 formula in Step 3 means the score test statistic summarises the
-distance between $\thetaOneTilde$ and the unconstrained $H_1$ model
+distance between $\thetaOneTilde$ and the peak of the $H_1$
+log-likelihood. That is, it summarises the distance between
+$\thetaOneTilde$ and the unconstrained $H_1$ model
 MLE vector, $\thetaOneMLE$. If this distance is large, the
 difference in fit between the $H_0$ and $H_1$ model is likely
 significant enough for the $H_1$ model to be preferable despite its
@@ -327,7 +385,6 @@ and information matrices we need. Note that due to the speed and
 accuracy of AD, we also use RTMB to fit our $H_0$ models. Refer to
 section \ref{sec:score-test-example} of the Appendix for a simple
 illustrative example of implementing a score test using RTMB. 
-    
 
 \subsection{Implementing the score test framework}
 \label{sec:implementing-framework}
@@ -363,96 +420,125 @@ framework enhances the convenience of any model-fitting -- the MLEs
 from a given $H_0$ model may provide appropriate starting values for
 fitting the next $H_0$ model \parencite{mccreaMorgan2011}. By
 harnessing the utility of score tests and the convenience afforded by
-AD, model selection with this framework requires newly accessible
-calculations, coupled with the likely straightforward fitting of a few models. 
+AD, model selection with this framework now involves accessible
+calculations, coupled with the likely straightforward fitting of few models. 
 
 \subsection{Issues with nesting}
 \label{sec:nesting-issues}
 
-When working with comprehensive candidate sets of potentially
-sophisticated models, issues with nesting may arise. There may be
-models in the candidate set that do not neatly fit into the levels
-described above. We extend the framework of
-\textcite{catchpoleMorgan1996} to accommodate this. 
+When working with comprehensive candidate sets, issues with nesting
+may arise. There may be models in the candidate set that do not 
+fit into the levels described above. We extend the framework of
+\textcite{catchpoleMorgan1996} to accommodate this.
 
--- For instance, may have models with different parameters which can
-cause issues. In this case, suggest different 
-`trees' for models with same parameters. From all chosen models,
-select final model with AIC.
+For models to correctly fit into the levels of our chosen model
+selection framework, they must be nested appropriately for score
+tests. There must be only one choice of $\thetaOneTilde$. This ensures
+any changes in $\thetaOneTilde$ cause a change in the $H_1$
+log-likelihood, resulting in the required curvature at
+$\thetaOneTilde$ for the score test statistic to inform how far
+$\thetaOneTilde$ is from the peak.
 
--- In our example, have models with different mixture
+This may be violated if our candidate set contains
+models with different parameters. Where issues arise, we propose extending
+the framework of \textcite{catchpoleMorgan1996} by separating the
+candidate set into groups of models with the same parameters and
+implementing the model selection framework on each group. The chosen
+models can be compared using AIC values to select the 
+final model. Being a well-established and straightforward method
+for comparing a few models, using AIC values facilitates our extension
+of the chosen framework, allowing practitioners to harness the
+convenience of score tests even when issues with nesting arise.
+
+For example, as shown in Table \textbf{(table no)} in the Results, our
+candidate set includes models with and without mixture components. Specifically,
+Model \textbf{(1st model no)} 
+has a mixture component for $\sigma$, while holding $D$ and $g_0$ constant
+for all animals across all sessions. Recall, this means the model
+assumes the ovenbirds fall into one of two groups -- Group 1 uses
+$\sigma_1$ and Group 2 uses $\sigma_2$. The probability of falling
+into either group is $p$ and $(1-p)$, respectively. In contrast, Model
+\textbf{(2nd model no)} holds all three parameters constant for all birds and
+sessions. If we set up a score test to compare these two models there
+is no single value of $\thetaOneTilde$ that, when
+plugged into the $H_1$ model (Model \textbf{(1st model no)}), returns
+the $H_0$ model. \textit{(Elaborate on this -- multiple choices due to
+  any $p$ being appropriate!)} 
+
+\textit{-- In our example, have models with different mixture
 dependencies. Means do not fit nesting structure required for score
-tests (use explanation below).
+tests (use explanation below).}
 
--- Doesn't always apply when added parameters, just when added
+\textit{-- Doesn't always apply when added parameters, just when added
 parameters result in identifiability issue above -- e.g. behavioural SCR model, can just set
-behavioural effect to 0. 
+behavioural effect to 0. }
 
-\textit{DO results table then come back to this session. Will clarify how to
-label models with explanations of dependencies in Appendix... just
-identify by name? And say something like `we use a mixture model for
-the parameter labelled $g_0$ that means we don't have the required
-identifiability when...' and so on?}
+% \textit{DO results table then come back to this session. Will clarify how to
+% label models with explanations of dependencies in Appendix... just
+% identify by name? And say something like `we use a mixture model for
+% the parameter labelled $g_0$ that means we don't have the required
+% identifiability when...' and so on?}
 
-% We apply the framework of \textcite{catchpoleMorgan1996}, extending it
-% to a comprehensive candidate set in which all models do not fit neatly
-% into a nested structure appropriate for score tests.
+% % We apply the framework of \textcite{catchpoleMorgan1996}, extending it
+% % to a comprehensive candidate set in which all models do not fit
+% % neatly
+% % into a nested structure appropriate for score tests.
 
-% For two models to be nested appropriately for score tests, it must be
-% possible to obtain the simpler model from the more complex one by
-% placing fixed constraints on any additional parameters. Any small changes in
-% the values of these constrained parameters must change the
-% likelihood. This ensures the $H_1$ log-likelihood has curvature at the
-% $H_0$ estimates, allowing us to calculate the required gradients.
+% % For two models to be nested appropriately for score tests, it must be
+% % possible to obtain the simpler model from the more complex one by
+% % placing fixed constraints on any additional parameters. Any small changes in
+% % the values of these constrained parameters must change the
+% % likelihood. This ensures the $H_1$ log-likelihood has curvature at the
+% % $H_0$ estimates, allowing us to calculate the required gradients.
 
-% From ChatGPT (for own understanding):
-% For a score test, we only need the likelihood to have curvature in the
-% directions of the parameters being tested under H_0 (psi), because the
-% test measures the sensitivity of the likelihood to changes in those
-% parameters. Curvature in other parameters is not required — it does
-% not affect the calculation of the score statistic or its chi-square
-% distribution.
-% The score test looks only at the change in likelihood if we move the
-% additional parameters psi away from their null values (constrained values under
-% H_0).
+% % From ChatGPT (for own understanding):
+% % For a score test, we only need the likelihood to have curvature in the
+% % directions of the parameters being tested under H_0 (psi), because the
+% % test measures the sensitivity of the likelihood to changes in those
+% % parameters. Curvature in other parameters is not required — it does
+% % not affect the calculation of the score statistic or its chi-square
+% % distribution.
+% % The score test looks only at the change in likelihood if we move the
+% % additional parameters psi away from their null values (constrained values under
+% % H_0).
 
-\textbf{(Perhaps refine with lambda and psi notation, if used in
-  section above?)}
+% \textbf{(Perhaps refine with lambda and psi notation, if used in
+%   section above?)}
 
-For two nested models to be appropriate for a score test, it must be
-possible to obtain the simpler model (the $H_0$ model) from the more
-complex one (the $H_1$ model) via fixed constraints on any additional
-parameters, $\boldsymbol{\psi}$. All parameters in
-$\boldsymbol{\psi}$ must be identifiable 
-in the context of the $H_0$ model -- i.e. when identifying the point on the
-$H_1$ likelihood surface equivalent to the $H_0$ MLE vector,
-there must be only one choice. When this holds, any small deviations
-from this point cause a
-change in the likelihood, ensuring the $H_1$ log-likelihood 
-at the $H_0$ MLE vector has the required curvature in the direction of
-all parameters in $\boldsymbol{\psi}$. Without this curvature, it is no longer clear how
-far the $H_0$ MLE vector is from the peak of the $H_1$ log-likelihood
--- that is, it is unclear how much the additional parameters
-in $\boldsymbol{\psi}$ improve fit. Any 
-score statistics are degenerate and the 
-asymptotic Chi-squared distribution gives unusable
-p-values. 
+% For two nested models to be appropriate for a score test, it must be
+% possible to obtain the simpler model (the $H_0$ model) from the more
+% complex one (the $H_1$ model) via fixed constraints on any additional
+% parameters, $\boldsymbol{\psi}$. All parameters in
+% $\boldsymbol{\psi}$ must be identifiable 
+% in the context of the $H_0$ model -- i.e. when identifying the point on the
+% $H_1$ likelihood surface equivalent to the $H_0$ MLE vector,
+% there must be only one choice. When this holds, any small deviations
+% from this point cause a
+% change in the likelihood, ensuring the $H_1$ log-likelihood 
+% at the $H_0$ MLE vector has the required curvature in the direction of
+% all parameters in $\boldsymbol{\psi}$. Without this curvature, it is no longer clear how
+% far the $H_0$ MLE vector is from the peak of the $H_1$ log-likelihood
+% -- that is, it is unclear how much the additional parameters
+% in $\boldsymbol{\psi}$ improve fit. Any 
+% score statistics are degenerate and the 
+% asymptotic Chi-squared distribution gives unusable
+% p-values. 
 
-In our example, issues arise as we consider models that allow for individual
-heterogeneity. As mentioned in Section \ref{sec:candidate-models}, our candidate set
-contains models that have a two-class finite mixture dependency for $g_0$ and/or
-$\sigma$. These models allow individuals in the population to belong to
-one of two classes, where each class is defined by its corresponding estimate of $g_0$
-and/or $\sigma$ \textbf{(cite -- SECR book)}. The probability of
-belonging to either class is estimated by the model. We refer to this
-probability estimate as $\hat{p}$.
+% In our example, issues arise as we consider models that allow for individual
+% heterogeneity. As mentioned in Section \ref{sec:candidate-models}, our candidate set
+% contains models that have a two-class finite mixture dependency for $g_0$ and/or
+% $\sigma$. These models allow individuals in the population to belong to
+% one of two classes, where each class is defined by its corresponding estimate of $g_0$
+% and/or $\sigma$ \textbf{(cite -- SECR book)}. The probability of
+% belonging to either class is estimated by the model. We refer to this
+% probability estimate as $\hat{p}$.
 
-% Due to their nature, when conducting score tests, models with mixture
-% models can only be compared to models with matching mixture
-% components.  
-% Consider the example where
-% our $H_0$ model has no mixture component 
-% and our $H_1$ model has a mixture component for $g_0$.
+% % Due to their nature, when conducting score tests, models with mixture
+% % models can only be compared to models with matching mixture
+% % components.  
+% % Consider the example where
+% % our $H_0$ model has no mixture component 
+% % and our $H_1$ model has a mixture component for $g_0$.
 
 \section{Appendix}
 \label{sec:appendix}
@@ -503,65 +589,7 @@ state/observation models, it is standard to specify any dependencies for $D$
 and the detection parameters. Following the example set by
 \textcite{borchersEfford2008}, we 
 consider models with the dependencies shown in Table
-\ref{table:dependencies}. We specify these dependencies using the
-parlance of the `secr' R package. 
-
-\begin{table}[h!]
-  \centering
-\begin{tabular} { |c|c|c|c|  }
-  \hline
-  \textbf{$D$ dependencies} & \textbf{$\sigma$ dependencies} &
-                                             \multicolumn{2}{|c|}{\textbf{$g_0$
-                                                               dependencies}} 
-  \\
-  \hline
-  $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim \text{b}$ \\
-  \hline
-  $D \sim \text{session}$ & $\sigma \sim \text{session}$ & $g_0 \sim
-                                                           \text{session}$
-             &  $g_0 \sim \text{session} + \text{b}$ \\
-  \hline
-  $D \sim \text{Session}$ & $\sigma \sim \text{h2}$ & $g_0 \sim
-                                                      \text{h2}$ & \\
-  \hline
-\end{tabular}
-\caption{All parameter dependencies considered in our candidate set.}
-\label{table:dependencies}
-\end{table}
-
-In Table 1 (see \textcite{secr-book} for further detail):
-\begin{itemize}
-  \item `$\sim 1$' represents a parameter being held pooled across
-    sessions. For example, with $D \sim 1$, we have only one
-    estimate of $D$ and use it for all sessions;
-  \item `$\sim \text{session}$' means a parameter has session-specific
-    levels. If we specify $D \sim \text{session}$, we have a separate estimate
-    of $D$ for each session;
-  \item `$\sim \text{Session}$' represents a trend across
-    sessions. With `$D \sim \text{Session}$', we  have $D(y) =
-    exp(\beta_0 + \beta_1 y)$, 
-    where $y$ is the session number \parencite{borchersEfford2008}. In
-    our case, $y=1,...,5$;
-  \item `$\sim \text{h2}$' denotes a
-    two-class finite mixture model. For example, with `$\sigma \sim \text{h2}$', we assume
-    there are two groups in the population: Group 1 uses $\sigma_1$ in its
-    detection function,  while Group 2 uses $\sigma_2$. An
-    individual falls in Group 1 with probability $p$ and in Group 2
-    with probability $(1-p)$. These estimates are pooled across sessions; 
-  \item `$\sim \text{b}$' represents a trap response. With $g_0 \sim
-    \text{b}$, we have two estimates of $g_0$: one for individuals
-    captured on previous sampling occasions, and one for individuals
-    that have not yet been captured in a session. These estimates are pooled
-    across sessions;
-  \item `$\sim \text{session} + \text{b}$' means we have
-    session-specific levels and a trap response -- e.g. with $g_0 \sim \text{session} +
-    \text{b}$, we fit a model with two separate estimates of $g_0$ for
-    each session: one for previously captured individuals, and one for
-    individuals that have not been caught yet. 
-\end{itemize}
-
-We construct our candidate set by considering all possible
-combinations of these dependencies, resulting in forty five models.
+\ref{table:dependencies} (see Section \ref{sec:candidate-set}). 
 
 \subsection{Score test examples}
 \label{sec:score-test-example}
