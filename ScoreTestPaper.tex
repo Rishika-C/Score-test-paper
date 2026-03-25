@@ -266,11 +266,14 @@ accessibility of model selection with little cost.
 \subsection{Calculating score test statistics with RTMB}
 \label{sec:calculating-stats-rtmb}
 
-When comparing two nested models using a score test, our null hypothesis
+Texts such as \textcite{rao2005} provide detailed information on score
+tests. We provide a brief overview. When comparing two nested models
+using a score test, our null hypothesis 
 is that the simpler model is adequate. Therefore, we will refer to the
-simpler model as the $H_0$ model, and the larger model as the $H_1$
-model. We label the parameter vector for the $H_0$ model as $\thetaZero$,
-and the parameter vector for the $H_1$ model as $\thetaOne$. The steps are as follows:
+simpler model as the `$H_0$ model', and the larger model as the `$H_1$
+model'. We label the parameter vector for the $H_0$ model as $\thetaZero$,
+and the parameter vector for the $H_1$ model as $\thetaOne$. The
+steps are as follows:
 \begin{enumerate}
 \item Fit the $H_0$ model, extract the MLE vector
   $\thetaZeroMLE$;
@@ -294,19 +297,20 @@ and the parameter vector for the $H_1$ model as $\thetaOne$. The steps are as fo
 \end{enumerate}
 
 Note that we focus on the use of the observed information matrix
-in Step 3. See the Discussion for more details. Intuitively, the
+in Step 3. See section (\textbf{insert number}) of the Discussion for
+more details. Intuitively, the 
 formula in Step 3 means the score test statistic summarises the
 distance between $\thetaOneTilde$ and the unconstrained $H_1$ model
-MLE vector, $\thetaOneMLE$. If this distance were large, the
-difference in fit between the $H_0$ and $H_1$ model would likely be
+MLE vector, $\thetaOneMLE$. If this distance is large, the
+difference in fit between the $H_0$ and $H_1$ model is likely
 significant enough for the $H_1$ model to be preferable despite its
 added complexity, and vice versa.
 
-By giving the gradient of the $H_1$ model
+By giving the gradient of the $H_1$
 log-likelihood at $\thetaOneTilde$, $\boldsymbol{u}_1
 (\thetaOneTilde)$ gives a rough idea of the distance between
-$\thetaOneTilde$ and $\thetaOneMLE$. Also taking into account the curvature
-at $\thetaOneTilde$ via $\mathcal{I}_1 (\thetaOneTilde)$, creates an
+$\thetaOneTilde$ and $\thetaOneMLE$. Additionally considering the curvature
+via $\mathcal{I}_1 (\thetaOneTilde)$ creates an
 accurate picture of this distance. For example, as we take the inverse
 of the information matrix, low
 curvature at $\thetaOneTilde$ means
@@ -315,12 +319,12 @@ gradient, as even a small gradient could relate to a large distance
 between $\thetaOneTilde$ and $\thetaOneMLE$.
 
 Previously, the obstacle in implementing score tests was obtaining the
-score vector and information matrix to evaluate. Making use of recent software advancements, we use
-the RTMB R package, a commonly-used AD tool, to implement this. By
-writing the log-likelihood for all $H_0$ and $H_1$ models of interest
-as R functions, it is straightforward to extract the score vector
-and information matrix for our models. Note that due to the speed and
-accuracy of AD, we also use RTMB to fit our $H_0$ models as needed. Refer to
+score vector and information matrix. Using recent software advancements, we employ
+the `RTMB' R package -- a commonly-used AD tool -- to implement this. By
+writing the log-likelihoods for all $H_1$ models of interest
+as R functions, it is straightforward to extract the score vectors
+and information matrices we need. Note that due to the speed and
+accuracy of AD, we also use RTMB to fit our $H_0$ models. Refer to
 section \ref{sec:score-test-example} of the Appendix for a simple
 illustrative example of implementing a score test using RTMB. 
     
@@ -328,52 +332,72 @@ illustrative example of implementing a score test using RTMB.
 \subsection{Implementing the score test framework}
 \label{sec:implementing-framework}
 
-We apply the framework of \textcite{catchpoleMorgan1996}, extending it
-to a comprehensive candidate set in which all models do not fit neatly
-into a nested structure appropriate for score tests.
+To implement the model selection framework of
+\textcite{catchpoleMorgan1996}, the candidate set is organised 
+into levels and, beginning with the simplest models, score tests
+define a path through these levels to select the
+final model. We begin by identifying the 
+most basic model. Using the terminology of \textcite{mccreaMorgan2011},
+this model makes up Level 0 of the candidate set. Level 1 contains all models
+with one added parameter dependency. 
 
-% To implement the score test framework, the candidate set is organised
-% into levels and, beginning with the simplest models, score tests
-% define a path through these levels to select the
-% final model \parencite{mccreaMorgan2011}. We begin by identifying the 
-% most basic model -- this model 
-% makes up Level 0 of the candidate set. Level 1 contains all models
-% with one added parameter dependency. We begin with the null hypothesis
-% that the Level 0 model is adequate for the data. Therefore, we refer to
-% the Level 0 model as the `$H_0$ model'. Our
-% alternative hypotheses are that each Level 1 model provides a
-% significantly better fit, and we refer to these models as `$H_1$ models'. We conduct
-% score tests comparing the null hypothesis to each alternative
-% hypothesis, i.e. comparing the $H_0$ model to each $H_1$ model. The $H_1$ model for the 
-% test with the smallest significant 
-% p-value defines the new null hypothesis -- that is, it becomes the new
-% $H_0$ model. Level 2 is then constructed,
-% consisting of all models with one additional parameter dependency
-% relative to this model, and the process is repeated. We stop
-% when none of the score tests produce significant p-values. At this
-% point, the $H_0$ model is the final chosen model.
+We conduct score tests to
+compare all Level 1 models to the Level 0 model, with the null hypothesis
+that the Level 0 model is adequate for the data. Applying the ideas of
+Section \ref{sec:calculating-stats-rtmb}, we refer to the Level 0
+model as the `$H_0$ model', and all of the Level 1 models as `$H_1$
+models'. The $H_1$ model for the 
+test with the smallest significant 
+p-value defines the new null hypothesis -- that is, it becomes the new
+$H_0$ model.
 
-% When conducting a score test comparing two nested models, only the simpler
-% of the two models needs to be fitted \textbf{(cite)}. So at
-% each step of the process, only the $H_0$ model needs to be
-% fitted. Furthermore, the stepwise nature of the 
-% framework enhances the convenience of any model-fitting -- the MLEs
-% from a given $H_0$ model may provide 
-% appropriate starting values for fitting the next $H_0$ model
-% \parencite{mccreaMorgan2011}. The issue of choosing a model from a 
-% potentially vast candidate set of complicated models is reduced to the
-% task of calculating score statistics and fitting a few, potentially
-% relatively simple, models.
+Level 2 is then constructed, consisting of all models with one
+additional parameter dependency relative to this model, and the
+process is repeated. We stop when none of the score tests produce
+significant p-values. At this point, the $H_0$ model is the final
+chosen model. 
+
+As seen in Section \ref{sec:calculating-stats-rtmb}, when conducting
+each score test, only the $H_0$ model needs to be fitted. And the stepwise nature of the 
+framework enhances the convenience of any model-fitting -- the MLEs
+from a given $H_0$ model may provide appropriate starting values for
+fitting the next $H_0$ model \parencite{mccreaMorgan2011}. By
+harnessing the utility of score tests and the convenience afforded by
+AD, model selection with this framework requires newly accessible
+calculations, coupled with the likely straightforward fitting of a few models. 
 
 \subsection{Issues with nesting}
 \label{sec:nesting-issues}
+
+When working with comprehensive candidate sets of potentially
+sophisticated models, issues with nesting may arise. There may be
+models in the candidate set that do not neatly fit into the levels
+described above. We extend the framework of
+\textcite{catchpoleMorgan1996} to accommodate this. 
+
+-- For instance, may have models with different parameters which can
+cause issues. In this case, suggest different 
+`trees' for models with same parameters. From all chosen models,
+select final model with AIC.
+
+-- In our example, have models with different mixture
+dependencies. Means do not fit nesting structure required for score
+tests (use explanation below).
+
+-- Doesn't always apply when added parameters, just when added
+parameters result in identifiability issue above -- e.g. behavioural SCR model, can just set
+behavioural effect to 0. 
 
 \textit{DO results table then come back to this session. Will clarify how to
 label models with explanations of dependencies in Appendix... just
 identify by name? And say something like `we use a mixture model for
 the parameter labelled $g_0$ that means we don't have the required
-identifiability when...' and so on? 
-}
+identifiability when...' and so on?}
+
+% We apply the framework of \textcite{catchpoleMorgan1996}, extending it
+% to a comprehensive candidate set in which all models do not fit neatly
+% into a nested structure appropriate for score tests.
+
 % For two models to be nested appropriately for score tests, it must be
 % possible to obtain the simpler model from the more complex one by
 % placing fixed constraints on any additional parameters. Any small changes in
