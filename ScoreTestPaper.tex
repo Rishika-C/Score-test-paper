@@ -27,13 +27,20 @@
 \usepackage{lineno,xcolor} % For numbering lines
 
 %% Bibliography, reference
-\usepackage[backend=biber,citestyle=authoryear,uniquename=false,maxcitenames=2,
-mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibliography
-\addbibresource{../../../../../PhDReferences_Zotero.bib} % Bibliography
-
-%% Referencing stuff
-\makeatletter
-\newcommand{\apamaxcitenames}{2}
+% \usepackage[backend=biber,citestyle=authoryear,uniquename=false,maxcitenames=2,
+% mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibliography
+\usepackage[backend=biber, style=apa, maxcitenames=2,
+mincitenames=1, maxbibnames=99]{biblatex}
+\DeclareLanguageMapping{english}{english-apa}
+\AtBeginBibliography{\setcounter{maxnames}{99}}
+\AtBeginDocument{
+  \setcounter{maxcitenames}{2}
+  \setcounter{mincitenames}{1}
+}
+\DeclareNameAlias{sortname}{family-given}
+\DeclareNameAlias{default}{family-given}
+\renewcommand*{\finalnamedelim}{\addspace\&\space}
+\addbibresource{../../../../../PhDReferences_Zotero.bib} 
 
 %% Notation stuff
 \newcommand{\thetaZero}{\boldsymbol{\theta}_0}
@@ -67,16 +74,25 @@ Model selection is an important step for
 statistical analysis, allowing the practitioner to confirm the
 reliability of their chosen model and any resulting
 conclusions. Well-known model selection methods include comparing
-models using likelihood ratio tests (LRTs), AIC values, and score
-tests. Comparing two nested models via LRTs requires twice the
-difference of each model's maximised log-likelihood
-\parencite{neymanPearson}. Using the AIC means applying a penalty
-reflecting model complexity to
-each maximised log-likelihood, and comparing the results
-\parencite{akaike1973}. To conduct a score test, a score test
-statistic is calculated using log-likelihood gradients from the 
-more complicated model -- specifically, the score
-vector and information matrix \parencite{rao1948}. See
+models using likelihood ratio tests (LRTs), AIC values, and score 
+tests. Comparing two nested models via LRTs and AIC values means 
+ using maximised log-likelihoods to assess the quality of
+each model, while applying a penalty for model
+complexity. Conducting a LRT requires twice the difference of each
+model's maximised log-likelihood, which is then 
+compared to a null distribution for which
+the degrees of freedom reflects the penalty for model complexity \parencite{neymanPearson}.
+Using AIC values means directly adding a penalty term to each
+maximised log-likelihood, and comparing the results \parencite{akaike1973}. 
+
+To compare two nested models using a score test, a score test
+statistic is calculated and compared to the same null
+distribution as the LRT statistic. However, the score test statistic
+employs gradients to inform the improvement in fit available by
+perturbing the parameter estimates from the simpler model
+\parencite{rao1948}. Specifically, the score test statistic uses the
+score vector and information matrix for the more complicated model,
+evaluated at the parameter estimates of the simpler model. See
 \textcite{rao2005} for an overview and recent developments of score
 tests. 
 
@@ -89,15 +105,15 @@ gradients can be challenging to obtain, often acting as a
 deterrent for conducting these tests. 
 
 Historically, LRTs and AIC values have been widely-used methods
-of model selection. Although, when the models under comparison require
+of model selection. However, when the models under comparison require
 considerable time and resources to fit, these methods of comparison can
 become inconvenient. This issue is amplified when considering
-multiple potential models for a data set -- every single model in the
+multiple potential models for a data set, as every model in the
 candidate set must be fitted, potentially rendering model selection
 impractical.
 
 In such cases, turning to score tests would be
-beneficial. Fitting fewer models makes model selection more
+beneficial as fitting fewer models makes model selection more
 practical. However, for usability, we require a straightforward way of
 calculating the gradients required by the score test
 statistic. Traditionally, options for obtaining these gradients
@@ -105,50 +121,51 @@ included symbolic differentiation and numeric approximations. The former
 can quickly become unrealistic as model complexity grows, while the
 latter often produces unstable and inaccurate
 results \parencite{ADMBpaper}. In this paper, we demonstrate that
-due to recent developments in statistical software, this issue is
-solved -- it is now easier than
-ever to implement score tests. Automatic differentiation (AD) tools 
-allow for convenient procurement of the necessary gradients. 
+due to recent developments in statistical software, this issue is now
+solved as automatic differentiation (AD) tools 
+allow for convenient procurement of the necessary gradients, and
+therefore newly straightforward implementation of score tests. 
 
-Employing the chain rule of differentiation, AD tools produce exact
-gradients of any specified function \parencite{ADMBpaper}. Using these tools often
-only requires translating the desired function into an
-appropriate coding language \parencite{TMBpaper}. For statistical models, these tools are
+Harnessing the chain rule of differentiation, AD tools produce exact
+gradients of any given function \parencite{ADMBpaper}. Using these
+tools only requires the practitioner to supply the desired function 
+\parencite{TMBpaper}. For statistical models, these tools are 
 mainly used for model-fitting or calculating 
 the Laplace approximation. Utilising the side-effects of these
 capabilities -- repurposing their ability to calculate
-exact log-likelihood gradients -- facilities a newly
+exact log-likelihood gradients -- now facilities a
 convenient implementation of score tests.
 
-This is especially valuable for random effects models, for example. Intractable
+This has implications for a wide range of models. For instance, for
+random effects models, intractable
 likelihoods involving potentially high 
 dimensional integrals produce gradients with no closed form, resulting in
 a host of challenges. Model fitting previously required tailored
-software, even for relatively simple random effects models such as
-Generalised Linear Mixed Models (GLMMs) \parencite{lme4-pkg}. However,
-gradients remained elusive. \textcite{wang2022}
-solved this issue for GLMMs, presenting extensive derivations
-to obtain GLMM gradients. There remain many
-classes of random effects models for which such solutions and
-derivations don't exist and are impractical, rendering AD a key
-advancement in the use of these models \parencite{skaug2002}. The ease
-with which AD fits models and 
+software, even for relatively simple examples such as
+generalised linear mixed models (GLMMs; \cite{lme4-pkg}). Being
+commonly-used modern statistical models, although gradients were
+previously elusive, \textcite{wang2022} present extensive derivations
+to obtain GLMM gradients. However, there remain many random effects
+models for which such solutions and derivations don't exist. Random effects
+models are just one illustration of the  
+advancements provided by AD. For many classes of models, the ease with
+which AD performs model-fitting and 
 supplies gradients makes previously unfeasible tasks, such as model selection via score 
 tests, viable in a way previously unseen. 
 
-Therefore, to illustrate the benefits of score tests 
+To illustrate the benefits of score tests 
 and AD tools, we will focus on the class of random effects models known as
 spatial capture-recapture (SCR) models. Model selection is often difficult 
-for SCR models. Likelihood equations for SCR models can be quite
-sophisticated, involving products of two-dimensional spatial
-integrals \parencite{borchersEfford2008}. Model-fitting, and therefore
+for SCR models. Likelihood equations for these models involve products of two-dimensional spatial
+integrals \parencite{borchersEfford2008}. This makes model-fitting, and therefore
 using AIC values to compare 
-models, is often resource intensive,
-especially when many models are being considered. Due 
+models, time consuming and resource intensive,
+especially when many models are being considered. However, an absence
+of suitable alternatives means comparison via AIC values is a common
+and established method of SCR model selection \parencite{secr-aic-ex}. Due 
 to the difficulties in symbolic differentiation or numerically 
 approximating gradients, score tests have not generally been
-used. Alternative approaches have been explored, but there are 
-no well-established methods of model selection. Removing the barriers
+used. Removing the barriers
 to conducting score tests 
 presents a new and potentially impactful solution to this issue. 
 
@@ -164,14 +181,17 @@ potentially vast candidate set of models of varying complexity is reduced to the
 task of calculating score statistics and fitting a few, potentially
 relatively simple, models. 
 
-We present our findings using an illustrative example. We will employ
-the `RTMB' R package -- a widely-used AD tool -- 
-to implement score tests for SCR model selection using
-the ovenbird SCR data set, available in the `secr' R
-package \parencite{secr-pkg}. Compared to traditional methods, we examine how our
-approach enhances the convenience and accessibility of
-model selection. By considering a range of candidate models, we also
-explore how to accommodate models that aren't
+We present our findings using an illustrative example, using an SCR
+data set of ovenbird captures \parencite{secr-pkg}. As described
+below, similarities to the data set presented in
+\parencite{borchersEfford2008} mean we have a range possible influences
+on capture probabilities, and therefore many potential
+models to consider. We will employ
+the `RTMB' R package \parencite{rtmb-pkg}, a widely-used AD tool, to
+implement score tests for SCR model selection. Compared to traditional
+methods, we examine how our approach enhances the 
+convenience and accessibility of model selection. By considering a
+range of candidate models, we also explore how to accommodate models that aren't
 nested, a potentially common issue. As with the possible difficulties of model
 selection, our insights are not specific to any one field of
 research or class of model. They may be applied to a vast range of models.
