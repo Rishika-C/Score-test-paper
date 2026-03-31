@@ -26,21 +26,79 @@
 \usepackage{setspace} % For line spacing
 \usepackage{lineno,xcolor} % For numbering lines
 
-%% Bibliography, reference
-% \usepackage[backend=biber,citestyle=authoryear,uniquename=false,maxcitenames=2,
-% mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex} % For bibliography
-\usepackage[backend=biber, style=apa, maxcitenames=2,
-mincitenames=1, maxbibnames=99]{biblatex}
-\DeclareLanguageMapping{english}{english-apa}
-\AtBeginBibliography{\setcounter{maxnames}{99}}
-\AtBeginDocument{
-  \setcounter{maxcitenames}{2}
-  \setcounter{mincitenames}{1}
-}
-\DeclareNameAlias{sortname}{family-given}
-\DeclareNameAlias{default}{family-given}
-\renewcommand*{\finalnamedelim}{\addspace\&\space}
-\addbibresource{../../../../../PhDReferences_Zotero.bib} 
+%% Bibliography, referencing 
+\usepackage[backend=biber,citestyle=authoryear,uniquename=false,maxcitenames=2,
+mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex}
+\addbibresource{../../../../../PhDReferences_Zotero.bib}
+\makeatletter
+\newcommand{\apamaxcitenames}{2}
+\DeclareNameFormat{labelname}{%
+  % First set the truncation point
+  \ifthenelse{\value{uniquelist}>1}
+    {\numdef\cbx@min{\value{uniquelist}}}
+    {\numdef\cbx@min{\value{minnames}}}%
+  % Always print the first name and the second if there are only two since
+  % "et al" must always be plural
+  \ifboolexpr{test {\ifnumcomp{\value{listcount}}{=}{1}}
+              or test {\ifnumcomp{\value{listtotal}}{=}{2}}}
+    {\usebibmacro{labelname:doname}%
+      {\namepartfamily}%
+      {\namepartfamilyi}%
+      {\namepartgiven}%
+      {\namepartgiveni}%
+      {\namepartprefix}%
+      {\namepartprefixi}%
+      {\namepartsuffix}%
+      {\namepartsuffixi}}
+    % We are looking at name >=3
+    % If the list is 6 or more names or we have seen citation before, potential truncation
+    {\ifboolexpr{test {\ifnumcomp{\value{listtotal}}{>}{\apamaxcitenames}}
+                 or test {\ifciteseen}}
+     % Less than the truncation point, print normally
+     {\ifnumcomp{\value{listcount}}{<}{\cbx@min + 1}
+       {\usebibmacro{labelname:doname}%
+         {\namepartfamily}%
+         {\namepartfamilyi}%
+         {\namepartgiven}%
+         {\namepartgiveni}%
+         {\namepartprefix}%
+         {\namepartprefixi}%
+         {\namepartsuffix}%
+         {\namepartsuffixi}}
+       {}%
+      % At potential truncation point ...
+      \ifnumcomp{\value{listcount}}{=}{\cbx@min + 1}
+        % but enforce plurality of et al - only truncate here if there is at
+        % least one more element after the current potential truncation point
+        % so that "et al" covers at least two elements.
+        {\ifnumcomp{\value{listcount}}{<}{\value{listtotal}}
+          {\printdelim{andothersdelim}\bibstring{andothers}}
+          {\usebibmacro{labelname:doname}%
+            {\namepartfamily}%
+            {\namepartfamilyi}%
+            {\namepartgiven}%
+            {\namepartgiveni}%
+            {\namepartprefix}%
+            {\namepartprefixi}%
+            {\namepartsuffix}%
+            {\namepartsuffixi}}}
+        {}%
+      % After truncation point, do not print name
+      \ifnumcomp{\value{listcount}}{>}{\cbx@min + 1}
+       {\relax}%
+       {}}%
+     % We are looking at name >=3
+     % Name list is < 6 names or we haven't seen this citation before, print normally
+     {\usebibmacro{labelname:doname}%
+       {\namepartfamily}%
+       {\namepartfamilyi}%
+       {\namepartgiven}%
+       {\namepartgiveni}%
+       {\namepartprefix}%
+       {\namepartprefixi}%
+       {\namepartsuffix}%
+       {\namepartsuffixi}}}}
+\makeatother
 
 %% Notation stuff
 \newcommand{\thetaZero}{\boldsymbol{\theta}_0}
@@ -76,21 +134,22 @@ reliability of their chosen model and any resulting
 conclusions. Well-known model selection methods include comparing
 models using likelihood ratio tests (LRTs), AIC values, and score 
 tests. Comparing two nested models via LRTs and AIC values means 
- using maximised log-likelihoods to assess the quality of
+ using maximised log-likelihood values to assess the quality of
 each model, while applying a penalty for model
 complexity. Conducting a LRT requires twice the difference of each
-model's maximised log-likelihood, which is then 
+model's maximised log-likelihood. This is 
 compared to a null distribution for which
-the degrees of freedom reflects the penalty for model complexity \parencite{neymanPearson}.
+the degrees of freedom contains the penalty for model complexity \parencite{neymanPearson}.
 Using AIC values means directly adding a penalty term to each
-maximised log-likelihood, and comparing the results \parencite{akaike1973}. 
+maximised log-likelihood and comparing the results \parencite{akaike1973}. 
 
 To compare two nested models using a score test, a score test
 statistic is calculated and compared to the same null
 distribution as the LRT statistic. However, the score test statistic
 employs gradients to inform the improvement in fit available by
 perturbing the parameter estimates from the simpler model
-\parencite{rao1948}. Specifically, the score test statistic uses the
+\parencite{rao1948}. Specifically, the score test statistic is
+calculated using the
 score vector and information matrix for the more complicated model,
 evaluated at the parameter estimates of the simpler model. See
 \textcite{rao2005} for an overview and recent developments of score
@@ -124,7 +183,7 @@ results \parencite{ADMBpaper}. In this paper, we demonstrate that
 due to recent developments in statistical software, this issue is now
 solved as automatic differentiation (AD) tools 
 allow for convenient procurement of the necessary gradients, and
-therefore newly straightforward implementation of score tests. 
+therefore a newly straightforward implementation of score tests. 
 
 Harnessing the chain rule of differentiation, AD tools produce exact
 gradients of any given function \parencite{ADMBpaper}. Using these
@@ -142,10 +201,12 @@ likelihoods involving potentially high
 dimensional integrals produce gradients with no closed form, resulting in
 a host of challenges. Model fitting previously required tailored
 software, even for relatively simple examples such as
-generalised linear mixed models (GLMMs; \cite{lme4-pkg}). Being
-commonly-used modern statistical models, although gradients were
-previously elusive, \textcite{wang2022} present extensive derivations
-to obtain GLMM gradients. However, there remain many random effects
+generalised linear mixed models (GLMMs), although gradients remained
+elusive \parencite{lme4-pkg}. Being 
+commonly-used modern statistical models, \textcite{wang2022} present extensive derivations
+to obtain GLMM gradients, enabling valuable yet previously
+inaccessible tasks such as score tests.
+However, there remain many random effects 
 models for which such solutions and derivations don't exist. Random effects
 models are just one illustration of the  
 advancements provided by AD. For many classes of models, the ease with
@@ -162,7 +223,7 @@ using AIC values to compare
 models, time consuming and resource intensive,
 especially when many models are being considered. However, an absence
 of suitable alternatives means comparison via AIC values is a common
-and established method of SCR model selection \parencite{secr-aic-ex}. Due 
+and established method of SCR model selection (e.g. \cite{secr-aic-ex}). Due 
 to the difficulties in symbolic differentiation or numerically 
 approximating gradients, score tests have not generally been
 used. Removing the barriers
@@ -184,32 +245,35 @@ relatively simple, models.
 We present our findings using an illustrative example, using an SCR
 data set of ovenbird captures \parencite{secr-pkg}. As described
 below, similarities to the data set presented in
-\parencite{borchersEfford2008} mean we have a range possible influences
-on capture probabilities, and therefore many potential
-models to consider. We will employ
+\textcite{borchersEfford2008} mean we have a range of possible
+parameter dependencies, and therefore many potential
+models to consider. We employ
 the `RTMB' R package \parencite{rtmb-pkg}, a widely-used AD tool, to
 implement score tests for SCR model selection. Compared to traditional
 methods, we examine how our approach enhances the 
-convenience and accessibility of model selection. By considering a
-range of candidate models, we also explore how to accommodate models that aren't
-nested, a potentially common issue. As with the possible difficulties of model
+convenience and accessibility of model selection, while accommodating for
+potentially common issues such as non-nested models. As with the
+possible difficulties of model 
 selection, our insights are not specific to any one field of
 research or class of model. They may be applied to a vast range of models.
 
 \section{Illustrative data set: ovenbirds}
 \label{sec:ovenbirds}
 
-In \textcite{borchersEfford2008}, alongside introducing Maximum
-Likelihood methods for SCR models,
+In \textcite{borchersEfford2008},
 the authors illustrate a potential approach 
 for SCR model selection. The data set used consists of captures of birds
 (red-eyed vireos) from a mist-netting survey on the Patuxent Research Refuge 
 in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. A variety of SCR
-models are fitted and the final model is selected via AIC.
+models are fitted and the final model is selected via AIC. Considering
+a range of parameter dependencies, a candidate set of 
+fifteen selected models is used in \textcite{borchersEfford2008}.
+Working with a similar data set, we use the same parameter
+dependencies. Considering all possible combinations of these
+dependencies allows construction of a comprehensive candidate set of
+forty five models.   
 
-For easy comparison to the standard set by such a well-known example, we
-work with a similar data set. The `ovenbird' data
-set, available via the `secr' R package, contains adult captures from a
+The `ovenbird' data set, available via the `secr' R package, contains adult captures from a
 mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
 Research Refuge by D. K. Dawson and M. G. Efford. As
 described in the documentation, the forest in the area has
@@ -227,22 +291,15 @@ years) are referred to as `sessions'
 \parencite{effordBook2009}. Therefore, our 
 data set contains five sessions, each with nine or ten sampling occasions. As
 is standard when fitting multi-session SCR models, we each session as
-if from an independent closed population
-\parencite{effordBook2009}. Using closed populations means we do not consider any changes in
-population size each year due to births, deaths, etc. 
-
-Our candidate model set contains all SCR models that share parameter
-dependencies considered in
-\textcite{borchersEfford2008}. The latter candidate set contains
-fifteen models. By considering all possible combinations of the
-parameter dependencies presented in \textcite{borchersEfford2008}, our
-set contains forty five models.
+if from an independent closed population -- that is, we do not
+consider any changes in population size due to births, deaths or migration
+\parencite{effordBook2009}. 
 
 To construct an accurate picture of the benefits afforded by model
 selection via score tests and AD tools, we implement model selection
 via AIC values alongside our proposed approach. We compare a new, more efficient,
-approach to model selection with a widely-used traditional approach,
-in the context of an example that would be familiar to practitioners.
+approach to model selection with a widely-used traditional approach
+using an extensive candidate set of models.
 
 \section{Model selection using score tests}
 \label{sec:model-sel}
@@ -251,16 +308,16 @@ in the context of an example that would be familiar to practitioners.
 \label{sec:candidate-set}
 
 Please refer to Section \ref{sec:overview-candidate-models} of the Appendix
-for a brief overview of the parametrisation of the models
-comprising our candidate set. The key idea is that in our SCR models,
+for a brief overview of the parametrisation of the candidate SCR
+models. In summary,  
 we have three parameters: $D$, $g_0$ and $\sigma$. $D$
 describes animal density, while $g_0$ and $\sigma$ describe 
 the probability of being captured. For each of these parameters, we
 consider the dependencies presented in
-\textcite{borchersEfford2008}, and shown in Table
-\ref{table:dependencies}. In this table, we specify these dependencies using the
+\textcite{borchersEfford2008}, also shown in Table
+\ref{table:dependencies}, where we specify these dependencies using the
 parlance of the `secr' R package. Considering all possible combinations of
-these dependencies gives the forty five models in our candidate set.
+these dependencies produces the forty five candidate models.
 
 \begin{table}[h!]
   \centering
@@ -287,56 +344,54 @@ these dependencies gives the forty five models in our candidate set.
 
 In Table \ref{table:dependencies} (see \textcite{secr-book} for further detail):
 \begin{itemize}
-  \item `$\sim 1$' represents a parameter being held pooled across
-    sessions. For example, with $D \sim 1$, we have only one
-    estimate of $D$ and use it for all sessions;
-  \item `$\sim \text{session}$' means a parameter has session-specific
-    levels. If we specify $D \sim \text{session}$, we have a separate estimate
-    of $D$ for each session;
-  \item `$\sim \text{Session}$' represents a trend across
-    sessions. With `$D \sim \text{Session}$', we  have $D(y) =
-    exp(\beta_0 + \beta_1 y)$, 
-    where $y$ is the session number \parencite{borchersEfford2008}. In
-    our case, $y=1,...,5$;
-  \item `$\sim \text{h2}$' denotes a
-    two-class finite mixture model. For example, with `$\sigma \sim \text{h2}$', we assume
-    there are two groups in the population: Group 1 uses $\sigma_1$,
-    while Group 2 uses $\sigma_2$. An 
-    individual falls in Group 1 with probability $p$ and in Group 2
-    with probability $(1-p)$. These estimates are pooled across sessions; 
-  \item `$\sim \text{b}$' represents a trap response. With $g_0 \sim
-    \text{b}$, we have two estimates of $g_0$: one for individuals
-    captured on previously in a session, and one for individuals
-    that have not yet been captured in a session. These estimates are pooled
-    across sessions;
-  \item `$\sim \text{session} + \text{b}$' means we have
-    session-specific levels and a trap response -- e.g. with $g_0 \sim \text{session} +
-    \text{b}$, we fit a model with two separate estimates of $g_0$ for
-    each session: one for previously captured individuals, and one for
-    individuals that have not been caught yet. 
+\item `$\sim 1$' represents a parameter being held pooled across
+  sessions. For example, with $D \sim 1$, we have only one
+  estimate of $D$ and use it for all sessions;
+\item `$\sim \text{session}$' means a parameter has session-specific
+  levels. If we specify $D \sim \text{session}$, we have a separate estimate
+  of $D$ for each session;
+\item `$\sim \text{Session}$' represents a trend across
+  sessions. With `$D \sim \text{Session}$', we  have $D(y) =
+  exp(\beta_0 + \beta_1 y)$, 
+  where $y$ is the session number \parencite{borchersEfford2008}. In
+  our case, $y=1,...,5$;
+\item `$\sim \text{h2}$' denotes a
+  two-class finite mixture model. For example, with `$\sigma \sim \text{h2}$', we assume
+  there are two groups in the population: Group 1 uses $\sigma_1$,
+  while Group 2 uses $\sigma_2$. An 
+  individual falls in Group 1 with probability $p$ and in Group 2
+  with probability $(1-p)$. These estimates are pooled across sessions; 
+\item `$\sim \text{b}$' represents a trap response. With $g_0 \sim
+  \text{b}$, we have two estimates of $g_0$: one for individuals
+  captured on previously in a session, and one for individuals
+  not yet been captured in a session. These estimates are pooled
+  across sessions;
+\item `$\sim \text{session} + \text{b}$' means we have
+  session-specific levels and a trap response -- e.g. with $g_0 \sim \text{session} +
+  \text{b}$, we fit a model with two separate estimates of $g_0$ for
+  each session: one for previously captured individuals, and one for
+  individuals not caught yet. 
 \end{itemize}
 
-Using score tests via RTMB greatly
-enhances the convenience of model selection for a comprehensive
-candidate set like ours. SCR models do not fit the description of a
-`standard' random effects model. Evaluating
-the likelihood of each model in the candidate set requires a
-product of two-dimensional integrals, where each integral is an infinite
-sum over the random effects in the model -- the captured animals' home
-range centers \parencite{borchersEfford2008} -- 
-adding a layer of complexity that further amplifies the challenges of working with a
-sophisticated class of models. Model fitting becomes resource
-intensive, hindering the utility of traditional model selection
-approaches such as LRTs and AIC values.
+See \textbf{Table (no)} of the Results for all models
+considered. For similarly extensive candidate sets,
+using score tests via the framework of \textcite{catchpoleMorgan1996}
+requires fitting much fewer models than traditional techniques of comparison
+such as LRTs and AIC values. Combining this advantage with the newfound
+convenience provided by AD tools significantly
+enhances the accessibility of model selection.
 
-Regardless, model selection via AIC values remains a common approach
-for SCR model selection. Although SCR models are useful for estimating
-animal abundance and therefore popular in the field of statistical
-ecology, these models aren't widely used enough for there to be
-established methods for finding derivatives or tailored approaches for
-convenient model selection. As we see below, our general use,
-straightforward method significantly enhances the
-accessibility of model selection with little cost.  
+Evaluating an SCR likelihood requires a product of 
+two-dimensional integrals, where each integral is an infinite sum over
+the model's random effects \parencite{borchersEfford2008}. Fitting
+every model in a candidate set such as ours requires significant
+resources. Despite this, the ease of calculating AIC values means they
+are commonly used for model selection
+\parencite{efford-schofield}. Although popular models for estimating   
+animal abundance, the complexity of SCR likelihoods has meant derivatives
+and therefore score tests were previously elusive. The benefits afforded by reducing  
+the number of models to be fitted, while harnessing AD tools for
+convenient score tests, are substantial. 
 
 \subsection{Calculating score test statistics with RTMB}
 \label{sec:calculating-stats-rtmb}
