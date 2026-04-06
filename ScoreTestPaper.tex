@@ -122,12 +122,6 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex}
 \section{Introduction}
 \label{sec:introduction}
 
-% \textbf{Rethink structure for better, easier flow? Maybe want to
-%   introduce AD tools later on, and say something like 'In this paper,
-%   we are proposing the use of AD tools -- specifically the `RTMB' R
-%   package -- to harness score tests for model selection, via the
-%   framework introduced by \textcite{catchpoleMorgan1996}.}
-
 Model selection is an important step for
 statistical analysis, allowing the practitioner to confirm the
 reliability of their chosen model and any resulting
@@ -257,8 +251,114 @@ possible difficulties of model
 selection, our insights are not specific to any one field of
 research or class of model. They may be applied to a vast range of models.
 
-\section{Illustrative data set: ovenbirds}
+\section{Model selection using score tests}
+\label{sec:model-sel}
+
+\subsection{Calculating score test statistics with RTMB}
+\label{sec:calculating-stats-rtmb}
+
+Texts such as \textcite{rao2005} provide detailed information on score
+tests, we provide a brief overview. When comparing two nested models
+using a score test, the null hypothesis 
+states the simpler model is adequate. We will refer to this
+ model as the `$H_0$ model', and the more complex model as the `$H_1$
+model'. We label the parameter vector for the $H_0$ model as `$\thetaZero$',
+and the parameter vector for the $H_1$ model as `$\thetaOne$'. To
+conduct a score test:
+\begin{enumerate}
+\item Fit the $H_0$ model, extract the Maximum Likelihood Estiamte
+  (MLE) vector $\thetaZeroMLE$; 
+\item Translate $\thetaZeroMLE$ into a $\thetaOne$ vector --
+  i.e. identify a $\thetaOne$ vector that shares the constraints of
+  the $H_0$ model and uses the estimates of $\thetaZeroMLE$. By
+  definition, this vector  makes the $H_1$ model
+  equivalent to the fitted $H_0$ model from Step 1. We
+  label the resulting vector $\thetaOneTilde$;
+\item Calculate the score test statistic:
+  \begin{equation}
+    \boldsymbol{u}_1 (\thetaOneTilde)^T \mathcal{I}_1
+    (\thetaOneTilde)^{-1} \boldsymbol{u}_1 (\thetaOneTilde)
+  \end{equation}
+  where $\boldsymbol{u}_1 (\thetaOneTilde)$ is the score vector of
+  the $H_1$ model evaluated at $\thetaOneTilde$, and $\mathcal{I}_1
+  (\thetaOneTilde)$ is the information matrix
+  evaluated at $\thetaOneTilde$. Note that we focus on using the
+  observed information matrix, see the Discussion for more details;
+\item Compare this statistic to a Chi-squared distribution where
+  the degrees of freedom is the difference in the number
+  of parameters for the $H_0$ and $H_1$ model. 
+\end{enumerate}
+
+By considering the gradient of the $H_1$ log-likelihood at
+$\thetaOneTilde$ via $\boldsymbol{u}_1
+(\thetaOneTilde)$, and the curvature via $\mathcal{I}_1
+(\thetaOneTilde)$, the score test statistic summarises the
+distance between $\thetaOneTilde$ and the unconstrained $H_1$
+MLE vector. If this distance is deemed sufficiently large by the
+Chi-squared distribution from Step 4, the
+difference in fit between the $H_0$ and $H_1$ model is enough for the
+$H_1$ model to be preferable, despite its added complexity. 
+
+Previously, the obstacle in implementing score tests was obtaining the
+score vector and information matrix. Using recent software advancements, we employ
+the `RTMB' R package -- a commonly-used AD tool -- to implement this. By
+writing the log-likelihoods for all $H_1$ models of interest
+as R functions, it is straightforward to extract the score vectors
+and information matrices we need. Note that due to the speed and
+accuracy of AD, we also use RTMB to fit our $H_0$ models. Refer to
+section \ref{sec:score-test-example} of the Appendix for a simple
+illustrative example of implementing a score test using RTMB. 
+
+\subsection{Implementing the score test framework}
+\label{sec:implementing-framework}
+
+To implement the model selection framework of
+\textcite{catchpoleMorgan1996}, the candidate set is organised 
+into levels and, beginning with the simplest models, score tests
+define a path through these levels to select the
+final model. We begin by identifying the 
+most basic model. Using the terminology of \textcite{mccreaMorgan2011},
+this model makes up Level 0 of the candidate set. Level 1 contains all models
+with one added parameter dependency. 
+
+We conduct score tests to
+compare all Level 1 models to the Level 0 model, with the null hypothesis
+that the Level 0 model is adequate for the data. Applying the ideas of
+Section \ref{sec:calculating-stats-rtmb}, we refer to the Level 0
+model as the `$H_0$ model', and all of the Level 1 models as `$H_1$
+models'. The $H_1$ model for the 
+test with the smallest significant 
+p-value defines the new null hypothesis -- that is, it becomes the new
+$H_0$ model.
+
+Level 2 is then constructed, consisting of all models with one
+additional parameter dependency relative to this model, and the
+process is repeated. We stop when none of the score tests produce
+significant p-values. At this point, the $H_0$ model is the final
+chosen model. 
+
+As seen in Section \ref{sec:calculating-stats-rtmb}, when conducting
+each score test, only the $H_0$ model needs to be fitted. And the stepwise nature of the 
+framework enhances the convenience of any model-fitting -- the MLEs
+from a given $H_0$ model may provide appropriate starting values for
+fitting the next $H_0$ model \parencite{mccreaMorgan2011}. By
+harnessing the utility of score tests and the convenience afforded by
+AD, model selection with this framework now involves accessible
+calculations, coupled with the likely straightforward fitting of few
+models.
+
+\subsection{Issues with nesting}
+\label{sec:issues-nesting-general}
+
+{General explanation of how issues with nesting might arise, how to
+  deal with using different trees and AIC. Can mention will see more
+  detail in example below.}
+
+\section{Application: ovenbirds}
 \label{sec:ovenbirds}
+
+\subsection{Data set}
+\label{sec:data-set}
 
 In \textcite{borchersEfford2008},
 the authors illustrate a potential approach 
@@ -271,6 +371,7 @@ fifteen selected models is used in \textcite{borchersEfford2008}.
 Working with a similar data set, we use the same parameter
 dependencies. Considering all possible combinations of these
 dependencies allows construction of a comprehensive candidate set of
+
 forty five models.   
 
 The `ovenbird' data set, available via the `secr' R package, contains adult captures from a
@@ -300,9 +401,6 @@ selection via score tests and AD tools, we implement model selection
 via AIC values alongside our proposed approach. We compare a new, more efficient,
 approach to model selection with a widely-used traditional approach
 using an extensive candidate set of models.
-
-\section{Model selection using score tests}
-\label{sec:model-sel}
 
 \subsection{Candidate set}
 \label{sec:candidate-set}
@@ -391,112 +489,7 @@ are commonly used for model selection
 animal abundance, the complexity of SCR likelihoods has meant derivatives
 and therefore score tests were previously elusive. The benefits afforded by reducing  
 the number of models to be fitted, while harnessing AD tools for
-convenient score tests, are substantial. 
-
-\subsection{Calculating score test statistics with RTMB}
-\label{sec:calculating-stats-rtmb}
-
-Texts such as \textcite{rao2005} provide detailed information on score
-tests. We provide a brief overview. When comparing two nested models
-using a score test, our null hypothesis 
-is that the simpler model is adequate. Therefore, we will refer to the
-simpler model as the `$H_0$ model', and the larger model as the `$H_1$
-model'. We label the parameter vector for the $H_0$ model as $\thetaZero$,
-and the parameter vector for the $H_1$ model as $\thetaOne$. The
-steps are as follows:
-\begin{enumerate}
-\item Fit the $H_0$ model, extract the Maximum Likelihood Estiamte
-  (MLE) vector $\thetaZeroMLE$; 
-\item Translate $\thetaZeroMLE$ into a $\thetaOne$ vector --
-  i.e. identify a $\thetaOne$ vector that shares the constraints of
-  the $H_0$ model and uses the estimates of $\thetaZeroMLE$. We
-  label the resulting vector $\thetaOneTilde$. Plugging
-  $\thetaOneTilde$ into the $H_1$ model returns the $H_0$ model;
-\item Calculate:
-  \begin{equation}
-    \boldsymbol{u}_1 (\thetaOneTilde)^T \mathcal{I}_1
-    (\thetaOneTilde) \boldsymbol{u}_1 (\thetaOneTilde)
-  \end{equation}
-  where $\boldsymbol{u}_1 (\thetaOneTilde)$ is the score vector of
-  the $H_1$ model evaluated at $\thetaOneTilde$, and $\mathcal{I}_1
-  (\thetaOneTilde)$ is the information matrix of the $H_1$ model
-  evaluated at the same. This gives the score test
-  statistic;
-\item Compare this statistic to a Chi-squared distribution where
-  the degrees of freedom is equal to the difference in the number
-  of parameters for the $H_0$ and $H_1$ model. 
-\end{enumerate}
-
-Note that we focus on the use of the observed information matrix
-in Step 3. See section (\textbf{insert number}) of the Discussion for
-more details. Intuitively, the 
-formula in Step 3 means the score test statistic summarises the
-distance between $\thetaOneTilde$ and the peak of the $H_1$
-log-likelihood. That is, it summarises the distance between
-$\thetaOneTilde$ and the unconstrained $H_1$ model
-MLE vector, $\thetaOneMLE$. If this distance is large, the
-difference in fit between the $H_0$ and $H_1$ model is likely
-significant enough for the $H_1$ model to be preferable despite its
-added complexity, and vice versa.
-
-By giving the gradient of the $H_1$
-log-likelihood at $\thetaOneTilde$, $\boldsymbol{u}_1
-(\thetaOneTilde)$ gives a rough idea of the distance between
-$\thetaOneTilde$ and $\thetaOneMLE$. Additionally considering the curvature
-via $\mathcal{I}_1 (\thetaOneTilde)$ creates an
-accurate picture of this distance. For example, as we take the inverse
-of the information matrix, low
-curvature at $\thetaOneTilde$ means
-the score test statistic becomes inflated. A heavier penalty is placed on the
-gradient, as even a small gradient could relate to a large distance
-between $\thetaOneTilde$ and $\thetaOneMLE$.
-
-Previously, the obstacle in implementing score tests was obtaining the
-score vector and information matrix. Using recent software advancements, we employ
-the `RTMB' R package -- a commonly-used AD tool -- to implement this. By
-writing the log-likelihoods for all $H_1$ models of interest
-as R functions, it is straightforward to extract the score vectors
-and information matrices we need. Note that due to the speed and
-accuracy of AD, we also use RTMB to fit our $H_0$ models. Refer to
-section \ref{sec:score-test-example} of the Appendix for a simple
-illustrative example of implementing a score test using RTMB. 
-
-\subsection{Implementing the score test framework}
-\label{sec:implementing-framework}
-
-To implement the model selection framework of
-\textcite{catchpoleMorgan1996}, the candidate set is organised 
-into levels and, beginning with the simplest models, score tests
-define a path through these levels to select the
-final model. We begin by identifying the 
-most basic model. Using the terminology of \textcite{mccreaMorgan2011},
-this model makes up Level 0 of the candidate set. Level 1 contains all models
-with one added parameter dependency. 
-
-We conduct score tests to
-compare all Level 1 models to the Level 0 model, with the null hypothesis
-that the Level 0 model is adequate for the data. Applying the ideas of
-Section \ref{sec:calculating-stats-rtmb}, we refer to the Level 0
-model as the `$H_0$ model', and all of the Level 1 models as `$H_1$
-models'. The $H_1$ model for the 
-test with the smallest significant 
-p-value defines the new null hypothesis -- that is, it becomes the new
-$H_0$ model.
-
-Level 2 is then constructed, consisting of all models with one
-additional parameter dependency relative to this model, and the
-process is repeated. We stop when none of the score tests produce
-significant p-values. At this point, the $H_0$ model is the final
-chosen model. 
-
-As seen in Section \ref{sec:calculating-stats-rtmb}, when conducting
-each score test, only the $H_0$ model needs to be fitted. And the stepwise nature of the 
-framework enhances the convenience of any model-fitting -- the MLEs
-from a given $H_0$ model may provide appropriate starting values for
-fitting the next $H_0$ model \parencite{mccreaMorgan2011}. By
-harnessing the utility of score tests and the convenience afforded by
-AD, model selection with this framework now involves accessible
-calculations, coupled with the likely straightforward fitting of few models. 
+convenient score tests, are substantial.
 
 \subsection{Issues with nesting}
 \label{sec:nesting-issues}
@@ -614,6 +607,7 @@ behavioural effect to 0. }
 % % Consider the example where
 % % our $H_0$ model has no mixture component 
 % % and our $H_1$ model has a mixture component for $g_0$.
+
 
 \section{Appendix}
 \label{sec:appendix}
