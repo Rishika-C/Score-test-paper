@@ -331,16 +331,18 @@ difference in fit between the $H_0$ and $H_1$ model is enough for the
 $H_1$ model to be preferable, despite its added complexity. 
 
 Previously, the obstacle in implementing score tests was obtaining the
-score vector and information matrix, to evaluate at
+score vector and information matrix to evaluate at
 $\thetaOneTilde$. Using recent software advancements, we employ 
 the `RTMB' R package -- a commonly-used AD tool -- to do
 this. Translating the $H_1$ log-likelihood into 
 an R function, it becomes straightforward to extract the score vector
-and information matrix. Note that due to the speed and
-accuracy of AD, it may also be convenient to use RTMB to fit the
-$H_0$ model.
+and information matrix. Using AD to also fit
+the $H_0$ model can provide time
+savings, especially for sophisticated models. See Code Block 1 for a
+simple example. Due to its  
+simplicity, using AD to fit the $H_0$ model in this example does not
+necessarily provide a time saving, but is done for illustrative purposes. 
 
-Here is a simple illustrative example:
 \begin{lstlisting}[language=R]
 # We are working with a similar linear regression model
 # We assume that: Y_i ~ Normal(mu_i, 1), where i=1,...,20
@@ -375,9 +377,9 @@ H0.MLE = H0.fit$par
 # Creating the RTMB object for the H1 model, from which we can extract and evaluate gradients
 H1.object = MakeADFun(func=H1.nll, parameters=list(beta0=beta0.start, beta1=beta1.start))
 
-# Constructing a vector that shares the constraints and MLEs of the H0 model
+# Constructing an H1 vector that shares the constraints and MLEs of the H0 model
 H0.MLE.for.H1 = list(beta0=H0.MLE["beta0"], beta1=0)
-# Evaluating the H1 score vector and information matrix at this vector (we multiply by -1 below as we are working with the negative log-likelihood)
+# Evaluating the H1 score vector and information matrix (we multiply by -1 below as we are working with the negative log-likelihood)
 score.vec = H1.object$gr(H0.MLE.for.H1) * (-1)
 obs.info.mat = H1.object$he(H0.MLE.for.H1)
 
@@ -385,7 +387,6 @@ obs.info.mat = H1.object$he(H0.MLE.for.H1)
 score.statistic = score.vec %*% solve(obs.info.mat) %*% t(score.vec)
 # Extracting the p-value
 p.value = pchisq(score.statistic, df=1, lower=F)
-
 \end{lstlisting}
 
 
