@@ -320,7 +320,14 @@ conduct a score test:
   the $H_0$ model and uses the estimates of $\thetaZeroMLE$. By
   definition, this vector  makes the $H_1$ model
   equivalent to the fitted $H_0$ model from Step 1. We
-  label the resulting vector $\thetaOneTilde$;
+  label the resulting vector $\thetaOneTilde$.
+
+  For example, let's assume $Y_i \sim \text{Normal}(\mu_i, 1)$, where $H_0:
+  \mu_i = \beta_0$ and $H_1 = \beta_0 + \beta_1  * x_i$ for some
+  covariate $\boldsymbol{x}$. If $\hat{\beta}_0$ is the MLE under the $H_0$ model,
+  then $\thetaOneTilde = \left( \hat{\beta}_0, 0 \right)$, as under
+  the $H_0$ model, $\beta_1=0$. See \ref{sec:score-test-rtmb-ex}
+  for the full example and details; 
 \item Calculate the score test statistic:
   \begin{equation}
     \boldsymbol{u}_1 (\thetaOneTilde)^T \mathcal{I}_1
@@ -337,12 +344,21 @@ conduct a score test:
   assess $H_0$. 
 \end{enumerate}
 
-By considering the gradient of the $H_1$ log-likelihood at
-$\thetaOneTilde$ via $\boldsymbol{u}_1
-(\thetaOneTilde)$, and the curvature via $\mathcal{I}_1
-(\thetaOneTilde)$, the score test statistic summarises the
-discrepancy between $\thetaOneTilde$ and the unconstrained $H_1$
-MLE vector. If this distance is deemed sufficiently large by the
+The score test statistic summarises the discrepancy between
+$\thetaOneTilde$ and the unconstrained $H_1$ MLE vector. Specifically, $\boldsymbol{u}_1
+(\thetaOneTilde)$ provides the gradient of the log-likelihood surface
+at $\thetaOneTilde$. However, a large value may be due to
+$\thetaOneTilde$ being far from the peak, or it may be due to having a
+well-informed surface that is steep as most points, and vice
+versa. Placing this gradient in the
+context of the overall curvature of the log-likelihood surface at
+$\thetaOneTilde$ via
+$\mathcal{I}_1 (\thetaOneTilde)$ determines which is
+likely true. This information matrix tempers the information provided
+by the gradient so the score statistic reliably reflects the
+discrepancy between $\thetaOneTilde$ and the peak of the $H_1$ log-likelihood. 
+
+If this discrepancy is deemed sufficiently large by the
 Chi-squared distribution from Step 4, the
 difference in fit between the $H_0$ and $H_1$ model is enough for the
 $H_1$ model to be preferable, despite its added complexity. 
@@ -372,7 +388,10 @@ select the best model at each level.
 As described in \textcite{mccreaMorgan2011}, 
 the most basic model defines Level 0 of the candidate set, and Level 1
 contains all models 
-with one added parameter dependency. Score tests are used to compare all Level 1
+with one added parameter dependence. For instance, in the example
+introduced in Section \ref{sec:calculating-stats-rtmb}, if $H_0: \mu_i =
+\beta_0$ is the Level 0 model, then $H_1: \mu_i = \beta_0 + \beta_1 *
+x_i$ is a Level 1 model. Score tests are used to compare all Level 1
 models to the Level 0 model. As in 
 Section \ref{sec:calculating-stats-rtmb}, we refer to the Level 0
 model as the `$H_0$ model', and the Level 1 models as `$H_1$
