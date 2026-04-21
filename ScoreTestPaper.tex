@@ -28,26 +28,43 @@
 
  % For R code, for now :)
 \usepackage{listings}
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
-\lstdefinestyle{mystyle}{
-  backgroundcolor=\color{backcolour},   
-  commentstyle=\color{codegreen},
-  basicstyle=\ttfamily\footnotesize,
-  breakatwhitespace=false,         
-  breaklines=true,                 
-  captionpos=b,                    
-  keepspaces=true,                 
-  numbers=left,                    
-  numbersep=5pt,                  
-  showspaces=false,                
-  showstringspaces=false,
-  showtabs=false,                  
-  tabsize=2
+\lstdefinelanguage{R}{
+  keywords={if, else, for, while, function, return},
+  otherkeywords={TRUE, FALSE, NULL, NA},
+  sensitive=true,
+  morecomment=[l]{\#},
+  morestring=[b]"
 }
-\lstset{style=mystyle}
+
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+  backgroundcolor=\color{backcolour},
+  language=R,
+  basicstyle=\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape,
+  stringstyle=\ttfamily
+}
+% \definecolor{codegreen}{rgb}{0,0.6,0}
+% \definecolor{codegray}{rgb}{0.5,0.5,0.5}
+% \definecolor{codepurple}{rgb}{0.58,0,0.82}
+% \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+% \lstdefinestyle{mystyle}{
+%   backgroundcolor=\color{backcolour},   
+%   commentstyle=\color{codegreen},
+%   basicstyle=\ttfamily\footnotesize,
+%   breakatwhitespace=false,         
+%   breaklines=true,                 
+%   captionpos=b,                    
+%   keepspaces=true,                 
+%   %numbers=left,                    
+%   numbersep=5pt,                  
+%   showspaces=false,                
+%   showstringspaces=false,
+%   showtabs=false,                  
+%   tabsize=2
+% }
+% \lstset{style=mystyle}
 
 
 %% Bibliography, referencing 
@@ -263,7 +280,7 @@ potentially vast candidate set of models of varying complexity is reduced to the
 task of calculating score statistics and fitting a few, potentially
 relatively simple, models. 
 
-We present our findings using an illustrative example, using an SCR
+We present our findings via an example, using an SCR
 data set of ovenbird captures \parencite{secr-pkg}. As described
 below, similarities to the data set presented in
 \textcite{borchersEfford2008} mean we have a range of possible
@@ -324,7 +341,7 @@ By considering the gradient of the $H_1$ log-likelihood at
 $\thetaOneTilde$ via $\boldsymbol{u}_1
 (\thetaOneTilde)$, and the curvature via $\mathcal{I}_1
 (\thetaOneTilde)$, the score test statistic summarises the
-distance between $\thetaOneTilde$ and the unconstrained $H_1$
+discrepancy between $\thetaOneTilde$ and the unconstrained $H_1$
 MLE vector. If this distance is deemed sufficiently large by the
 Chi-squared distribution from Step 4, the
 difference in fit between the $H_0$ and $H_1$ model is enough for the
@@ -338,57 +355,9 @@ this. Translating the $H_1$ log-likelihood into
 an R function, it becomes straightforward to extract the score vector
 and information matrix. Using AD to also fit
 the $H_0$ model can provide time
-savings, especially for sophisticated models. See Code Block 1 for a
-simple example. Due to its  
-simplicity, using AD to fit the $H_0$ model in this example does not
-necessarily provide a time saving, but is done for illustrative purposes. 
-
-\begin{lstlisting}[language=R]
-# We are working with a similar linear regression model
-# We assume that: Y_i ~ Normal(mu_i, 1), where i=1,...,20
-# Our H0 model is: mu_i = beta0
-# Our H1 model is: mu_i = beta0 + beta1 * x_i, where x is a vector of 20 covariate values
-
-# In the code below, we assume that:
-# (1) The response values are saved as an object labelled `y'
-# (2) The covariate values are saved as an object labelled `x'
-# (3) Appropriate starting values for optimisation for beta0 and beta1 are saved as objects labelled `beta0.start' and `beta1.start', respectively
-
-# Defining the objective function (negative log-likelihood) for the H0 model
-H0.nll = function(params) {
-  beta0 = params$beta0
-  sum(dnorm(y, mean=beta0, sd=1, log=TRUE)) * (-1)
-}
-
-# Defining the objective function (negative log-likelihood) for the H1 model
-H1.nll = function(params) {
-  beta0 = params$beta0
-  beta1 = params$beta1
-  sum(dnorm(y, beta0 + (beta1 * x), 1, log=TRUE)) * (-1)
-}
-
-# Creating the RTMB object for the H0 model
-H0.object = MakeADFun(func=H0.nll, parameters=list(beta0=beta0.start))
-# Fitting the H0 model
-H0.fit = nlminb(start=H0.object$par, objective=H0.object$fn, gradient=H0.object$gradient)
-# Extracting the H0 MLE
-H0.MLE = H0.fit$par
-
-# Creating the RTMB object for the H1 model, from which we can extract and evaluate gradients
-H1.object = MakeADFun(func=H1.nll, parameters=list(beta0=beta0.start, beta1=beta1.start))
-
-# Constructing an H1 vector that shares the constraints and MLEs of the H0 model
-H0.MLE.for.H1 = list(beta0=H0.MLE["beta0"], beta1=0)
-# Evaluating the H1 score vector and information matrix (we multiply by -1 below as we are working with the negative log-likelihood)
-score.vec = H1.object$gr(H0.MLE.for.H1) * (-1)
-obs.info.mat = H1.object$he(H0.MLE.for.H1)
-
-# Calculating the score statistic
-score.statistic = score.vec %*% solve(obs.info.mat) %*% t(score.vec)
-# Extracting the p-value
-p.value = pchisq(score.statistic, df=1, lower=F)
-\end{lstlisting}
-
+savings, especially for sophisticated models. See
+\ref{sec:score-test-rtmb-ex} of the Appendix for a simple illustrative
+example. 
 
 \subsection{Implementing the score test framework}
 \label{sec:implementing-framework}
@@ -411,13 +380,13 @@ models'. The $H_1$ model associated with the smallest significant
 p-value defines the new null hypothesis -- that is, it becomes the new
 $H_0$ model. Level 2 is then constructed, consisting of all models with one
 additional parameter dependency relative to this model, and the
-process is repeated. We stop when none of the score tests produce
+process is repeated. We stop at the level where none of the score tests produce
 significant p-values. At this point, the $H_0$ model becomes the
 chosen model.  
 
 By using the level structure, implementing this
 framework on a 
-comprehensive candidate set likely only requires a
+comprehensive candidate set typicallonly requires a
 few models be fitted, as only the $H_0$ models need to be fitted for
 the score tests. Furthermore, the stepwise nature of the  
 framework promotes convenient model-fitting -- the MLEs
@@ -429,37 +398,28 @@ AD, the framework of \textcite{catchpoleMorgan1996} requires fewer
 resources and less time than traditional model selection
 techniques, especially for a comprehensive candidate set. Fitting
 all models under consideration is replaced by accessible
-calculations and fitting a few models, enhancing the accessibility of
-model selection. 
+calculations and fitting a few models. 
 
-\subsection{Issues with nesting}
-\label{sec:issues-nesting-general}
+\subsection{Non-nested models and boundary considerations}
+\label{sec:non-nested-and-boundary-consid}
 
-During model selection with score tests, obstacles can arise due to
-non-nested models, or nested models with boundary issues. With
-non-nested models, it is impossible 
+When models are non-nested, it is impossible 
 to obtain the $H_0$ model from the $H_1$ model, i.e. no
 $\thetaOneTilde$ vector exists, so a
-score test statistic cannot be calculated. Boundary issues occur when values in
+score test statistic cannot be calculated. Issues also occur when values in
 $\thetaOneTilde$ lie on the boundary of the parameter space. The null
 Chi-squared distribution no longer holds, so any p-values are
-unusable \parencite{vaartAsymptoticStatistics2012}.
+unusable \parencite{vaartAsymptoticStatistics2012}. For example, as we
+see in Section \ref{sec:ovenbirds}, this happens when comparing models
+with and without mixture components.   
 
 In such cases, we propose separating the
 candidate set into groups -- where models in each group fall into a
-nested structure with no boundary issues -- and carrying out the
+nested structure with no boundary problems -- and carrying out the
 framework of \textcite{catchpoleMorgan1996} on each group, using AIC values to
-make a final selection from the chosen models. See
-below for an example of this.
-
-This proposed extension is unlikely to
-require any extra models be fitted, as each group's final model is likely 
-fitted during model selection. We
-are proposing employing a well-established method for model
-comparison, allowing practitioners to take advantage of score tests
-via the framework of \textcite{catchpoleMorgan1996} in the presence of
-nesting issues.  
-
+make a final selection from the chosen models. This proposed extension
+is unlikely to require any extra models be fitted. See Section
+\ref{sec:ovenbirds} for an example of this. 
 
 \section{Application: ovenbirds}
 \label{sec:ovenbirds}
@@ -684,6 +644,111 @@ the Results for the complete list of models.
 
 \section{Appendix}
 \label{sec:appendix}
+
+\subsection{Score test RTMB example}
+\label{sec:score-test-rtmb-ex}
+
+We work with a simple linear regression model, where we assume
+$Y_i \sim \text{Normal}(\mu_i, 1)$, for $i=1,...,20$. Our $H_0$
+model is $\mu_i = \beta_0$, i.e. the expected value for each
+observation is the same. The $H_1$ model states $\mu_i =
+\beta_0 + \beta_1  * x_i$ -- the expected value for each observation
+depends on the corresponding value of covariate
+$\boldsymbol{x}$. 
+
+In the code below, we assume the observations are saved as an R
+object labelled \lstinline{y}, and the covariate values are saved as object
+\lstinline{x}. We also assume appropriate start values for estimating
+$\beta_0$ and $\beta_1$ are saved as \lstinline{beta0.start} and \lstinline{beta1.start},
+respectively. Using AD to fit the $H_0$ model in this simple example
+does not necessarily provide a time saving, but is done for
+illustrative purposes.
+
+We begin by defining a list labelled \lstinline{data}, containing our $\boldsymbol{x}$
+and $\boldsymbol{y}$ values.
+
+\begin{lstlisting}[language=R]
+data = list(x = x, y = y)
+\end{lstlisting}
+
+Next, we define the negative log-likelihood (the objective
+function) for the $H_0$ model as an R function. Its argument
+\lstinline{params} is expected to be a list of parameter values. 
+We use \lstinline{getAll} to unpack lists \lstinline{data} and
+\lstinline{params}, making all data and parameter values visible within
+the function \parencite{rtmb-pkg}. 
+
+\begin{lstlisting}[language=R]
+H0.nll = function(params) {
+  getAll(params, data)
+  sum(dnorm(y, mean=beta0, sd=1, log=TRUE)) * (-1)
+}
+\end{lstlisting}
+
+We define the negative log-likelihood for the $H_1$ model as an
+R function. 
+
+\begin{lstlisting}[language=R]
+H1.nll = function(params) {
+  getAll(params, data)
+  sum(dnorm(y, beta0 + (beta1 * x), 1, log=TRUE)) * (-1)
+}
+\end{lstlisting}
+
+The lines below use AD to fit the $H_0$ model. First, we create
+\lstinline{H0.start}, containing the starting value of $\beta_0$ for
+optimisation. Using this, we create an
+RTMB object with \lstinline{MakeADFun}. This contains the
+exact negative log-likelihood gradient with respect to $\beta_0$, amongst
+other information on the objective function. We fit the $H_0$ model 
+using \lstinline{nlminb} (alternative functions such as \lstinline{optim} may be used),
+supplying the gradient for accurate and fast 
+optimisation. Lastly, we extract the MLE, $\hat{\beta}_0$.
+
+\begin{lstlisting}[language=R]
+H0.start = list(beta0=beta0.start)
+H0.object = MakeADFun(func=H0.nll, parameters=H0.start)
+H0.fit = nlminb(start=H0.object$par, objective=H0.object$fn, 
+                gradient=H0.object$gradient)
+H0.MLE = H0.fit$par
+\end{lstlisting}
+
+We construct $\thetaOneTilde$, an $H_1$ vector that shares
+the constraints and MLEs of the $H_0$ model. Specifically,
+$\thetaOneTilde = \left( \hat{\beta}_0, 0 \right)$ as under the $H_0$
+model, $\beta_1=0$. Therefore, plugging $\thetaOneTilde$ into the
+$H_1$ model returns the equivalent of the $H_0$ model.
+
+\begin{lstlisting}[language=R]
+H0.MLE.for.H1 = list(beta0=H0.MLE["beta0"], beta1=0)
+\end{lstlisting}
+
+We create an RTMB object for the $H_1$ negative
+log-likelihood. 
+
+\begin{lstlisting}[language=R]
+H1.start = list(beta0=beta0.start, beta1=beta1.start)
+H1.object = MakeADFun(func=H1.nll, parameters=H1.start)
+\end{lstlisting}
+
+Using this RTMB object, we evaluate the $H_1$ score vector and
+observed information  matrix at $\thetaOneTilde$, then calculate the
+score test statistic. To obtain the score vector, we multiply by $-1$
+as the RTMB object gives the gradient for the negative log-likelihood. 
+
+\begin{lstlisting}[language=R]
+score.vec = H1.object$gr(H0.MLE.for.H1) * (-1)
+obs.info.mat = H1.object$he(H0.MLE.for.H1)
+score.statistic = score.vec %*% solve(obs.info.mat) %*% t(score.vec)
+\end{lstlisting}
+
+And lastly, we use the \lstinline{pchisq} R function to calculate the
+p-value. We specify \lstinline{df=1} since 
+the $H_0$ and $H_1$ models differ by one parameter.   
+
+\begin{lstlisting}[language=R]
+p.value = pchisq(score.statistic, df=1, lower=F)
+\end{lstlisting}
 
 \subsection{Brief  overview of SCR and the candidate set}
 \label{sec:overview-candidate-models}
