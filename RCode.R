@@ -4,6 +4,7 @@ library(RTMB)
 
 if (F) {
   ## Simple RTMB illustrative example for Appendix :)
+  library(RTMB)
 
   # H0 true
   set.seed(2026)
