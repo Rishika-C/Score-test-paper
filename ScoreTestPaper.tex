@@ -359,7 +359,26 @@ discrepancy between $\thetaOneTilde$ and the peak of the $H_1$
 log-likelihood. If this discrepancy is deemed sufficiently large by
 the Chi-squared distribution from Step 4, the
 difference in fit between the $H_0$ and $H_1$ model is enough for the
-$H_1$ model to be preferable, despite its added complexity. 
+$H_1$ model to be preferable, despite its added complexity.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Fig1a.pdf}
+    \caption{Different n, same peak.}
+    \label{fig:fig1a}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Fig1b.pdf}
+    \caption{Same score value, different score statistics.}
+    \label{fig:fig1b}
+  \end{subfigure}
+  \caption{For these scenarios, S=U-squared/Y. Edit please!}
+  \label{fig:fig1}
+\end{figure}
 
 Previously, the obstacle in implementing score tests was obtaining the
 score vector and information matrix to evaluate at
