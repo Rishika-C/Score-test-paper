@@ -330,7 +330,7 @@ carry out a score test:
   of the Appendix for further details on conducting a score test for this example; 
 \item Calculate the score test statistic:
   \begin{equation}
-    \boldsymbol{u}_1 (\thetaOneTilde)^T \mathcal{I}_1
+    S = \boldsymbol{u}_1 (\thetaOneTilde)^T \mathcal{I}_1
     (\thetaOneTilde)^{-1} \boldsymbol{u}_1 (\thetaOneTilde)
   \end{equation}
   where $\boldsymbol{u}_1 (\thetaOneTilde)$ is the score vector of
@@ -345,11 +345,19 @@ carry out a score test:
 \end{enumerate}
 
 The score test statistic summarises the discrepancy between
-$\thetaOneTilde$ and the unconstrained $H_1$ MLE vector. Firstly, $\boldsymbol{u}_1
-(\thetaOneTilde)$ provides the gradient of the log-likelihood surface
-at $\thetaOneTilde$. However, a large gradient may be due to
-$\thetaOneTilde$ being far from the peak, or it may be due to having a
-well-informed surface that is steep as most points, and vice
+$\thetaOneTilde$ and the unconstrained $H_1$ MLE vector. Understanding
+this discrepancy requires more than the difference between these two
+vectors. For instance, in Figure
+\ref{fig:fig1a}, we can see how by considering the increasing gradient
+and curvature at $\tilde{\beta}_1$, as sample size and evidence
+against $H_0$ increases we correctly obtain a significant
+p-value. Firstly, $\boldsymbol{u}_1 (\thetaOneTilde)$ provides the
+gradient of 
+the log-likelihood surface at $\thetaOneTilde$. As shown in Figure
+\ref:{fig:fig1b}, the gradient
+alone cannot inform the desired discrepancy. A low gradient may be due to
+$\thetaOneTilde$ being close to the peak, or it may be due to having a
+relatively flat surface, and vice
 versa. Using $\mathcal{I}_1 (\thetaOneTilde)$ determines which
 scenario is likely true, by placing the gradient in the context of the
 overall curvature of the log-likelihood surface at
@@ -360,6 +368,24 @@ log-likelihood. If this discrepancy is deemed sufficiently large by
 the Chi-squared distribution from Step 4, the
 difference in fit between the $H_0$ and $H_1$ model is enough for the
 $H_1$ model to be preferable, despite its added complexity.
+
+-- Move all this to caption:
+For example,
+in Figure \ref{fig:fig1}, we consider $Y_i \sim \text{Normal}(\mu_i,
+1)$, where $H_0: \mu_i=0$ and $H_i: \mu_i = 0 + \beta_1$. We represent
+$\thetaOneTilde$ as $\tilde{\beta}_1=0$. As the
+$H_1$ model has one parameter, the score statistic is given by the scalar:
+\begin{equation}
+S = \frac{(u_1 (\tilde{\beta}_1))^2}{\mathcal{I}_1 (\tilde{\beta}_1)}
+= \frac{(n\bar{Y})^2}{n} = n (\bar{Y})^2
+\end{equation}
+AND mention have shifted parabolas
+-- Fig 1a caption: sample size
+-- Fig 1a, edit so blue curve has sig p-value (n=20?)
+-- Fig 1b, flatten out black  curve??
+-- Fig1b, caption: both curves have same gradient at beta1-tilde
+
+
 
 \begin{figure}
   \centering

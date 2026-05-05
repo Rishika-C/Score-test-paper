@@ -78,44 +78,139 @@ if (F) {
 # H0: mu_i=0
 # H1: mu_i=0 + beta_1
 
-# Function to create y-values for plot
-ll.diff.func = function(n, beta1.seq=seq(-1.5, 2, by=0.01), mean.y=1, which.beta.subtract=1) {
+# Function to evaluate log-lik. beta1 may be a sequence or scalar
+ll.func = function(beta1, n, mean.y) {
+  sum.y.sq = (1 + (mean.y^2)) * n
+  (((n/2) * log(2*pi)) + (1/2)*sum.y.sq - (beta1)*(n)*(mean.y) + (n/2)*(beta1^2)) * (-1)
+}
+
+# Function to calculate LRT statistic comparing maximised (unconstrained) H1 model with H0 model
+lrt.func = function(n, mean.y) {
+  h1.ll = ll.func(beta1=mean.y, n=n, mean.y=mean.y)
+  h0.ll = ll.func(beta1=0, n=n, mean.y=mean.y)
+  lrt.stat = 2 * (h1.ll - h0.ll)
+  lrt.stat
+}
+
+# Function to create y-values for plot: shifted log-lik values
+ll.diff.func = function(n, beta1.seq=seq(-2, 2, by=0.01), mean.y=1, which.beta.subtract=1) {
+  #browser()
   sum.y.sq = (1 + (mean.y^2)) * n # Based on Var(Y)=1/so that Var(Y)=1 for one observation still holds :)
-  ll = (((n/2) * log(2*pi)) + (1/2)*sum.y.sq - (beta1.seq)*(n)*(mean.y) + (n/2)*(beta1.seq^2)) * (-1) # Have manually confirmed this expression is correct :)
-  ll.subtract = ll[beta1.seq==which.beta.subtract] # Shifting curves accordingly -- so that for scenario 1, curves intersect at peak; for scenario 2, curves intersect at theta1-tilde
+  # Log-likelihood values for all beta1.seq -- have manually confirmed this expression is correct :)
+  #ll = (((n/2) * log(2*pi)) + (1/2)*sum.y.sq - (beta1.seq)*(n)*(mean.y) + (n/2)*(beta1.seq^2)) * (-1)
+  ll = ll.func(beta1=beta1.seq, n=n, mean.y=mean.y)
+  # Shifting curves accordingly -- so that for scenario 1, curves intersect at peak; for scenario 2, curves intersect at theta1-tilde
+  ll.subtract = ll[beta1.seq==which.beta.subtract]
+  # Log-lik values
   ll.diff = ll - ll.subtract
   ll.diff
 }
 
-beta1.seq = seq(-1.5, 2, by=0.01) # x seq for both plots
+beta1.seq = seq(-2, 2, by=0.01) # x seq for both plots. Going beyond 1 so that on Fig1a, black curve goes right to the edge
 
 # Scenario (1): different gradient at theta1-tilde, due to n only (not due to Var(Y) -- equivalently, not due to Y-bar or sum(Y_i^2). Shows how increasing sample size affects gradient, and therefore affects score statistic (as here, score = U^2/I)
 cairo_pdf("Figures/Fig1a.pdf")
+
+# Reducing space between y-axis label and y-axis
 par(mgp=c(2.7, 1, 0))
-plot(beta1.seq, ll.diff.func(n=5), type="l", xlab="", ylab=expression("\u2113"(beta[1]) - "\u2113"(hat(beta)[1])), lwd=2, cex.lab=1.3, xaxt="n", cex.axis=1.2)
+
+# Creating plot with black curve first
+# n=5, mean.y=1, S=5
+plot(beta1.seq, ll.diff.func(n=5), type="l", xlab="", ylab=expression("\u2113"(beta[1]) - "\u2113"(hat(beta)[1])), lwd=2, cex.lab=1.3, xaxt="n", cex.axis=1.2, xlim=c(-1.5, 2), ylim=c(-24, 1))
+
+# Adding x axis with beta1 labels
 axis(side=1, at=c(-1, -0.5, 0, 0.5, 1, 1.5, 2), labels=c("-1", "-0.5", expression(tilde(beta)[1]), "0.5", expression(hat(beta)[1]), "1.5", "2"), cex.axis=1.2, padj=0.3)
-title(xlab=expression(beta[1]), mgp=c(3, 1, 0), cex.lab=1.4)
+title(xlab=expression(beta[1]), mgp=c(3, 1, 0), cex.lab=1.4) # xlab
+
+# Grid lines
 grid()
+
+# Adding blue curve
+# n=10, mean.y=1, S=10
 lines(beta1.seq, ll.diff.func(n=10), col="blue", lwd=2)
+
+# Adding gradient lines at beta1-tilde (both curves)
+# Score at beta1-tilde=sum(y)=n*mean.y. To plot gradient, will go one unit either side of beta1=0. For tangent line at beta1=-1, is log-lik(beta1-tilde) - n*mean.y; at beta1=1, is log-lik(beta1-tilde) + n*mean.y
+black.curve.y = ll.diff.func(n=5)[which(beta1.seq==0)]# y-value for black curve at beta1-tilde (beta1=0)
+lines(x=c(-1,1), y=c(black.curve.y - 5*1, black.curve.y + 5*1), col='black', lty=2, lwd=2) # Tangent line
+blue.curve.y = ll.diff.func(n=10)[which(beta1.seq==0)]
+lines(x=c(-1,1), y=c(blue.curve.y - 10*1, blue.curve.y + 10*1), col='blue', lty=2, lwd=2)
+
+# Dashed green line at beta1-tilde and beta1-hat
 abline(v=1, col="green", lty=2)
-legend("topleft", legend=c(expression(n~"="~5~", "~S~"="~"25/5"~"="~5),
-                           expression(n~"="~10~", "~S~"="~"100/10"~"="~10)), lwd=2, col=c("black", "blue"))
+abline(v=0, col="green", lty=2)
+
+# Score test p-values
+# n=5, mean.y=1, S=5
+s.5.p = pchisq(5, df=1, lower=F)
+# n=10, mean.y=1, S=10
+s.10.p = pchisq(10, df=1, lower=F)
+# LRT p-values for each scenario
+# n=5, mean.y=1, S=5
+lrt.s.5 = lrt.func(n=5, mean.y=1)
+lrt.s.5
+lrt.s.5.p = pchisq(lrt.s.5, df=1, lower=F)
+# n=10, mean.y=1, S=10
+lrt.s.10 = lrt.func(n=10, mean.y=1)
+lrt.s.10
+lrt.s.10.p = pchisq(lrt.s.10, df=1, lower=F)
+# In summary -- score test, LRT statistics align; hence, p-values align
+
+# Informative legend
+## legend("topleft", legend=c(expression(n~"="~5~", "~S~"="~5),
+##                            expression(n~"="~10~", "~S~"="~10)), lwd=2, col=c("black", "blue"))
+legend("topleft", legend=c(expression(S~"="~LRT~"="~5~", "~p~"="~0.03),
+                           expression(S~"="~LRT~"="~10~", "~p~"="~0.002)), lwd=2, col=c("black", "blue"))
+
 dev.off()
 
 
 
 # Scenario (2): same score at theta1-tilde --> gradient alone is not enough! :)
- cairo_pdf("Figures/Fig1b.pdf")
+cairo_pdf("Figures/Fig1b.pdf")
+
+# Distance bw y-axis label and y-axis
 par(mgp=c(2.7, 1, 0))
-plot(beta1.seq, ll.diff.func(n=10, mean.y=0.5, which.beta.subtract=0), type="l", xlab="", ylab=expression("\u2113"(beta[1]) - "\u2113"(hat(beta)[1])), col='red', ylim=c(-10, 3), lwd=2, cex.lab=1.3, xaxt="n", cex.axis=1.2)
-axis(side=1, at=c(-1, -0.5, 0, 0.5, 1, 1.5, 2), labels=c("-1", "-0.5", expression(tilde(beta)[1]), "0.5", expression(hat(beta)[1]), "1.5", "2"), cex.axis=1.2, padj=0.3)
+
+# Plot: black curve
+# n=5, mean.y=1, S=5
+plot(beta1.seq, ll.diff.func(n=5, which.beta.subtract=0), type="l", xlab="", ylab=expression("\u2113"(beta[1]) - "\u2113"(hat(beta)[1])), col='black', ylim=c(-10, 3), lwd=2, cex.lab=1.3, xaxt="n", cex.axis=1.2, xlim=c(-1.5, 2))
+
+# x-axis
+axis(side=1, at=c(-1, -0.5, 0, 0.5, 1, 1.5, 2), labels=c("-1", "-0.5", expression(tilde(beta)[1]), "0.5", "1", "1.5", "2"), cex.axis=1.2, padj=0.3)
 title(xlab=expression(beta[1]), mgp=c(3, 1, 0), cex.lab=1.4)
+
+# Grid lines
 grid()
-lines(beta1.seq, ll.diff.func(n=5, which.beta.subtract=0),lwd=2)
+
+# Red curve
+# n=10, mean.y=0.5, S=2.5
+lines(beta1.seq, ll.diff.func(n=10, mean.y=0.5, which.beta.subtract=0), col="red", lwd=2)
+
+# Gradient lines. Since they'll overlap, we'll do the first one solid, the second one dashed (so can see both overlaid)
+# This time, we know that the y-value at our point of interest (beta1-tilde, i.e. beta1=0) is 0 due to the way we have shifted the parabolas
+lines(x=c(-1,1), y=c(0 - 5*1, 0 + 5*1), col='black', lty=1, lwd=2)
+lines(x=c(-1,1), y=c(0 - 10*0.5, 0 + 10*0.5), col='red', lty=2, lwd=2)
+
+# Dashed green line: curves don't share the same peak, so won't draw a line at beta1-hat for now
 abline(v=0, col="green", lty=2)
-legend("topleft", legend=c(expression(U(tilde(beta)[1])~"="~5~", "~S~"="~5),
-                           expression(U(tilde(beta)[1])~"="~5~", "~S~"="~2.5)), lwd=2, col=c("black", "red"),
+
+# Score test p-values (already done above for S=5, same scenario)
+s.2.5.p = pchisq(2.5, df=1, lower=F)
+
+# LRT p-values (already done for S=5 scenario above)
+lrt.s.2.5 = lrt.func(n=10, mean=0.5)
+lrt.s.2.5
+lrt.s.2.5.p = pchisq(lrt.s.2.5, df=1, lower=F)
+
+# Legend
+## legend("topleft", legend=c(expression(U(tilde(beta)[1])~"="~5~", "~S~"="~5),
+##                            expression(U(tilde(beta)[1])~"="~5~", "~S~"="~2.5)), lwd=2, col=c("black", "red"),
+##        bg="white")
+legend("topleft", legend=c(expression(S~"="~LRT~"="~5~", "~p~"="~0.03),
+                           expression(S~"="~LRT~"="~2.5~", "~p~"="~0.11)), lwd=2, col=c("black", "red"),
        bg="white")
+
 dev.off()
 
 ###########################################################################################
