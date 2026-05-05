@@ -106,6 +106,7 @@ ll.diff.func = function(n, beta1.seq=seq(-2, 2, by=0.01), mean.y=1, which.beta.s
   ll.diff
 }
 
+
 beta1.seq = seq(-2, 2, by=0.01) # x seq for both plots. Going beyond 1 so that on Fig1a, black curve goes right to the edge
 
 # Scenario (1): different gradient at theta1-tilde, due to n only (not due to Var(Y) -- equivalently, not due to Y-bar or sum(Y_i^2). Shows how increasing sample size affects gradient, and therefore affects score statistic (as here, score = U^2/I)
@@ -114,9 +115,16 @@ cairo_pdf("Figures/Fig1a.pdf")
 # Reducing space between y-axis label and y-axis
 par(mgp=c(2.7, 1, 0))
 
+# Settings to use
+# Sample sizes
+n.1 = 5
+n.2 = 20
+# Means: will use mean.y=1 for both (default for ll.func())
+mean.y = 1
+
 # Creating plot with black curve first
 # n=5, mean.y=1, S=5
-plot(beta1.seq, ll.diff.func(n=5), type="l", xlab="", ylab=expression("\u2113"(beta[1]) - "\u2113"(hat(beta)[1])), lwd=2, cex.lab=1.3, xaxt="n", cex.axis=1.2, xlim=c(-1.5, 2), ylim=c(-24, 1))
+plot(beta1.seq, ll.diff.func(n=n.1), type="l", xlab="", ylab=expression("\u2113"(beta[1]) - "\u2113"(hat(beta)[1])), lwd=2, cex.lab=1.3, xaxt="n", cex.axis=1.2, xlim=c(-1.5, 2), ylim=c(-24, 1))
 
 # Adding x axis with beta1 labels
 axis(side=1, at=c(-1, -0.5, 0, 0.5, 1, 1.5, 2), labels=c("-1", "-0.5", expression(tilde(beta)[1]), "0.5", expression(hat(beta)[1]), "1.5", "2"), cex.axis=1.2, padj=0.3)
@@ -127,40 +135,41 @@ grid()
 
 # Adding blue curve
 # n=10, mean.y=1, S=10
-lines(beta1.seq, ll.diff.func(n=10), col="blue", lwd=2)
+lines(beta1.seq, ll.diff.func(n=n.2), col="blue", lwd=2)
 
 # Adding gradient lines at beta1-tilde (both curves)
 # Score at beta1-tilde=sum(y)=n*mean.y. To plot gradient, will go one unit either side of beta1=0. For tangent line at beta1=-1, is log-lik(beta1-tilde) - n*mean.y; at beta1=1, is log-lik(beta1-tilde) + n*mean.y
-black.curve.y = ll.diff.func(n=5)[which(beta1.seq==0)]# y-value for black curve at beta1-tilde (beta1=0)
-lines(x=c(-1,1), y=c(black.curve.y - 5*1, black.curve.y + 5*1), col='black', lty=2, lwd=2) # Tangent line
-blue.curve.y = ll.diff.func(n=10)[which(beta1.seq==0)]
-lines(x=c(-1,1), y=c(blue.curve.y - 10*1, blue.curve.y + 10*1), col='blue', lty=2, lwd=2)
+black.curve.y = ll.diff.func(n=n.1)[which(beta1.seq==0)]# y-value for black curve at beta1-tilde (beta1=0)
+lines(x=c(-1,1), y=c(black.curve.y - n.1*mean.y, black.curve.y + n.1*mean.y), col='black', lty=2, lwd=2) # Tangent line
+blue.curve.y = ll.diff.func(n=n.2)[which(beta1.seq==0)]
+lines(x=c(-0.5,0.5), y=c(blue.curve.y - (n.2*mean.y*0.5), blue.curve.y + (n.2*mean.y*0.5)), col='blue', lty=2, lwd=2) # Only want it to go from x=(-0.5, 0.5) for aesthetics
 
 # Dashed green line at beta1-tilde and beta1-hat
 abline(v=1, col="green", lty=2)
 abline(v=0, col="green", lty=2)
 
 # Score test p-values
+# Score statistics
+s.n1 = n.1 * 1 * 1
+s.n2 = n.2 * 1 * 1
 # n=5, mean.y=1, S=5
-s.5.p = pchisq(5, df=1, lower=F)
-# n=10, mean.y=1, S=10
-s.10.p = pchisq(10, df=1, lower=F)
+s.n1.p = pchisq(s.n1, df=1, lower=F)
+# n=10, mean.y=1, S=20
+s.n2.p = pchisq(s.n2, df=1, lower=F)
 # LRT p-values for each scenario
 # n=5, mean.y=1, S=5
-lrt.s.5 = lrt.func(n=5, mean.y=1)
-lrt.s.5
-lrt.s.5.p = pchisq(lrt.s.5, df=1, lower=F)
+lrt.n1 = lrt.func(n=n.1, mean.y=1)
+lrt.n1 # Same as score stat -- p-value will be the same
 # n=10, mean.y=1, S=10
-lrt.s.10 = lrt.func(n=10, mean.y=1)
-lrt.s.10
-lrt.s.10.p = pchisq(lrt.s.10, df=1, lower=F)
+lrt.n2 = lrt.func(n=n.2, mean.y=1)
+lrt.n2 # Same as score stat -- p-value will be the same
 # In summary -- score test, LRT statistics align; hence, p-values align
 
 # Informative legend
 ## legend("topleft", legend=c(expression(n~"="~5~", "~S~"="~5),
 ##                            expression(n~"="~10~", "~S~"="~10)), lwd=2, col=c("black", "blue"))
 legend("topleft", legend=c(expression(S~"="~LRT~"="~5~", "~p~"="~0.03),
-                           expression(S~"="~LRT~"="~10~", "~p~"="~0.002)), lwd=2, col=c("black", "blue"))
+                           expression(S~"="~LRT~"="~20~", "~p~"="~0)), lwd=2, col=c("black", "blue"))
 
 dev.off()
 
