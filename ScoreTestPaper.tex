@@ -350,25 +350,27 @@ amount of evidence against $H_0$ to reliably summarise the
 discrepancy between $\thetaOneTilde$ and $\thetaOneMLE$ (the unconstrained $H_1$ MLE
 vector). If this discrepancy is deemed sufficiently large by 
 the Chi-squared distribution from Step 4, the
-difference in fit between the $H_0$ and $H_1$ model is enough for the
+difference in fit between the $H_0$ and $H_1$ models is enough for the
 $H_1$ model to be preferable, despite its added complexity. For instance, in Figure
-\ref{fig:fig1a}, as sample size increases, so does the evidence
-against $H_0$, as evidenced by the growing curvature at 
+\ref{fig:fig1a}, as sample size grows, so does the evidence
+against $H_0$, as shown by the increasing curvature at 
 $\thetaOneMLE$. The score test statistic increases accordingly,
-producing a significant p-value.
+accurately producing a significant p-value.
 
 As shown in Figure \ref{fig:fig1b}, it is necessary to consider both
-derivatives. For both scenarios, the discrepancy between $\thetaOneTilde$ and $\thetaOneMLE$ is
-considerably different. However, the curves have the same $u_1 (\thetaOneTilde)$
-value, illustrating how the gradient may reflect the distance between
-$\thetaOneTilde$ and $\thetaOneMLE$, or it may simply reflect the
-shape of the log-likelihood surface. Placing the gradient in the
-context of the overall curvature of the log-likelihood surface at
-$\thetaOneTilde$, via $\mathcal{I}_1 (\thetaOneTilde)$, determines
-which scenario is likely true. The information matrix tempers the gradient so the
+derivatives in assessing this discrepancy. For both scenarios shown, the
+discrepancy between $\thetaOneTilde$ and $\thetaOneMLE$ is 
+noticeably different. However, the curves share the same $u_1 (\thetaOneTilde)$
+value. Although $u_1 (\thetaOneTilde)$ contains information on the distance between
+$\thetaOneTilde$ and $\thetaOneMLE$, it is also
+influenced by the general slope of the log-likelihood surface, and so
+is not be reliable by itself. Placing
+the gradient in the context of the overall curvature of the log-likelihood surface at
+$\thetaOneTilde$, via $\mathcal{I}_1 (\thetaOneTilde)$, resolves
+this. The information matrix tempers the gradient so the 
 score statistic reliably reflects the 
-discrepancy between $\thetaOneTilde$ and the peak of the $H_1$
-log-likelihood, as shown in the p-values of Figure \ref{fig:fig1b}.
+discrepancy between $\thetaOneTilde$ and $\thetaOneMLE$, as reflected in
+the p-values of Figure \ref{fig:fig1b}. 
 
 \begin{figure}
   \centering
@@ -389,14 +391,16 @@ log-likelihood, as shown in the p-values of Figure \ref{fig:fig1b}.
       different.}
     \label{fig:fig1b}
   \end{subfigure}
-  \caption{$H_1$ log-likelihood values where we assume $Y_i \sim
+  \caption{$H_1$ log-likelihood values for four samples, where we assume $Y_i \sim
     \text{Normal}(\mu_i, 1)$, with $H_0: \mu_i=0$ and $H_i: \mu_i = 0
     + \beta_1$. We represent $\thetaOneTilde$ as
     $\tilde{\beta}_1=0$ and $\thetaOneMLE$ as $\hat{\beta}_1$. The
     score statistic is given by the scalar $S 
     =  \frac{(u_1 (\tilde{\beta}_1))^2}{\mathcal{I}_1
       (\tilde{\beta}_1)} = n (\bar{Y})^2$. Tangents are drawn to
-    represent $u_1 (\tilde{\beta}_1)$. Note that the 
+    represent $u_1 (\tilde{\beta}_1)$. LRT statistics have also been
+    calculated -- in all cases, they match the score statistics, so
+    one p-value is reported for each sample. Note that the 
     log-likelihood parabolas have been shifted, as indicated on the
     y-axes, for interpretability.} 
   \label{fig:fig1}
