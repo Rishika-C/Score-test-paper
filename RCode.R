@@ -18,7 +18,7 @@ if (F) {
   ## y = rnorm(20, 0, 1) + beta1 * x
 
   # Start values, tailored to be appropriate in both cases :)
-  beta0.start = mean(y)
+  beta0.start = mean(y)+1
   beta1.start = 1
 
   # We are working with a similar linear regression model
@@ -31,43 +31,67 @@ if (F) {
   # (2) The covariate values are saved as an object labelled 'x'
   # (3) Appropriate starting values for optimisation for beta0 and beta1 are saved as objects labelled 'beta0.start' and 'beta1.start', respectively
 
-  # Creating the data object
-  data = list(x = x, y = y)
+  # Simple code for paper, based on Ben's example:
 
-  # Defining the objective function (negative log-likelihood) for the H0 model
-  H0.nll = function(params) {
-    getAll(params, data)
-    sum(dnorm(y, mean=beta0, sd=1, log=TRUE)) * (-1)
-  }
+  # Negative log-likelihood function
+  nll <- function(pars) -sum(dnorm(y, pars$beta0 + pars$beta1*x, 1, log = TRUE))
 
-  # Defining the objective function (negative log-likelihood) for the H1 model
-  H1.nll = function(params) {
-    getAll(params, data)
-    sum(dnorm(y, beta0 + (beta1 * x), 1, log=TRUE)) * (-1)
-  }
+  # RTMB object for H0 and H1
+  obj.null <- MakeADFun(nll, list(beta0 = beta0.start, beta1 = 0), map = list(beta1 = factor(NA)))
+  obj.alt <- MakeADFun(nll, list(beta0 = beta0.start, beta1 = beta1.start))
 
-  # Creating the RTMB object for the H0 model
-  H0.start = list(beta0=beta0.start)
-  H0.object = MakeADFun(func=H0.nll, parameters=H0.start)
-  # Fitting the H0 model
-  H0.fit = nlminb(start=H0.object$par, objective=H0.object$fn, gradient=H0.object$gradient)
-  # Extracting the H0 MLE
-  H0.MLE = H0.fit$par
+  # Fitting H0 model
+  fit.null <- nlminb(obj.null$par, obj.null$fn, obj.null$gr)
 
-  # Creating the RTMB object for the H1 model, from which we can extract and evaluate gradients
-  H1.start = list(beta0=beta0.start, beta1=beta1.start)
-  H1.object = MakeADFun(func=H1.nll, parameters=H1.start)
+  # theta1-tilde vector
+  pars.null <- list(beta0 = fit.null$par["beta0"], beta1 = 0)
 
-  # Constructing a vector that shares the constraints and MLEs of the H0 model
-  H0.MLE.for.H1 = list(beta0=H0.MLE["beta0"], beta1=0)
-  # Evaluating the H1 score vector and information matrix at this vector (we multiply by -1 below as we are working with the negative log-likelihood)
-  score.vec = H1.object$gr(H0.MLE.for.H1) * (-1)
-  obs.info.mat = H1.object$he(H0.MLE.for.H1)
+  # H1 score vector at theta1-tilde
+  score.null <- -obj.alt$gr(pars.null)
+  # H1 obs info matrix at theta1-tilde
+  info.null <- obj.alt$he(pars.null)
 
-  # Calculating the score statistic
-  score.statistic = score.vec %*% solve(obs.info.mat) %*% t(score.vec)
-  # Extracting the p-value
-  p.value = pchisq(score.statistic, df=1, lower=F)
+  # Score statistic and p-vaue
+  S <- score.null %*% solve(info.null) %*% t(score.null)
+  p.val <- 1 - pchisq(S, df=1)
+
+  ## # Creating the data object
+  ## data = list(x = x, y = y)
+
+  ## # Defining the objective function (negative log-likelihood) for the H0 model
+  ## H0.nll = function(params) {
+  ##   getAll(params, data)
+  ##   sum(dnorm(y, mean=beta0, sd=1, log=TRUE)) * (-1)
+  ## }
+
+  ## # Defining the objective function (negative log-likelihood) for the H1 model
+  ## H1.nll = function(params) {
+  ##   getAll(params, data)
+  ##   sum(dnorm(y, beta0 + (beta1 * x), 1, log=TRUE)) * (-1)
+  ## }
+
+  ## # Creating the RTMB object for the H0 model
+  ## H0.start = list(beta0=beta0.start)
+  ## H0.object = MakeADFun(func=H0.nll, parameters=H0.start)
+  ## # Fitting the H0 model
+  ## H0.fit = nlminb(start=H0.object$par, objective=H0.object$fn, gradient=H0.object$gradient)
+  ## # Extracting the H0 MLE
+  ## H0.MLE = H0.fit$par
+
+  ## # Creating the RTMB object for the H1 model, from which we can extract and evaluate gradients
+  ## H1.start = list(beta0=beta0.start, beta1=beta1.start)
+  ## H1.object = MakeADFun(func=H1.nll, parameters=H1.start)
+
+  ## # Constructing a vector that shares the constraints and MLEs of the H0 model
+  ## H0.MLE.for.H1 = list(beta0=H0.MLE["beta0"], beta1=0)
+  ## # Evaluating the H1 score vector and information matrix at this vector (we multiply by -1 below as we are working with the negative log-likelihood)
+  ## score.vec = H1.object$gr(H0.MLE.for.H1) * (-1)
+  ## obs.info.mat = H1.object$he(H0.MLE.for.H1)
+
+  ## # Calculating the score statistic
+  ## score.statistic = score.vec %*% solve(obs.info.mat) %*% t(score.vec)
+  ## # Extracting the p-value
+  ## p.value = pchisq(score.statistic, df=1, lower=F)
 
 }
 

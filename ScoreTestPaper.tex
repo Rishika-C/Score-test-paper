@@ -1,16 +1,16 @@
 %% Paper implementing score test framework for SCR :)
 
-%% Uncomment to knit for Ben and Rachel:
-\documentclass[14pt]{extarticle}
-\usepackage{geometry}
-\geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
- headheight=5mm, marginpar=5mm}
-
-% %% Uncomment to knit for writing: 
-% \documentclass{article}
+% %% Uncomment to knit for Ben and Rachel:
+% \documentclass[14pt]{extarticle}
 % \usepackage{geometry}
-% \geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
+% \geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
 %  headheight=5mm, marginpar=5mm}
+
+%% Uncomment to knit for writing: 
+\documentclass{article}
+\usepackage{geometry}
+\geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
+ headheight=5mm, marginpar=5mm}
 
 \usepackage{layout}
 \usepackage{blindtext}
@@ -145,8 +145,17 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex}
 \newcommand{\thetaZero}{\boldsymbol{\theta}_0}
 \newcommand{\thetaZeroMLE}{\hat{\boldsymbol{\theta}}_0}
 \newcommand{\thetaOne}{\boldsymbol{\theta}_1}
+\newcommand{\thetaAlpha}{\boldsymbol{\theta}_1}
+\newcommand{\thetaBeta}{\boldsymbol{\theta}_1}
 \newcommand{\thetaOneTilde}{\tilde{\boldsymbol{\theta}}_1}
 \newcommand{\thetaOneMLE}{\hat{\boldsymbol{\theta}}_1}
+\newcommand{\scoreU}{\boldsymbol{u}_1 (\thetaOneTilde)}
+\newcommand{\scoreI}{\mathcal{I}_1 (\thetaOneTilde)^{-1}}
+\newcommand{\lr}[1]{\left( #1 \right)}
+\newcommand{\lrbr}[1]{\left\{ #1 \right\}}
+\newcommand{\lrsq}[1]{\left[ #1 \right]}
+\newcommand{\sumN}{\sum_{i=1}^n}
+\newcommand{\ellOne}{\ell_1}
 
 
 \title{Harnessing score tests for model selection}
@@ -300,18 +309,136 @@ models across a vast range of fields.
 \section{Model selection using score tests}
 \label{sec:model-sel}
 
-\subsection{Calculating score test statistics with RTMB}
-\label{sec:calculating-stats-rtmb}
+\subsection{Calculating score test statistics}
+\label{sec:calculating-score-stat}
 
-We begin with a brief overview of conducting score tests. Refer to texts such
+% By considering derivatives of the $H_1$
+% log-likelihood at $\thetaOneTilde$, score tests summarise differences
+% in fit for the $H_0$ and $H_1$ model.
+
+We begin with a brief overview of score tests, refer to texts such
 as \textcite{rao2005} for more detailed information. When
 comparing two nested models 
 using a score test, the null hypothesis 
 states the simpler model is adequate. We will refer to this
  model as the `$H_0$ model', and the more complex model as the `$H_1$
-model'. We label the parameter vector for the $H_0$ model as `$\thetaZero$',
-and the parameter vector for the $H_1$ model as `$\thetaOne$'. To
-carry out a score test:
+model', with parameter vectors $\thetaZero$ and
+$\thetaOne$, respectively. For a simple illustrative example, we consider $Y_i \sim
+\text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \beta_0$ and $H_1: \mu_i
+= \beta_0 + \beta_1  * x_i$ for some covariate $\boldsymbol{x}$, with
+Maximum Likelihood Estimate (MLE) vectors $\thetaZeroMLE$ and
+$\thetaOneMLE$, respectively. 
+
+We define $\thetaOneTilde$ as the
+$\thetaOne$ vector that shares the constraints of the $H_0$ model and
+uses the estimates of $\thetaZeroMLE$. By definition, this vector
+makes the $H_1$ model equivalent to the fitted $H_0$
+model. Therefore,
+if $\thetaZeroMLE = \left( \hat{\beta}_0 \right)$, then 
+$\thetaOneTilde = \left( \hat{\beta}_0, 0 \right)$, as under the $H_0$
+model, $\beta_1=0$. In Figure \ref{fig:fig1a}, we have the
+$H_1$ log-likelihood for a chosen sample with $\thetaOneMLE$ and
+$\thetaOneTilde$ labelled, where we fix $\beta_0=0$ for
+ease of plotting.
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Fig1a.pdf}
+    \caption{REPLACE AS DISCUSSED WITH BEN.}
+    \label{fig:fig1a}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Fig1b.pdf}
+    \caption{For both samples the gradient at $\tilde{\beta}_1$ is
+      5. However, the score statistics and p-values are considerably
+      different. [ALSO EDIT so have lines showing discrepancy along y-axis]}
+    \label{fig:fig1b}
+  \end{subfigure}
+  \caption{[EDIT AS DISCUSSED] We represent $\thetaOneTilde$ as
+    $\tilde{\beta}_1=0$ and $\thetaOneMLE$ as $\hat{\beta}_1$. Tangents are drawn to
+    represent $u_1 (\tilde{\beta}_1)$. LRT statistics have also been
+    calculated -- they match the score statistics, so
+    one p-value is reported for each sample. Note that the 
+    log-likelihood parabolas have been shifted, as indicated on the
+    y-axes, for interpretability. [OVERALL, EDIT PLOTS SO USE THETA'S
+    INSTEAD OF BETA'S ON X AXIS?]} 
+  \label{fig:fig1}
+\end{figure}
+
+Here, the LRT statistic is given by $2(\ellOne(\thetaOne) -
+\ellOne(\thetaOneTilde))$, where $\ellOne$ represents the $H_1$
+log-likelihood. By fitting
+both models, LRTs use the distance between the peak of the $H_1$
+log-likelihood and the log-likelihood at $\thetaOneTilde$ to summarise
+the discrepancy in fit. A smaller distance means the fit of both models is
+similar enough to favour the simplicity of the $H_0$ model, and vice
+versa. Comparisons via the AIC employ the same approach, requiring
+the same log-likelihood values.    
+
+By harnessing derivatives of the $H_1$ log-likelihood, score tests
+also summarise
+this distance, while only requiring the $H_0$
+model be fitted. Specifically, score test statistics are calculated using the
+gradient and curvature of the $H_1$ log-likelihood at
+$\thetaOneTilde$. The gradient provides a rough idea of the desired
+discrepancy. For instance, if the gradient at $\thetaOneTilde$ is
+zero, it indicates $\thetaOneTilde = \thetaOneMLE$, i.e. perfect
+alignment between the $H_0$ and $H_1$ model. If the gradient
+is small, the distance between $\ellOne(\thetaOneMLE)$ and
+$\ellOne(\thetaOneTilde)$ is likely small, and vice versa. However,
+the gradient is also influenced by the general slope of the log-likelihood
+surface. Therefore, to
+determine this distance with accuracy, the rate of change of the
+gradient must also be
+taken into account, and this is done via the curvature at
+$\thetaOneTilde$. By considering the gradient in the context of the
+ curvature of the $H_1$ log-likelihood, the score test
+statistic reliably reflects the discrepancy between the $H_0$ and
+$H_1$ model. We use the same asymptotic distribution as the LRT statistic -- 
+we compare $S$ to a a Chi-squared distribution where the degrees of
+freedom is the difference in the number of parameters for the $H_0$
+and $H_1$ model -- to produce a p-value assessing $H_0$.
+
+Formally, the score statistic is given by: $S = \scoreU^T \scoreI
+\scoreU$, where $\scoreU$ is the score vector of the $H_1$ model
+evaluated at $\thetaOneTilde$ and $\scoreI$ is the information
+matrix. In Figure \ref{fig:fig1b}, we can see that although both curves share the same
+$\scoreU$ value, the discrepancy between
+$\ellOne({\thetaOneMLE})$ and $\ellOne({\thetaOneTilde})$ is considerably
+different (as reflected by the score statistics and p-values),
+highlighting the necessity of considering $\scoreI$. In calculating
+$S$, we will focus on using the observed information matrix, see the
+Discussion for more details. 
+
+Below, we illustrate the steps required to symbolically 
+find $S$, using the simple example from Figure \ref{fig:fig1}. [MOVE
+TO APPENDIX FOR CONTRAST, AND FOR CONSISTENCY, DO EXAMPLE WITH UNKNOWN
+BETA0??]:
+\begin{equation}
+  \ellOne = \sumN \log \lr{\frac{1}{2 \pi}} - \frac{(y_1 - \beta_1)^2}{2}
+\end{equation}
+
+\begin{equation}
+  \implies \frac{\delta \ellOne}{\delta \beta_1} = [continue...]
+\end{equation}
+
+
+
+
+\subsection{Temp}
+
+We begin with a brief overview of score tests. Refer to texts such
+as \textcite{rao2005} for more detailed information. When
+comparing two nested models 
+using a score test, the null hypothesis 
+states the simpler model is adequate. We will refer to this
+ model as the `$H_0$ model', and the more complex model as the `$H_1$
+model', with parameter vectors $\bold{\theta}_0$ and
+$\bold{\theta}_1$, respectively. To carry out a score test:
 \begin{enumerate}
 \item Fit the $H_0$ model, extract the Maximum Likelihood Estimate
   (MLE) vector $\thetaZeroMLE$; 
@@ -372,39 +499,39 @@ score statistic reliably reflects the
 discrepancy between $\thetaOneTilde$ and $\thetaOneMLE$, as reflected in
 the p-values of Figure \ref{fig:fig1b}. 
 
-\begin{figure}
-  \centering
-  \begin{subfigure}{0.48\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{Figures/Fig1a.pdf}
-    \caption{For the black curve, the sample size is n=5. For the blue
-      curve, n=20. Both samples have the same mean, and therefore the
-      same MLE, $\hat{\beta}$.}
-    \label{fig:fig1a}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}{0.48\textwidth}
-    \centering
-    \includegraphics[width=\linewidth]{Figures/Fig1b.pdf}
-    \caption{For both samples the gradient at $\tilde{\beta}_1$ is
-      5. However, the score statistics and p-values are considerably
-      different.}
-    \label{fig:fig1b}
-  \end{subfigure}
-  \caption{$H_1$ log-likelihood values for four samples, where we assume $Y_i \sim
-    \text{Normal}(\mu_i, 1)$, with $H_0: \mu_i=0$ and $H_i: \mu_i = 0
-    + \beta_1$. We represent $\thetaOneTilde$ as
-    $\tilde{\beta}_1=0$ and $\thetaOneMLE$ as $\hat{\beta}_1$. The
-    score statistic is given by the scalar $S 
-    =  \frac{(u_1 (\tilde{\beta}_1))^2}{\mathcal{I}_1
-      (\tilde{\beta}_1)} = n (\bar{Y})^2$. Tangents are drawn to
-    represent $u_1 (\tilde{\beta}_1)$. LRT statistics have also been
-    calculated -- in all cases, they match the score statistics, so
-    one p-value is reported for each sample. Note that the 
-    log-likelihood parabolas have been shifted, as indicated on the
-    y-axes, for interpretability.} 
-  \label{fig:fig1}
-\end{figure}
+% \begin{figure}
+%   \centering
+%   \begin{subfigure}{0.48\textwidth}
+%     \centering
+%     \includegraphics[width=\linewidth]{Figures/Fig1a.pdf}
+%     \caption{For the black curve, the sample size is n=5. For the blue
+%       curve, n=20. Both samples have the same mean, and therefore the
+%       same MLE, $\hat{\beta}$.}
+%     \label{fig:fig1a}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}{0.48\textwidth}
+%     \centering
+%     \includegraphics[width=\linewidth]{Figures/Fig1b.pdf}
+%     \caption{For both samples the gradient at $\tilde{\beta}_1$ is
+%       5. However, the score statistics and p-values are considerably
+%       different.}
+%     \label{fig:fig1b}
+%   \end{subfigure}
+%   \caption{$H_1$ log-likelihood values for four samples, where we assume $Y_i \sim
+%     \text{Normal}(\mu_i, 1)$, with $H_0: \mu_i=0$ and $H_i: \mu_i = 0
+%     + \beta_1$. We represent $\thetaOneTilde$ as
+%     $\tilde{\beta}_1=0$ and $\thetaOneMLE$ as $\hat{\beta}_1$. The
+%     score statistic is given by the scalar $S 
+%     =  \frac{(u_1 (\tilde{\beta}_1))^2}{\mathcal{I}_1
+%       (\tilde{\beta}_1)} = n (\bar{Y})^2$. Tangents are drawn to
+%     represent $u_1 (\tilde{\beta}_1)$. LRT statistics have also been
+%     calculated -- in all cases, they match the score statistics, so
+%     one p-value is reported for each sample. Note that the 
+%     log-likelihood parabolas have been shifted, as indicated on the
+%     y-axes, for interpretability.} 
+%   \label{fig:fig1}
+% \end{figure}
 
 % \begin{equation}
 % S = \frac{(u_1 (\tilde{\beta}_1))^2}{\mathcal{I}_1 (\tilde{\beta}_1)}
@@ -437,11 +564,11 @@ As described in \textcite{mccreaMorgan2011},
 the most basic model defines Level 0 of the candidate set, and Level 1
 contains all models 
 with one added parameter dependence. For instance, in the example
-introduced in Section \ref{sec:calculating-stats-rtmb}, if $H_0: \mu_i =
+introduced in Section \ref{sec:calculating-score-stat}, if $H_0: \mu_i =
 \beta_0$ is the Level 0 model, then $H_1: \mu_i = \beta_0 + \beta_1 *
 x_i$ is a Level 1 model. Score tests are used to compare all Level 1
 models to the Level 0 model. As in 
-Section \ref{sec:calculating-stats-rtmb}, we refer to the Level 0
+Section \ref{sec:calculating-score-stat}, we refer to the Level 0
 model as the `$H_0$ model', and the Level 1 models as `$H_1$
 models'. The $H_1$ model associated with the smallest significant
 p-value defines the new null hypothesis -- that is, it becomes the new
@@ -717,108 +844,57 @@ is unlikely to require any extra models be fitted. See Section
 \subsection{Score test RTMB example}
 \label{sec:score-test-rtmb-ex}
 
-%% Code is from 'Simple_RTMB_Appendix.R' in 'Score-test-paper' folder :)
+%% Code is from `RCode.R' in 'Score-test-paper' folder :)
 
-We work with a simple linear regression model, where we assume
-$Y_i \sim \text{Normal}(\mu_i, 1)$, for $i=1,...,20$. Our $H_0$
-model is $\mu_i = \beta_0$, i.e. the expected value for each
-observation is the same. The $H_1$ model states $\mu_i =
-\beta_0 + \beta_1  * x_i$ -- the expected value for each observation
-depends on the corresponding value of covariate
-$\boldsymbol{x}$. 
+We use the simple linear regression example from Section
+\ref{sec:calculating-score-stat}, where $Y_i \sim \text{Normal}(\mu_i,
+1)$, with $H_0: \mu_i = \beta_0$ and $H_1: \mu_i =
+\beta_0 + \beta_1  * x_i$. Using AD to fit the $H_0$ model in this
+simple example does not necessarily provide a time saving, but is done
+for illustrative purposes. Apart from the objective function and
+its corresponding parameters, the code below generally applies
+to calculating score statistics for different models.  
 
-In the code below, we assume the observations are saved as an R
-object labelled \lstinline{y}, and the covariate values are saved as object
-\lstinline{x}. We also assume appropriate start values for estimating
-$\beta_0$ and $\beta_1$ are saved as \lstinline{beta0.start} and \lstinline{beta1.start},
-respectively. Using AD to fit the $H_0$ model in this simple example
-does not necessarily provide a time saving, but is done for
-illustrative purposes.
-
-We begin by defining a list labelled \lstinline{data}, containing our $\boldsymbol{x}$
-and $\boldsymbol{y}$ values.
+First, we define the objective
+function (the negative log-likelihood) for the $H_0$ and $H_1$
+model. 
 
 \begin{lstlisting}[language=R]
-data = list(x = x, y = y)
-\end{lstlisting}
-
-Next, we define the negative log-likelihood (the objective
-function) for the $H_0$ model as an R function. Its argument
-\lstinline{params} is expected to be a list of parameter values. 
-We use \lstinline{getAll} to unpack lists \lstinline{data} and
-\lstinline{params}, making all data and parameter values visible within
-the function \parencite{rtmb-pkg}. 
-
-\begin{lstlisting}[language=R]
-H0.nll = function(params) {
-  getAll(params, data)
-  sum(dnorm(y, mean=beta0, sd=1, log=TRUE)) * (-1)
+nll <- function(pars) {
+-sum(dnorm(y, pars$beta0 + pars$beta1*x, 1, log = TRUE))
 }
 \end{lstlisting}
 
-Similarly, we define the negative log-likelihood for the $H_1$ model as an
-R function. 
+Then, we create RTMB objects for the $H_0$ and $H_1$ models. These
+ contain exact derivatives, amongst other information on the
+objective functions. 
 
 \begin{lstlisting}[language=R]
-H1.nll = function(params) {
-  getAll(params, data)
-  sum(dnorm(y, beta0 + (beta1 * x), 1, log=TRUE)) * (-1)
-}
+obj.null <- MakeADFun(nll, list(beta0 = beta0.start, beta1 = 0), map =
+list(beta1 = factor(NA))) 
+obj.alt <- MakeADFun(nll, list(beta0 = beta0.start, beta1 = beta1.start))
 \end{lstlisting}
 
-The lines below use AD to fit the $H_0$ model. First, we create the list
-\lstinline{H0.start}, containing the starting value of $\beta_0$ for
-optimisation and using \lstinline{MakeADFun}, we create an
-RTMB object, \lstinline{H0.object}. This object contains
-exact derivatives, amongst
-other information on the objective function. We fit the $H_0$ model 
-using \lstinline{nlminb} (alternative optimisers such as \lstinline{optim} may be used),
-supplying the gradient from \lstinline{H0.object} for accurate and fast 
-optimisation. Lastly, we extract the MLE, $\hat{\beta}_0$.
+Next, we obtain the $H_0$ MLEs and define $\thetaOneTilde$. 
 
 \begin{lstlisting}[language=R]
-H0.start = list(beta0=beta0.start)
-H0.object = MakeADFun(func=H0.nll, parameters=H0.start)
-H0.fit = nlminb(start=H0.object$par, objective=H0.object$fn, 
-                gradient=H0.object$gradient)
-H0.MLE = H0.fit$par
+fit.null <- nlminb(obj.null$par, obj.null$fn, obj.null$gr)
+pars.null <- list(beta0 = fit.null$par["beta0"], beta1 = 0)
 \end{lstlisting}
 
-We construct $\thetaOneTilde$, an $H_1$ vector that shares
-the constraints and MLEs of the $H_0$ model. Specifically,
-$\thetaOneTilde = \left( \hat{\beta}_0, 0 \right)$ as under the $H_0$
-model, $\beta_1=0$. Therefore, plugging $\thetaOneTilde$ into the
-$H_1$ model returns the equivalent of the $H_0$ model.
+In place of symbolic differentiation, the following two simple lines of code
+calculate $\scoreU$ and $\scoreI$. 
 
 \begin{lstlisting}[language=R]
-H0.MLE.for.H1 = list(beta0=H0.MLE["beta0"], beta1=0)
+score.null <- -obj.alt$gr(pars.null)
+info.null <- obj.alt$he(pars.null)
 \end{lstlisting}
 
-We create an RTMB object for the $H_1$ negative
-log-likelihood, \lstinline{H1.object}. 
+And lastly, we obtain the score statistic and its p-value. 
 
 \begin{lstlisting}[language=R]
-H1.start = list(beta0=beta0.start, beta1=beta1.start)
-H1.object = MakeADFun(func=H1.nll, parameters=H1.start)
-\end{lstlisting}
-
-Using \lstinline{H1.object}, we evaluate the $H_1$ score vector and
-observed information  matrix at $\thetaOneTilde$, then calculate the
-score test statistic. To obtain the score vector, we multiply by $-1$
-as \lstinline{H1.object$gr()} returns the gradient for the negative log-likelihood. 
-
-\begin{lstlisting}[language=R]
-score.vec = H1.object$gr(H0.MLE.for.H1) * (-1)
-obs.info.mat = H1.object$he(H0.MLE.for.H1)
-score.statistic = score.vec %*% solve(obs.info.mat) %*% t(score.vec)
-\end{lstlisting}
-
-And lastly, we use the \lstinline{pchisq} R function to calculate the
-p-value. We specify \lstinline{df=1} since 
-the $H_0$ and $H_1$ models differ by one parameter.   
-
-\begin{lstlisting}[language=R]
-p.value = pchisq(score.statistic, df=1, lower=F)
+S <- score.null %*% solve(info.null) %*% t(score.null)
+p.val <- 1 - pchisq(S, df=1)
 \end{lstlisting}
 
 % \subsection{Brief  overview of SCR and the candidate set}
