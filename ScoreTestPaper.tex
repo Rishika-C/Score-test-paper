@@ -145,11 +145,14 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex}
 \newcommand{\thetaZero}{\boldsymbol{\theta}_0}
 \newcommand{\thetaZeroMLE}{\hat{\boldsymbol{\theta}}_0}
 \newcommand{\thetaOne}{\boldsymbol{\theta}_1}
-\newcommand{\thetaAlpha}{\boldsymbol{\theta}_1}
-\newcommand{\thetaBeta}{\boldsymbol{\theta}_1}
+\newcommand{\thetaOneOD}{\theta_1}
 \newcommand{\thetaOneTilde}{\tilde{\boldsymbol{\theta}}_1}
+\newcommand{\thetaOneTildeOD}{\tilde{\theta}_1} % OD for 'one
+                                % dimension', i.e. scalar version
 \newcommand{\thetaOneMLE}{\hat{\boldsymbol{\theta}}_1}
+\newcommand{\thetaOneMLEOD}{\hat{\theta}_1}
 \newcommand{\scoreU}{\boldsymbol{u}_1 (\thetaOneTilde)}
+\newcommand{\scoreUOneDim}{u_1 (\thetaOneTildeOD)}
 \newcommand{\scoreI}{\mathcal{I}_1 (\thetaOneTilde)}
 \newcommand{\lr}[1]{\left( #1 \right)}
 \newcommand{\lrbr}[1]{\left\{ #1 \right\}}
@@ -323,13 +326,13 @@ using a score test, the null hypothesis
 states the simpler model is adequate. We will refer to this
  model as the `$H_0$ model', and the more complex model as the `$H_1$
 model', with parameter vectors $\thetaZero$ and
-$\thetaOne$, respectively. For a simple illustrative example, we consider $Y_i \sim
+$\thetaOne$, respectively.
+
+For a simple illustrative example, we consider $Y_i \sim
 \text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \beta_0$ and $H_1: \mu_i
 = \beta_0 + \beta_1 x_i$ for some covariate $\boldsymbol{x}$, with
 maximum likelihood estimate (MLE) vectors $\thetaZeroMLE$ and
-$\thetaOneMLE$, respectively. 
-
-We define $\thetaOneTilde$ as the
+$\thetaOneMLE$, respectively. We define $\thetaOneTilde$ as the
 $\thetaOne$ vector that shares the constraints of the $H_0$ model and
 uses the estimates of $\thetaZeroMLE$. By definition, this vector
 makes the $H_1$ model equivalent to the fitted $H_0$
@@ -338,19 +341,45 @@ if $\thetaZeroMLE = \hat{\beta}_0$, then
 $\thetaOneTilde = (\hat{\beta}_0, 0)$, as under the $H_0$
 model, $\beta_1=0$.
 
-Note that in Figure \ref{fig:fig1} and the
-explanations below, we fix
+In Figure \ref{fig:fig1} and the following, we fix
 $\betaZero = 0$ to collapse the model to one dimension under $H_1$ for
-ease of plotting and explanation.
+ease of plotting and explanation. Therefore, below we refer to $\ellOne$ as the $H_1$
+log-likelihood and $\scoreUOneDim$ as the gradient of $\ellOne$ at
+$\thetaOneTildeOD$. Briefly, score tests summarise how `surprising'
+$\scoreUOneDim$ is under $H_0$. If $H_0$ is true, we expect this
+gradient to be small, i.e. 
+we expect close alignment between $\thetaOneTildeOD$ and $\thetaOneMLEOD$. In
+contrast, if the $H_0$ model is inadequate relative to the $H_1$
+model, we expect a large gradient and considerable differences between
+$\thetaOneTildeOD$ and $\thetaOneMLEOD$.
 
-Briefly, score tests standardise the gradient of the $H_1$
-log-likelihood at $\thetaOneTilde$ to create a meaningful measure of
-how `surprising' the gradient is under $H_0$. Similar to a z-test or
-t-test, standardisation is necessary to 
-produce a statistic not influenced by variability in the
-data.
+To assess $\scoreUOneDim$
+accurately, it is necessary to consider the curvature at
+$\thetaOneTildeOD$. The gradient alone is insufficient. For example, in Figure
+\ref{fig:fig1b}, both curves share $\scoreUOneDim=5$. However, as
+confirmed by the LRT statistics, the $H_0$ model is adequate for the
+data of the orange curve, and inadequate for the data of the blue
+curve. Furthermore, in Figure \ref{fig:fig1a}, both curves have 
+considerably different $\scoreUOneDim$ values, yet as shown by the LRT
+statistics, the $H_0$ model is similarly adequate for both data
+sets. Intuitively, it is necessary to consider how fast the gradient
+changes at $\thetaOneTildeOD$ -- i.e. to consider the curvature -- to
+assess whether $\scoreUOneDim$ is reasonable under the null. Formally,
+as we see in z-tests and t-tests, it is necessary to 
+standardise $\scoreUOneDim$ using its variance (the curvature)
+so variability in the data does not affect the results.
 
-[Score test formula in 1-D here -- talk in terms of variance of
+[Happy until here! :) Next want to introduce standardisation, leading
+to formula of score statistic.]
+
+If $\thetaOneOD$ represents the true parameter value, the expectation
+of $u_i(\thetaOneOD)$ is $0$. 
+
+The score statistic is
+the square of the standardised $H_1$ log-likelihood at
+$\thetaOneTilde$, providing a meaningful measure of model fit. 
+
+Formally...[Score test formula in 1-D here -- talk in terms of variance of
 gradient. Maybe begin with the z-test formula, where expectation of
 gradient at true parameter is 0. Then, we square and this results in the Chi-sq
 distribution. When working with > 1D under H1, scales upwards so talk
@@ -362,7 +391,11 @@ on observed information matrix.]
 % evaluated at $\thetaOneTilde$ and $\scoreI$ is the information
 % matrix. In calculating
 % $S$, we will focus on using the observed information matrix, see the
-% Discussion for more details.
+% Discussion for more details. 
+
+[Explanation of equivalent to LRTs, using Taylor expansion explanation
+and figure. Therefore, we use the same
+asymptotic distribution.]
 
 \textbf{Want to build up intuition of standardisation more. Especially
 for para below -- are basically just showing that because of
@@ -377,18 +410,19 @@ discrepancies, can see how to understand this discrepancy, need to
 consider curvature and gradient.} 
 
 For example, in Figure \ref{fig:fig1a}, the gradient at $\thetaOneTilde$ is
-similarly `surprising' for both data sets. Therefore, both score
+similarly `surprising' for both data sets, as evidenced by the
+vertical distance on the y-axis, used in calculating the LRT
+statistic. In contrast, in Figure \ref{fig:fig1b}, both models provide
+the data with 
+
+. Therefore, both score
 statistics are the same. However, without taking
 into account the variance of the gradient, this would not be clear -- the gradient
 values are considerably different. Similarly, in Figure
 \ref{fig:fig1b}, although both curves share the same gradient at
 $\thetaOneTilde$, the validity of the $H_0$ model for each data
 set varies significantly, as evidenced by the score statistics and
-p-values, further highlighting the need for standardisation. 
-
-[Explanation of equivalent to LRTs, using Taylor expansion explanation
-and figure. Therefore, we use the same
-asymptotic distribution.]
+p-values, further highlighting the need for standardisation.
 
 % We use the same asymptotic distribution as the LRT statistic -- 
 % we compare $S$ to a a Chi-squared distribution where the degrees of
@@ -411,7 +445,7 @@ asymptotic distribution.]
   \end{subfigure}
   \caption{Log-likelihood parabolas under $H_1$ for different
     samples, where log-likelihood values are represented by $\ellOne$. Tangent lines
-    are drawn to indicate the gradient $\scoreU$. Note that the 
+    are drawn to indicate the gradient $\scoreUOneDim$. Note that the 
     log-likelihood parabolas have been shifted, as indicated on the
     y-axes, for interpretability.} 
   \label{fig:fig1}
