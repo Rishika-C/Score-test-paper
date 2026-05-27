@@ -341,41 +341,43 @@ maximum likelihood estimate (MLE) vectors $\thetaZeroMLE$ and
 $\thetaOneMLE$, respectively. For this model, $\thetaZeroMLE =
 \hat{\alpha}$, and therefore 
 $\thetaOneTilde = (\hat{\alpha}, 0)$, as under the $H_0$
-model, $\beta=0$. 
+model, $\beta=0$.
+
+% A one-dimensional $H_1$ model allows for ease of plotting and explanation.
 
 Briefly, score tests summarise how `surprising'
-$\scoreUOneDim$ is under $H_0$. If $H_0$ is true, we expect the
-gradient $\scoreUOneDim$ to be small, i.e.,
-we expect close alignment between $\thetaOneTildeOD$ and
-$\thetaOneMLEOD$, and vice versa. For an accurate assessment, the
-value of $\scoreUOneDim$ alone is 
-insufficient. For example, in Figure 
-\ref{fig:fig1}, we consider $Y_i \sim \text{Normal}(\mu, 1)$, where
-$H_0: \mu = 0$ and $H_1: \mu = \alpha$, and specifically in
-Figure \ref{fig:fig1a}, both log-likelihood curves share $\scoreUOneDim=5$. However, as
+$\scoreU$ is under $H_0$ by standardising $\scoreU$, as in a
+z-test. Under $H_0$, we expect this gradient to be 
+$0$ -- i.e. $E[\boldsymbol{u}_1
+(\thetaOneTilde^*)]=0$, where $\thetaOneTilde^*$ is the true
+vector under $H_0$. Therefore, to standardise the gradient in one
+dimension (for ease of explanation), we calculate $S^* = \frac{\scoreUOneDim - 
+  E[u_1(\thetaOneTildeOD^*)]}{\sqrt{\text{Var}\lrbr{\scoreUOneDim}}} =
+\frac{\scoreUOneDim}{\sqrt{\text{Var}\lrbr{\scoreUOneDim}}}$. Algebraically,
+this is equivalent to the intuitive approach of dividing
+$\scoreUOneDim$ by the curvature at $\thetaOneTildeOD$, taking into
+account the overall shape of the likelihood to assess the
+magnitude of $\scoreUOneDim$. Therefore, the standardised gradient can
+also be expressed as $S^* =
+\frac{\scoreUOneDim}{\sqrt{\mathcal{I}(\thetaOneTildeOD)}}$.
+
+Figure \ref{fig:fig1a} highlights the necessity of standardising, as
+the value of $\scoreUOneDim$ alone is insufficient. In this
+figure, we consider $Y_i \sim \text{Normal}(\mu, 1)$, where
+$H_0: \mu = 0$ and $H_1: \mu = \alpha$, and both log-likelihood curves
+share $\scoreUOneDim=5$. However, as 
 confirmed by the LRT statistics, the $H_0$ model is adequate for the
 data of the orange curve, yet inadequate for the data of the blue
-curve. Considering how fast the gradient changes at
-$\thetaOneTildeOD$ -- i.e., dividing $\scoreUOneDim$ by the square root
-of the curvature at $\thetaOneTildeOD$ -- determines  
-whether $\scoreUOneDim$ is reasonable under
-$H_0$. Algebraically, this is equivalent to dividing $\scoreUOneDim$
-by its standard deviation under $H_0$, another intuitive approach to
-assessing $\scoreUOneDim$. Thus to determine model
-adequacy, we standardise $\scoreUOneDim$ as in a z-test, so
-variability in the data does not produce misleading results. 
+curve.
 
-Therefore, we calculate $\frac{\scoreUOneDim -
-  E[u_1(\thetaOneTildeOD^*)]}{\sqrt{\text{Var}(\scoreUOneDim)}}$, where
-$\thetaOneTildeOD^*$ is the true vector under $H_0$. Algebraically, we
-can confirm $E[u_1(\thetaOneTildeOD^*)]=0$, so the standardised score
-is given by $\frac{\scoreUOneDim}{\sqrt{\text{Var}(\scoreUOneDim)}}$. As
-$\scoreUOneDim$ is a sum of independent contributions, this quantity
-is asymptotically Normal$(0,1)$, as in a z-test. However, so that the
-test is two-sided, we define the score test statistic as the square of this
-quantity. Therefore, the score test statistic has an asymptotic 
-Chi-squared distribution. This reasoning holds as model dimension
-increases, so generally the score test statistic is given by:
+As $\scoreUOneDim$ is a sum of independent contributions, $S^*$
+is asymptotically Normal$(0,1)$ under $H_0$, as in a z-test, and so a two-tailed
+p-value may be obtained to assess $H_0$. However, following convention, the score test
+statistic is found by squaring this standardised value, resulting in
+an asymptotic Chi-squared distribution.
+
+The above reasoning holds as model dimension increases, so in general,
+the score test statistic is given by: 
 \begin{equation}
   S = \scoreU^T \scoreI^{-1} \scoreU
   \label{eq:score-stat}
@@ -394,12 +396,14 @@ Discussion for more details.
 % -- squaring means that the test becomes two-sided. Also gives same
 % chi-sq distribution as LRT, for example
 
-As a consequence of Equation \ref{eq:score-stat}, when the
-log-likelihood is quadratic, the LRT statistic and score statistic are
-exactly equal -- as shown in Figure \ref{fig:fig1b} -- as the LRT
-statistic can be represented by a second-order Taylor series
-expansion. Therefore, the LRT statistic and score test statistic are 
-asymptotically equivalent. As with the LRT statistic, to
+As shown in one dimension in Figure \ref{fig:fig1b}, $S$ is equivalent to the LRT
+statistic if the latter is 
+calculated using a second-order Taylor series expansion about
+$\thetaOneTilde$ to approximate the log-likelihood. Therefore, when
+the log-likelihood is quadratic, the LRT statistic and score statistic
+are exactly equal, as this second-order Taylor series expansion
+provides the exact log-likelihood. Thus, the LRT statistic and score
+test statistic are asymptotically equivalent. As with the LRT statistic, to
 produce a p-value assessing $H_0$, we compare $S$ to a Chi-squared
 distribution where the degrees of freedom is the difference in the
 number of parameters for the $H_0$ and $H_1$ model.
@@ -419,16 +423,16 @@ number of parameters for the $H_0$ and $H_1$ model.
     \caption{}
     \label{fig:fig1b}
   \end{subfigure}
-  \caption{(UPDATE!) Log-likelihood curves under $H_1$ for different
-    samples where, with the exception of the black curve,  $Y_i \sim
-    \text{Normal}(\mu, 1)$, with $H_0: \mu = 
-    0$ and $H_1: \mu = \alpha$. A one-dimensional $H_1$ model allows
-    for ease of plotting and explanation. In the plots, $\ellOne$
-    represents log-likelihood values, and 
-    `LRT' and `S' represent the LRT and score statistic,
-    respectively. The log-likelihood
+  \caption{Figure (a) shows log-likelihood curves under $H_1$ for different
+    samples, where $Y_i \sim \text{Normal}(\mu, 1)$, with $H_0: \mu = 
+    0$ and $H_1: \mu = \alpha$. The log-likelihood
     curves have been shifted, as indicated on the y-axes, for
-    interpretability.}   
+    interpretability. In Figure (b), the blue curve
+    represents a non-parabolic $H_1$ log-likelihood, and the dashed
+    pink line is the second-order Taylor series expansion about
+    $\thetaOneTildeOD$. In both figures,
+    `LRT' and `S' represent the LRT and score statistic,
+    respectively.}   
   \label{fig:fig1}
 \end{figure}
 
@@ -443,7 +447,9 @@ the $H_0$ model can provide time savings, especially for sophisticated models.
 
 See \ref{sec:score-test-rtmb-ex} of the Appendix for an illustration
 of using \lstinline{RTMB} and symbolic differentiation
-to calculate $S$ for our example, with $\alpha$ unknown. We emphasise that
+to calculate $S$ for the example with $Y_i \sim
+\text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \alpha$ and $H_1: \mu_i
+= \alpha + \beta x_i$ for some covariate $\boldsymbol{x}$. We emphasise that
 this example is particularly simple. The symbolic
 differentiation required to calculate $S$ increases considerably as
 model complexity increases, often becoming impractical, if not
@@ -463,9 +469,10 @@ As described in \textcite{mccreaMorgan2011},
 the most basic model defines Level 0 of the candidate set, and Level 1
 contains all models 
 with one added parameter dependence. For instance, in the example
-introduced in Section \ref{sec:calculating-score-stat}, if $H_0: \mu_i =
-\alpha$ is the Level 0 model, then $H_1: \mu_i = \alpha + \beta
-x_i$ is a Level 1 model. Score tests are used to compare all Level 1
+introduced in Section \ref{sec:calculating-score-stat} with $Y_i \sim
+\text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \alpha$ and $H_1: \mu_i
+= \alpha + \beta x_i$, if $H_0$ is the Level 0 model, then $H_1$ is a
+Level 1 model. Score tests are used to compare all Level 1 
 models to the Level 0 model. As in 
 Section \ref{sec:calculating-score-stat}, we refer to the Level 0
 model as the `$H_0$ model', and the Level 1 models as `$H_1$
@@ -519,140 +526,150 @@ is unlikely to require any extra models be fitted. See Section
 \section{Application: ovenbirds}
 \label{sec:ovenbirds}
 
-% \subsection{Data set}
-% \label{sec:data-set}
+\subsection{Data set}
+\label{sec:data-set}
 
-% In \textcite{borchersEfford2008},
-% the authors illustrate SCR model selection using AIC values. The data
-% set used consists of captures of birds 
-% (red-eyed vireos) from a mist-netting survey on the Patuxent Research Refuge 
-% in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. Considering
-% a range of parameter dependencies, a candidate set of 
-% fifteen potential models is considered, and the model with the lowest
-% AIC value is selected as the final model.
+In \textcite{borchersEfford2008},
+the authors illustrate SCR model selection using AIC values. The data
+set used consists of captures of birds 
+(red-eyed vireos) from a mist-netting survey on the Patuxent Research Refuge 
+in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. Considering
+a range of parameter dependencies, a candidate set of 
+fifteen potential models is considered, and the model with the lowest
+AIC value is selected as the final model.
 
-% Working with a similar data set allows consideration of the same
-% parameter dependencies and comparison to a well-known example. The `ovenbird' data set,
-% available via the `secr' R package, contains adult captures from a 
-% mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
-% Research Refuge by D. K. Dawson and M. G. Efford. As
-% described in the package documentation, the forest in the area has
-% changed little since the previous survey conducted by C.S. Robbins
-% \parencite{secr-pkg}. As we are illustrating model
-% selection, rather then drawing inference on the population, it
-% therefore seems reasonable to consider the same parameter dependencies as
-% \textcite{borchersEfford2008}. By considering all possible
-% combinations of these dependencies, we construct a comprehensive
-% candidate set of forty five models. 
+Working with a similar data set allows consideration of the same
+parameter dependencies, and comparison to a well-known
+example. The `ovenbird' data set, 
+available via the `secr' R package, contains adult captures from a 
+mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
+Research Refuge by D. K. Dawson and M. G. Efford. As
+described in the package documentation, the forest in the area has
+changed little since the previous survey conducted by C.S. Robbins
+\parencite{secr-pkg}. As we are only illustrating model selection, not
+drawing model-based inference, it seems reasonable to consider the 
+same parameter dependencies as 
+\textcite{borchersEfford2008}. By considering all possible
+combinations of these dependencies, we construct a comprehensive
+candidate set of forty five models. 
 
-% Forty four mist nets were passively operated for nine or
-% ten non-consecutive days in late May and June of each year. One bird
-% was killed by a predator while in a net 
-% in 2009 \parencite{secr-pkg}, and for our analysis we remove this loss
-% from the data set. We retain any 
-% records of individual birds being captured more than once in a
-% day. 
+Forty four mist nets were passively operated for nine or
+ten non-consecutive days in late May and June of each year. One bird
+was killed by a predator while in a net 
+in 2009 \parencite{secr-pkg}, and for our analysis we remove this loss
+from the data set. We retain any 
+records of individual birds being captured more than once in a
+day. 
 
-% To construct an accurate picture of the benefits afforded by model
-% selection via score tests and AD tools, alongisde our proposed
-% approach, we implement the widely-used approach of model selection via
-% AIC values. By using an extensive candidate
-% set, we conduct a comprehensive comparison of a new, more efficient,
-% method of model selection with a traditional approach. 
+To construct an accurate picture of the benefits afforded by model
+selection via score tests and AD tools, alongside our proposed
+approach, we implement model selection via
+AIC values. Using an extensive candidate
+set, we conduct a comprehensive comparison of a novel, more efficient,
+method of model selection with a traditional approach. 
 
-% \subsection{Implementing model selection}
-% \label{sec:candidate-set}
+\subsection{Implementing model selection}
+\label{sec:implementing-for-ex}
 
-% Evaluating an SCR likelihood requires a product of 
-% two-dimensional integrals, where each integral is an infinite sum over
-% the model's random effects \parencite{borchersEfford2008}. One
-% consequence is fitting every model in a comprehensive candidate set
-% such as ours requires significant resources and time. Despite this,
-% the ease of calculating AIC values means this is often required for
-% SCR model selection \parencite{efford-schofield}. Although popular models
-% for estimating animal abundance, the complexity of SCR likelihoods
-% meant derivatives and therefore tools such as score tests were
-% previously elusive. The benefits of simplifying model selection with
-% score tests via AD tools are substantial, allowing newly accessible
-% model selection for these models.  
+Evaluating an SCR likelihood requires a product of 
+two-dimensional integrals, where each integral is an infinite sum over
+the model's random effects \parencite{borchersEfford2008}. Therefore,
+fitting every model in a comprehensive candidate set 
+such as ours requires significant resources and time. Despite this,
+the convenience of calculating AIC values means they are often used for
+SCR model selection \parencite{efford-schofield}. Although popular models
+for estimating animal abundance, the complexity of SCR likelihoods
+meant derivatives and therefore tools such as score tests were
+previously elusive. The benefits of simplifying model selection via
+our proposed approach are substantial, allowing newly accessible
+model selection for these models.  
 
-% Please refer to Section \ref{sec:overview-candidate-models} of the Appendix
-% for an overview of the parametrisation of the SCR models in our
-% candidate set. Briefly, each model estimates three parameters -- $D$,
-% $g_0$ and $\sigma$ -- and we consider a range of possible dependencies
-% for these parameters. By considering all combinations of these dependencies, we 
-% have forty five models in our candidate set. See \textbf{Tables (no)} in
-% the Results for the complete list of models.
+Please refer to Section \ref{sec:overview-candidate-models} of the Appendix
+for an overview of the parametrisation of the SCR models in our
+candidate set. Briefly, each model estimates three parameters -- $D$,
+$g_0$ and $\sigma$ -- and we consider a range of possible dependencies
+for these parameters. By considering all combinations of these dependencies, we 
+have forty five models in our candidate set. See \textbf{Tables (no)} in
+the Results for a complete list of models.
 
-% Due to the comprehensive nature of the candidate set, we encounter
-% boundary considerations as described in Section
-% \ref{sec:non-nested-and-boundary-consid}. Specifically, in the
-% candidate set, we consider models with a two-component finite mixture
-% for $g_0$ and/or $\sigma$. For example, if we try to use a score test
-% to compare a SCR model with a $g_0$ mixture dependency to a nested
-% model with no mixture dependencies, the mixing probability will lie on
-% the boundary of the parameter space under $H_0$ -- that is,
-% $\thetaOneTilde$ will contain boundary values. To resolve this, we
-% only conduct score tests comparing models with the same mixture
-% dependencies for $g_0$ and $\sigma$. Therefore, we construct four
-% groups for model selection: one with no mixture dependencies, one with
-% mixture dependencies for $g_0$ only, one with mixture dependencies for
-% $\sigma$ only, and one with mixture dependencies for $g_0$ and
-% $\sigma$. If we were also considering models with different detection
-% functions -- i.e. non-nested models, as described in Section
-% \ref{sec:non-nested-and-boundary-consid} -- we would also separate
-% models by detection function. 
+Due to the comprehensive nature of the candidate set, we encounter
+boundary considerations as described in Section
+\ref{sec:non-nested-and-boundary-consid} as we consider models with
+and without mixture components. Specifically, in the
+candidate set, we consider models with a two-component finite mixture
+for $g_0$ and/or $\sigma$. For example, if we try to use a score test
+to compare a SCR model with a $g_0$ mixture dependency to a nested
+model with no mixture dependencies, the mixing probability will lie on
+the boundary of the parameter space under $H_0$ -- that is,
+$\thetaOneTilde$ will contain boundary values. To resolve this, we
+only conduct score tests comparing models with the same mixture
+dependencies for $g_0$ and $\sigma$. Therefore, we construct four
+groups for model selection: one with no mixture dependencies, one with
+mixture dependencies for $g_0$ only, one with mixture dependencies for
+$\sigma$ only, and one with mixture dependencies for $g_0$ and
+$\sigma$. If we were also considering models with different detection
+functions -- i.e. non-nested models, as described in Section
+\ref{sec:non-nested-and-boundary-consid} -- we would also separate
+models by detection function. 
 
-% To conduct model selection, we define the objective function
-% (the negative log-likelihood) for every candidate model as an R 
-% function. For each group, we identify the Level 0 model and, using
-% \lstinline{RTMB} as outlined in Section \ref{sec:rtmb-appendix}  
-% of the Appendix, we efficiently conduct score tests comparing the
-% Level 0 model to all Level 1 models. We continue with the score test
-% framework as outlined in Section \ref{sec:implementing-framework},
-% stopping at the level where p-values are no longer significant. Using
-% AIC values, we compare the final model selected for each group,
-% selecting the model with the smallest AIC as the final model. 
+To conduct model selection, we define the objective function
+(the negative log-likelihood) for every candidate model as an R 
+function. For each group, we carry out the framework of
+\textcite{catchpoleMorgan1996} to navigate through the candidate
+models. We identify the Level 0 model and, using 
+\lstinline{RTMB} as outlined in Section \ref{sec:rtmb-appendix}  
+of the Appendix, we efficiently conduct score tests comparing the
+Level 0 model to all Level 1 models. We continue with the score test
+framework as described in Section \ref{sec:implementing-framework},
+stopping at the level where p-values are no longer significant. Using
+AIC values, we compare the final model selected for each group,
+selecting the model with the smallest AIC as the final model. 
 
-% To illustrate the benefits of this approach, we also implemented model selection as
-% it would likely be done in practice. We fitted every model using the
-% \lstinline{secr.fit} function from the \lstinline{secr} R package, and
-% compared them using AIC values, calculated using the \lstinline{AIC}
-% function from the same package.  
+To illustrate the benefits of this approach, we also implement model selection as
+it would likely currently be done in practice. We fit every model using the
+\lstinline{secr.fit} function from the \lstinline{secr} R package, and
+compare them using AIC values found using the \lstinline{AIC}
+function from the same package.  
 
-% \subsection{Results}
-% \label{sec:ex-results}
+\subsection{Results}
+\label{sec:ex-results}
 
-% Implementing model selection using score tests via \lstinline{RTMB} takes
-% approximately 13.4 minutes. In contrast, implementing model selection
-% via AIC values takes approximately 24.8 hours. 
+Implementing model selection using the approach outlined in Section
+\ref{sec:implementing-for-ex}, harnessing score tests via \lstinline{RTMB}
+to select a final model takes approximately 13.4 minutes. In contrast,
+implementing model selection via AIC values takes approximately 24.8
+hours. Both approaches select the same final model -- a model with constant $D$ and
+$\sigma$ for all individuals across the survey years, and a behaviour
+response for $g_0$ -- confirming the reliability of the proposed 
+approach.
 
-% With the chosen framework, only a few models from each group need to be
-% fitted. Furthermore, fitting $H_0$ models via \lstinline{RTMB}
-% considerably speeds up model fitting for these complex models as
-% iterative optimisation procedures are replaced with calculations
-% involving exact gradients. When combined, these benefits provide
-% significant time savings for model selection.
+This significant time saving can be attributed to the reduced number
+of models to fit, and the use of AD via \lstinline{RTMB} for model
+fitting and score tests. By using the framework of \textcite{catchpoleMorgan1996} for
+each constructed group, as described in Section
+\ref{sec:implementing-for-ex}, only
+6 of the 45 candidate models need to be fitted for model selection. Furthermore, 
+using \lstinline{RTMB} significantly speeds up model fitting and
+calculating score statistics for these
+complex models, as iterative and potentially impractical procedures
+are replaced with calculations involving exact gradients. 
 
-% Both approaches select the same final model -- a model with $D$ and
-% $\sigma$ constant across survey years, and a behaviour response
-% dependency for $g_0$ -- confirming the reliability of our proposed
-% approach. In Table \textbf{(no)}, we provide results from using AIC
-% values and the \lstinline{secr} package. In Tables \textbf{(no-no)}, we provide results
-% from the score tests. The model selected at each level is provided in 
-% bold. In addition to the score statistics and
-% p-values, we provide LRT statistics and differences in AIC values for
-% further confirmation of the reliability of the results. Note
-% these values are also calculated using \lstinline{RTMB}, but are not
-% included in the time taken given above. 
+In Table \textbf{(no)}, we provide results from using AIC
+values. In Tables \textbf{(no-no)}, we provide results
+from the score tests. For the latter, the model selected at each level is provided in  
+bold. In addition to score statistics and
+p-values, we provide LRT statistics and differences in AIC
+($\Delta$AIC) values,
+further confirming the reliability of the results. These values are also
+calculated using \lstinline{RTMB}, but are not 
+included in the time taken above. Note the alignment in the $\Delta$AIC values
+across both model selection procedures. 
 
-% As in Section \ref{sec:overview-candidate-models}
-% of the Appendix, the model descriptions in these table are provided in
-% the parlance of the \lstinline{secr} package. Refer to this section for more
-% details on these descriptions and the models considered. Also, note
-% the close alignment between the values given in Tables
-% \textbf{(no-no)}, and the alignment in the differences in AIC values
-% across both model selection procedures. 
+As in Section \ref{sec:overview-candidate-models}
+of the Appendix, the model descriptions in these tables are provided in
+the parlance of the \lstinline{secr} package. Refer to Section
+\ref{sec:overview-candidate-models} for more
+details. 
 
 \section{Appendix}
 \label{sec:appendix}
@@ -739,7 +756,7 @@ given by:
 
 \begin{equation}
   f \left(y_i |  \thetaZero \right) = \frac{1}{\sqrt{2 \pi}} \exp
-  \lrsq{\frac{-(y_i - \mu_i)^2}{2}}
+  \lrbr{\frac{-(y_i - \mu_i)^2}{2}}
 \end{equation}
 
 Therefore, the log-likelihood under $H_0$ is given by: 
@@ -752,7 +769,7 @@ Therefore, the log-likelihood under $H_0$ is given by:
 
 \begin{equation}
   \implies \frac{\delta \ellZero}{\delta \alpha} = \sumN -
-  \frac{\delta}{\delta \betaZero} \lrsq{\frac{(y_i - \betaZero)^2}{2}}
+  \frac{\delta}{\delta \betaZero} \lrbr{\frac{(y_i - \betaZero)^2}{2}}
   = \sumN - \frac{2 (y_i - \betaZero) (-1)}{2} = \sumN (y_i - \betaZero)
 \end{equation}
 
@@ -880,7 +897,7 @@ observed information matrix.
 Lastly, we calculate $S = \scoreU^T \scoreI^{-1} \scoreU$,
 \begin{equation}
   S  = \frac{1}{n \sumN x_i^2 -
-    \lr{\sumN x_i}^2} \lrbr{
+    \lr{\sumN x_i}^2} \lr{
   \begin{bmatrix}
     0 & \sumN x_i (y_i - \yBar)
   \end{bmatrix}
@@ -914,7 +931,7 @@ Therefore:
 
 \begin{equation*}
   S = \frac{1}{n \sumN x_i^2 -
-    \lr{\sumN x_i}^2} \lrbr{
+    \lr{\sumN x_i}^2} \lr{
     \begin{bmatrix}
       -\sumN x_i \sumN x_i(y_i - \yBar) & n \sumN x_i (y_i - \yBar)
     \end{bmatrix}
@@ -935,110 +952,110 @@ similar to the one in Section \ref{sec:rtmb-appendix}.
 
 
 
-% \subsection{Brief  overview of SCR and the candidate set}
-% \label{sec:overview-candidate-models}
+\subsection{Brief  overview of SCR and the candidate set}
+\label{sec:overview-candidate-models}
 
-% % $D$ describes animal density, while $g_0$ and $\sigma$ describe 
-% % the probability of being captured.
+% $D$ describes animal density, while $g_0$ and $\sigma$ describe 
+% the probability of being captured.
 
-% Using records of when and where individuals were captured, SCR models
-% allow for estimation of animal density and distribution
-% \parencite{borchersEfford2008}. As described in \textcite{secr-book},
-% there are two parts to an SCR model: the state model and the
-% observation model. The state model describes the distribution of the animal population,
-% the `biological reality we wish to describe'. The observation model
-% describes the sampling process we use to understand this
-% population. Selecting appropriate state and observation models to accurately
-% reflect the population and survey enhances the validity of
-% inference. For understanding, we briefly describe our selections below. Please refer to
-% texts such as \textcite{secr-book} for further details.
+Using records of when and where individuals were captured, SCR models
+allow for estimation of animal density and distribution
+\parencite{borchersEfford2008}. As described in \textcite{secr-book},
+there are two parts to an SCR model: the state model and the
+observation model. The state model describes the distribution of the animal population,
+the `biological reality we wish to describe'. The observation model
+describes the sampling process we use to understand this
+population. Selecting appropriate state and observation models to accurately
+reflect the population and survey enhances the validity of
+inference. For understanding, we briefly describe our selections below. Please refer to
+texts such as \textcite{secr-book} for further details.
 
-% Specifying the state model means choosing a spatial point process to
-% describe the distribution of animals in the survey area
-% \parencite{borchersFewster2016}. It is common to select a spatial
-% Poisson process \parencite{secr-book}. Specifically, following the
-% example of \parencite{borchersEfford2008}, we use a
-% homogeneous Poisson process, so animals are assumed to be
-% distributed uniformly across the survey area. Therefore, in our candidate SCR models,
-% we estimate the parameter $D$, animal density in the area of interest.
+Specifying the state model means choosing a spatial point process to
+describe the distribution of animals in the survey area
+\parencite{borchersFewster2016}. It is common to select a spatial
+Poisson process \parencite{secr-book}. Specifically, following the
+example of \parencite{borchersEfford2008}, we use a
+homogeneous Poisson process, so animals are assumed to be
+distributed uniformly across the survey area. Therefore, in our candidate SCR models,
+we estimate the parameter $D$, animal density in the area of interest.
 
-% To specify the observation process, we select a detection function for
-% our SCR models. This describes how an animal's probability of detection
-% changes as a function of the distance between their activity centre and a
-% detector, where an animal's activity centre is the centre of their home
-% range \parencite{secr-book}. The choice of detection function dictates
-% the `detection' parameters 
-% to be estimated. Although \textcite{borchersEfford2008} consider
-% SCR models with half-normal and hazard rate detection functions, we
-% only consider models with a 
-% half-normal detection function. Hazard rate detection
-% functions are seldom used and generally not recommended due to their
-% long tail \parencite{secr-pkg}. Therefore, our detection
-% parameters are $g_0$ and $\sigma$. 
+To specify the observation process, we select a detection function for
+our SCR models. This describes how an animal's probability of detection
+changes as a function of the distance between their activity centre and a
+detector, where an animal's activity centre is the centre of their home
+range \parencite{secr-book}. The choice of detection function dictates
+the `detection' parameters 
+to be estimated. Although \textcite{borchersEfford2008} consider
+SCR models with half-normal and hazard rate detection functions, we
+only consider models with a 
+half-normal detection function. Hazard rate detection
+functions are seldom used and generally not recommended due to their
+long tail \parencite{secr-pkg}. Therefore, our detection
+parameters are $g_0$ and $\sigma$. 
 
-% In summary, our candidate SCR models estimate three parameters: $D$,
-% $g_0$ and $\sigma$. When fitting a SCR model, along with the
-% state/observation models, it is standard to specify any dependencies for $D$
-% and the detection parameters. Following the example set by
-% \textcite{borchersEfford2008}, we 
-% consider models with the dependencies shown in Table
-% \ref{table:dependencies}, where we specify the dependencies using the
-% parlance of the \lstinline{secr} R package. Considering all possible combinations of
-% these dependencies produces the forty five candidate models.
+In summary, our candidate SCR models estimate three parameters: $D$,
+$g_0$ and $\sigma$. When fitting a SCR model, along with the
+state/observation models, it is standard to specify any dependencies for $D$
+and the detection parameters. Following the example set by
+\textcite{borchersEfford2008}, we 
+consider models with the dependencies shown in Table
+\ref{table:dependencies}, where we specify the dependencies using the
+parlance of the \lstinline{secr} R package. Considering all possible combinations of
+these dependencies produces the forty five candidate models.
 
-% \begin{table}[h!]
-%   \centering
-% \begin{tabular} { |c|c|c|c|  }
-%   \hline
-%   \textbf{$D$ dependencies} & \textbf{$\sigma$ dependencies} &
-%                                              \multicolumn{2}{|c|}{\textbf{$g_0$
-%                                                                dependencies}} 
-%   \\
-%   \hline
-%   $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim \text{b}$ \\
-%   \hline
-%   $D \sim \text{session}$ & $\sigma \sim \text{session}$ & $g_0 \sim
-%                                                            \text{session}$
-%              &  $g_0 \sim \text{session} + \text{b}$ \\
-%   \hline
-%   $D \sim \text{Session}$ & $\sigma \sim \text{h2}$ & $g_0 \sim
-%                                                       \text{h2}$ & \\
-%   \hline
-% \end{tabular}
-% \caption{All parameter dependencies considered in our candidate set.}
-% \label{table:dependencies}
-% \end{table}
+\begin{table}[h!]
+  \centering
+\begin{tabular} { |c|c|c|c|  }
+  \hline
+  \textbf{$D$ dependencies} & \textbf{$\sigma$ dependencies} &
+                                             \multicolumn{2}{|c|}{\textbf{$g_0$
+                                                               dependencies}} 
+  \\
+  \hline
+  $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim \text{b}$ \\
+  \hline
+  $D \sim \text{session}$ & $\sigma \sim \text{session}$ & $g_0 \sim
+                                                           \text{session}$
+             &  $g_0 \sim \text{session} + \text{b}$ \\
+  \hline
+  $D \sim \text{Session}$ & $\sigma \sim \text{h2}$ & $g_0 \sim
+                                                      \text{h2}$ & \\
+  \hline
+\end{tabular}
+\caption{All parameter dependencies considered in our candidate set.}
+\label{table:dependencies}
+\end{table}
 
-% In Table \ref{table:dependencies} (see \textcite{secr-book} for further detail):
-% \begin{itemize}
-% \item `$\sim 1$' represents a parameter being held pooled across
-%   sessions. For example, with $D \sim 1$, we have only one
-%   estimate of $D$ and use it for all sessions;
-% \item `$\sim \text{session}$' means a parameter has session-specific
-%   levels. If we specify $D \sim \text{session}$, we have a separate estimate
-%   of $D$ for each session;
-% \item `$\sim \text{Session}$' represents a trend across
-%   sessions. With `$D \sim \text{Session}$', we  have $D(y) =
-%   exp(\beta_0 + \beta_1 y)$, 
-%   where $y$ is the session number \parencite{borchersEfford2008}. In
-%   our case, $y=1,...,5$;
-% \item `$\sim \text{h2}$' denotes a
-%   two-class finite mixture model. For example, with `$\sigma \sim \text{h2}$', we assume
-%   there are two groups in the population: Group 1 uses $\sigma_1$,
-%   while Group 2 uses $\sigma_2$. An 
-%   individual falls in Group 1 with probability $p$ and in Group 2
-%   with probability $(1-p)$. These estimates are pooled across sessions; 
-% \item `$\sim \text{b}$' represents a trap response. With $g_0 \sim
-%   \text{b}$, we have two estimates of $g_0$: one for individuals
-%   captured on previously in a session, and one for individuals
-%   not yet been captured in a session. These estimates are pooled
-%   across sessions;
-% \item `$\sim \text{session} + \text{b}$' means we have
-%   session-specific levels and a trap response -- e.g. with $g_0 \sim \text{session} +
-%   \text{b}$, we fit a model with two separate estimates of $g_0$ for
-%   each session: one for previously captured individuals, and one for
-%   individuals not caught yet. 
-% \end{itemize}
+In Table \ref{table:dependencies} (see \textcite{secr-book} for further detail):
+\begin{itemize}
+\item `$\sim 1$' represents a parameter being held pooled across
+  sessions. For example, with $D \sim 1$, we have only one
+  estimate of $D$ and use it for all sessions;
+\item `$\sim \text{session}$' means a parameter has session-specific
+  levels. If we specify $D \sim \text{session}$, we have a separate estimate
+  of $D$ for each session;
+\item `$\sim \text{Session}$' represents a trend across
+  sessions. With `$D \sim \text{Session}$', we  have $D(y) =
+  exp(\beta_0 + \beta_1 y)$, 
+  where $y$ is the session number \parencite{borchersEfford2008}. In
+  our case, $y=1,...,5$;
+\item `$\sim \text{h2}$' denotes a
+  two-class finite mixture model. For example, with `$\sigma \sim \text{h2}$', we assume
+  there are two groups in the population: Group 1 uses $\sigma_1$,
+  while Group 2 uses $\sigma_2$. An 
+  individual falls in Group 1 with probability $p$ and in Group 2
+  with probability $(1-p)$. These estimates are pooled across sessions; 
+\item `$\sim \text{b}$' represents a trap response. With $g_0 \sim
+  \text{b}$, we have two estimates of $g_0$: one for individuals
+  captured on previously in a session, and one for individuals
+  not yet been captured in a session. These estimates are pooled
+  across sessions;
+\item `$\sim \text{session} + \text{b}$' means we have
+  session-specific levels and a trap response -- e.g. with $g_0 \sim \text{session} +
+  \text{b}$, we fit a model with two separate estimates of $g_0$ for
+  each session: one for previously captured individuals, and one for
+  individuals not caught yet. 
+\end{itemize}
 
 
 
