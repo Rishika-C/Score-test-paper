@@ -331,8 +331,9 @@ $\thetaOne$ vector that shares the constraints of the $H_0$ model and
 uses the estimates of $\thetaZeroMLE$. By definition, this vector
 makes the $H_1$ model equivalent to the fitted $H_0$
 model, see below for an example. Lastly, we refer to $\ellOne$ as the $H_1$
-log-likelihood and $\scoreU$ as the gradient of $\ellOne$ at
-$\thetaOneTilde$.
+log-likelihood and $\boldsymbol{u}_1 (\thetaOne)$ as the gradient
+vector, also called the score, of $\ellOne$ at
+$\thetaOne$.
 
 For a simple illustrative example to clarify $\thetaOneTilde$, consider $Y_i \sim
 \text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \alpha$ and $H_1: \mu_i
@@ -343,25 +344,26 @@ $\thetaOneMLE$, respectively. For this model, $\thetaZeroMLE =
 $\thetaOneTilde = (\hat{\alpha}, 0)$, as under the $H_0$
 model, $\beta=0$.
 
-% A one-dimensional $H_1$ model allows for ease of plotting and explanation.
-
 Briefly, score tests summarise how `surprising'
-$\scoreU$ is under $H_0$ by standardising $\scoreU$, as in a
-z-test. Under $H_0$, we expect this gradient to be 
+$\scoreU$ is under $H_0$ using a z-test. Under $H_0$, the
+expectation of this gradient is 
 $0$ -- i.e. $E[\boldsymbol{u}_1
 (\thetaOneTilde^*)]=0$, where $\thetaOneTilde^*$ is the true
-vector under $H_0$. Therefore, to standardise the gradient in one
-dimension (for ease of explanation), we calculate $S^* = \frac{\scoreUOneDim - 
+vector under $H_0$ -- as shown in Section \ref{sec:score-test-proofs} of
+the Appendix. Using one dimension for illustration, the z-test
+statistic is therefore $\frac{\scoreUOneDim - 
   E[u_1(\thetaOneTildeOD^*)]}{\sqrt{\text{Var}\lrbr{\scoreUOneDim}}} =
 \frac{\scoreUOneDim}{\sqrt{\text{Var}\lrbr{\scoreUOneDim}}}$. Algebraically,
 this is equivalent to the intuitive approach of dividing
 $\scoreUOneDim$ by the curvature at $\thetaOneTildeOD$, taking into
 account the overall shape of the likelihood to assess the
-magnitude of $\scoreUOneDim$. Therefore, the standardised gradient can
-also be expressed as $S^* =
-\frac{\scoreUOneDim}{\sqrt{\mathcal{I}(\thetaOneTildeOD)}}$.
+magnitude of $\scoreUOneDim$. Refer to Section
+\ref{sec:score-test-proofs} of the Appendix for this algebraic
+justification. Therefore, the z-test statistic can also be expressed as
+$\frac{\scoreUOneDim}{\sqrt{\mathcal{I}(\thetaOneTildeOD)}}$. 
 
-Figure \ref{fig:fig1a} highlights the necessity of standardising, as
+Figure \ref{fig:fig1a} highlights the necessity of standardising via a
+z-statistic, as
 the value of $\scoreUOneDim$ alone is insufficient. In this
 figure, we consider $Y_i \sim \text{Normal}(\mu, 1)$, where
 $H_0: \mu = 0$ and $H_1: \mu = \alpha$, and both log-likelihood curves
@@ -370,19 +372,18 @@ confirmed by the LRT statistics, the $H_0$ model is adequate for the
 data of the orange curve, yet inadequate for the data of the blue
 curve.
 
-As $\scoreUOneDim$ is a sum of independent contributions, $S^*$
-is asymptotically Normal$(0,1)$ under $H_0$, as in a z-test, and so a two-tailed
+As $\scoreUOneDim$ is a sum of independent contributions, the
+z-statistic is asymptotically Normal$(0,1)$ under $H_0$, as is customary
+for a z-test. Therefore, a two-tailed
 p-value may be obtained to assess $H_0$. However, following convention, the score test
-statistic is found by squaring this standardised value, resulting in
+statistic is found by squaring this standardised value,
+i.e. $S=\frac{\scoreUOneDim^2}{\mathcal{I}(\thetaOneTildeOD)}$,
+resulting in 
 an asymptotic Chi-squared distribution.
 
-The above reasoning holds as model dimension increases, so in general,
-the score test statistic is given by: 
-\begin{equation}
-  S = \scoreU^T \scoreI^{-1} \scoreU
-  \label{eq:score-stat}
-\end{equation}
-where $\scoreU$ is the score vector of the $H_1$ model
+The above reasoning holds as model dimension increases. Therefore, in general,
+$S = \scoreU^T \scoreI^{-1}
+\scoreU$, where $\scoreU$ is the score vector of the $H_1$ model
 evaluated at $\thetaOneTilde$ and $\scoreI$ is the information
 matrix. In calculating
 $S$, we will focus on using the observed information matrix, see the
@@ -396,14 +397,12 @@ Discussion for more details.
 % -- squaring means that the test becomes two-sided. Also gives same
 % chi-sq distribution as LRT, for example
 
-As shown in one dimension in Figure \ref{fig:fig1b}, $S$ is equivalent to the LRT
-statistic if the latter is 
-calculated using a second-order Taylor series expansion about
-$\thetaOneTilde$ to approximate the log-likelihood. Therefore, when
-the log-likelihood is quadratic, the LRT statistic and score statistic
-are exactly equal, as this second-order Taylor series expansion
-provides the exact log-likelihood. Thus, the LRT statistic and score
-test statistic are asymptotically equivalent. As with the LRT statistic, to
+As shown in one dimension in Figure \ref{fig:fig1b}, $S$ is obtainable
+as an approximate LRT statistic under a quadratic approximation to the
+log-likelihood. This is derivedin Section \ref{sec:score-test-proofs} of
+the Appendix. Therefore, when the log-likelihood is quadratic, the LRT
+statistic and score statistic are exactly equal, and otherwise are
+asymptotically equal. As with the LRT statistic, to 
 produce a p-value assessing $H_0$, we compare $S$ to a Chi-squared
 distribution where the degrees of freedom is the difference in the
 number of parameters for the $H_0$ and $H_1$ model.
@@ -437,7 +436,8 @@ number of parameters for the $H_0$ and $H_1$ model.
 \end{figure}
 
 Previously, the obstacle in implementing score tests was obtaining the
-score vector and information matrix to evaluate at
+score vector, $\boldsymbol{u}_1 (\thetaOne)$, and information
+matrix, $\mathcal{I}_1 (\thetaOne)$, to evaluate at
 $\thetaOneTilde$. Using recent software advancements, we employ 
 the \lstinline{RTMB} R package -- a commonly-used AD tool -- to do
 this. Translating the $H_1$ log-likelihood into 
@@ -669,10 +669,43 @@ As in Section \ref{sec:overview-candidate-models}
 of the Appendix, the model descriptions in these tables are provided in
 the parlance of the \lstinline{secr} package. Refer to Section
 \ref{sec:overview-candidate-models} for more
-details. 
+details.
+
+\section{Discussion}
+\label{sec:discussion}
+
+The proposed approach for applying score tests via AD for model
+selection can be applied to a wide range of models. The potential
+benefits are not restricted to SCR or random effects models. The only
+requirements are standard regularity assumptions, similar to those
+underlying LRTs. However, unlike for LRTs, these 
+regularity assumptions do not need to hold globally across the $H_1$
+parameter space. By the local nature of score tests, these assumptions
+only need to hold in a neighbourhood around $\thetaOneTilde$. For example, 
+in Section \ref{sec:non-nested-and-boundary-consid} we only consider
+boundary estimates and unidentifiability for $\thetaOneTilde$. Our
+approach is more robust to `irregular' $H_1$ models, and therefore
+more widely applicable, than common model selection methods
+such as LRTs. 
+
+It is possible to use the observed or expected information matrix to
+calculate score statistics. (Use `reframing' structure, including info
+from paragraph below!) 
+
+As discussed in \textcite{morgan2007}, when using the observed
+information matrix to calculate score statistics, a poor fit under
+$H_0$ may result in negative, and therefore unusable, score
+statistics. This is due to the observed information matrix not being
+positive definite. \textbf{(Note that in Morgan 2007 -- only recommends not
+using obs info for zero-modified distributions.)}
 
 \section{Appendix}
 \label{sec:appendix}
+
+\subsection{Score test proofs}
+\label{sec:score-test-proofs}
+
+
 
 \subsection{Score test example}
 \label{sec:score-test-rtmb-ex}

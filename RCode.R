@@ -154,14 +154,14 @@ if (F) {
 
   # Blue curve: larger discrepancy between theta-tilde and theta1-hat
   # n=5, mean.y=1, S=5
-  plot(beta1.seq, ll.diff.func(n=n.1, mean.y=mean.y.1, which.beta.subtract=0), type="l", xlab="", ylab=expression("\u2113"("\u03B1") - "\u2113"(0)), col='blue', lwd=3, cex.lab=1.6, xaxs="i", ylim=c(-6,4), cex.axis=1.5, xaxt="n")# xlim=c(-1.5, 2), ylim=c(-10, 3)
+  plot(beta1.seq, ll.diff.func(n=n.1, mean.y=mean.y.1, which.beta.subtract=0), type="l", xlab="", ylab=expression("\u2113"("\u03B1") - "\u2113"(0)), col='blue', lwd=3, cex.lab=1.6, xaxs="i", ylim=c(-6,4), cex.axis=1.5, xaxt="n", las=2)# xlim=c(-1.5, 2), ylim=c(-10, 3)
 
   # x-axis
   axis(side=1, at=c(0, mean.y.2, mean.y.1), labels=c(expression(0), expression(hat("\u03B1")[1]), expression(hat("\u03B1")[2])), cex.axis=1.5, padj=0.3)
   title(xlab=expression("\u03B1"), mgp=c(3, 1, 0), cex.lab=1.6, adj=1)
 
   # Grid lines
-  grid()
+  #grid()
 
   # Orange curve: smaller discrepancy between theta1-tilde and theta1-hat
   # n=10, mean.y=0.5, S=2.5
@@ -209,7 +209,7 @@ if (F) {
          bg="white", cex=1.3)
 
   # Adding text to indicate this is plot (a)
-  text(x=1.8, y=4, labels="(a)", cex=2, col='red')
+  text(x=1.8, y=3.8, labels="(a)", cex=2, col='black')
 
   dev.off()
 
@@ -255,6 +255,7 @@ gamma.ll.diff.func = function(mu, y, known.var, which.mu.subtract=0) {
 }
 
 if (F) {
+  # Note: below, will see '+90' for shifting up y-axis -- part of change from unshifted curves, to curves shifted so that y=0 at theta1-tilde (so are just adjusting old settings accordingly) :)
 
   # Scenario (1): visualising equivalence between LRT and S when quadratic log-likelihood
   cairo_pdf("Figures/Fig1b.pdf")
@@ -276,25 +277,23 @@ if (F) {
 
   gamma.sample = rgamma(n.gamma, shape=gamma.true.mean^2/gamma.variance, rate=gamma.true.mean/gamma.variance)
 
-  mu.seq = seq(0.1, 15, by=0.01)
-  # Log-likelihood, which is a function of the mean (i.e. theta=mean)
-  plot(mu.seq, gamma.ll.known.var(mu.seq, y=gamma.sample, known.var=gamma.variance), type='l', lwd=3, col=col.1, ylab=expression("\u2113"(bold(theta)[1])), cex.lab=1.6, cex.axis=1.5, xlab="", xaxs="i", ylim=c(-175, -50), xaxt="n")
-  grid()
-
+  # According to Copilot, for the asymptotics to hold (i.e. for LRT \sim S), we want theta1-tilde only about 1-1.5 standard errors away from theta1-hat
+  # (standard error refers to standard deviation of distribution of sample mean under the null model -- as we assume known variance, note that the standard deviation of the sample mean is the same under the null and alternative model!)
   # MLE
   obj.gamma = MakeADFun(gamma.nll.known.var, list(mu=8))
   gamma.fit = nlminb(obj.gamma$par, obj.gamma$fn, obj.gamma$gr)
   gamma.mle = gamma.fit$par["mu"]
   gamma.mle
   # obj.gamma$gr(gamma.mle) # MLE looks correct -- gradient is basically 0 :)
-
-  # According to Copilot, for the asymptotics to hold (i.e. for LRT \sim S), we want theta1-tilde only about 1-1.5 standard errors away from theta1-hat
-  # (standard error refers to standard deviation of distribution of sample mean under the null model -- as we assume known variance, note that the standard deviation of the sample mean is the same under the null and alternative model!)
   se = sqrt(gamma.variance/n.gamma)
   se * 1.5
-
   # Therefore, we will give theta1-tilde of:
   theta1.tilde = 5
+
+  mu.seq = seq(0.1, 15, by=0.01)
+  # Log-likelihood, which is a function of the mean (i.e. theta=mean)
+  plot(mu.seq, gamma.ll.diff.func(mu=mu.seq, y=gamma.sample, known.var=gamma.variance, which.mu.subtract=theta1.tilde), type='l', lwd=3, col=col.1, ylab=expression("\u2113"(bold(theta)[1]) - "\u2113"(tilde(bold(theta))[1])), cex.lab=1.6, cex.axis=1.5, xlab="", xaxs="i", xaxt="n", yaxt="n", ylim=c(-175+90, -50+90))
+  #grid()
 
   # x-axis
   axis(side=1, at=c(theta1.tilde, gamma.mle), labels=c(expression(bold(tilde(theta))[1]), expression(bold(hat(theta)[1]))), cex.axis=1.5, padj=0.3)
@@ -317,38 +316,48 @@ if (F) {
   U0prime <- (2 / sigma2) * A0 + ((3 * n) / sigma2) - ((4 * n * mu0^2) / sigma2^2) * trigamma(k0)
 
   # Log-lik at theta1-tilde
-  ll.theta1.tilde = gamma.ll.known.var(mu.seq, y=gamma.sample, known.var=gamma.variance)[which(mu.seq==theta1.tilde)]
+  ll.theta1.tilde = 0 # by construction, using gamma.ll.diff.func()
+  # gamma.ll.diff.func(mu.seq, y=gamma.sample, known.var=gamma.variance, which.mu.subtrac)[which(mu.seq==theta1.tilde)]
+
   # Second-order Taylor series expansion, calculated using Copilot (based on the U0 and U0prime values above)
-  lines(mu.seq, (ll.theta1.tilde + U0 * (mu.seq - theta1.tilde) + (U0prime/2) * (mu.seq - theta1.tilde)^2), type="l", lty=5, col=col.2, lwd=3)
+  # Non-shifted Taylor series expansion
+  taylor.expansion = ll.theta1.tilde + U0 * (mu.seq - theta1.tilde) + (U0prime/2) * (mu.seq - theta1.tilde)^2
+  # Shifting so is 0 at theta1.tilde
+  taylor.subtract = taylor.expansion[mu.seq==theta1.tilde]
+  taylor.expansion.shift = taylor.expansion - taylor.subtract
+  lines(mu.seq, taylor.expansion.shift, type="l", lty=5, col=col.2, lwd=3)
 
   # Plotting theta1-tilde and theta1-hat on graph
-  ll.gamma.mle = gamma.ll.known.var(mu.seq, y=gamma.sample, known.var=gamma.variance)[which(mu.seq==round(gamma.mle))]
+  ll.gamma.mle = gamma.ll.diff.func(mu=mu.seq, y=gamma.sample, known.var=gamma.variance, which.mu.subtract=theta1.tilde)[which(mu.seq==round(gamma.mle))]
   lines(x=c(gamma.mle, gamma.mle), y=c(-300, ll.gamma.mle), col=line.col, lty=2)
   lines(x=c(theta1.tilde, theta1.tilde), y=c(-300,ll.theta1.tilde) , col=line.col, lty=2)
   # Horizontal lines to define LRT/2 and S/2
   abline(h=ll.theta1.tilde, lty=2, col=line.col, lwd=2)
   abline(h=ll.gamma.mle, lty=2, col=line.col, lwd=2)
   # Based on the equation of a parabola, the peak of our second-order Taylor series expansion should be at:
-  taylor.mle = (-1) * U0/(2 * (U0prime/2)) + 5
+  taylor.mle.x = (-1) * U0/(2 * (U0prime/2)) + 5
   # Plugging this value into the formula for our parabola
-  yval.taylor.mle = ll.theta1.tilde + U0 * (taylor.mle - theta1.tilde) + (U0prime/2) * (taylor.mle - theta1.tilde)^2
+  yval.taylor.mle = ll.theta1.tilde + U0 * (taylor.mle.x - theta1.tilde) + (U0prime/2) * (taylor.mle.x - theta1.tilde)^2
   abline(h=yval.taylor.mle, lty=2, col=line.col, lwd=2)
+
+  # y-axis: only want to show y-values corresponding to these three horizontal lines :)
+  axis(side=2, at=c(ll.theta1.tilde, ll.gamma.mle, yval.taylor.mle), labels=c("0", "18", "26"), las=2, cex.axis=1.5, padj=0.3)
 
   # Adding points
   points(x=theta1.tilde, y=ll.theta1.tilde, col="purple", pch=19, cex=1.7)
   points(x=gamma.mle, y=ll.gamma.mle, col="purple", pch=19, cex=1.7)
-  points(x=taylor.mle, y=yval.taylor.mle, col="purple", pch=19, cex=1.7)
+  points(x=taylor.mle.x, y=yval.taylor.mle, col="purple", pch=19, cex=1.7)
 
   # Arrows
   arrows(x0=4, x1=4, y0=ll.theta1.tilde, y1=ll.gamma.mle, col=col.1, length=0.15, code=3, lwd=2)
   arrows(x0=1.7, x1=1.7, y0=ll.theta1.tilde, y1=yval.taylor.mle, col=col.2, length=0.15, code=3, lwd=2)
 
   # Text
-  text(x=2.8, y=-80, labels="LRT/2", font=2, cex=1.1, col=col.1)
-  text(x=1, y=-80, labels="S/2", font=2, cex=1.2, col=col.2)
+  text(x=2.8, y=-80+90, labels="LRT/2", font=2, cex=1.1, col=col.1)
+  text(x=1, y=-80+90, labels="S/2", font=2, cex=1.2, col=col.2)
 
   # Adding text to indicate this is plot (b)
-  text(x=14.2, y=-50, labels="(b)", cex=2, col='red')
+  text(x=14.2, y=37.5, labels="(b)", cex=2, col='black')
 
   dev.off()
 
