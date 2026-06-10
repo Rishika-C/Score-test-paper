@@ -205,22 +205,23 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex}
 Model selection is an important step for
 statistical analysis, allowing the practitioner to confirm the
 reliability of their chosen model and any resulting
-conclusions. Well-known model selection methods include comparing
-models using likelihood ratio tests (LRTs), AIC values, and score 
-tests. Comparing two nested models via LRTs and AIC values means 
+conclusions. Well-known model selection methods include likelihood
+ratio tests (LRTs), Akaike's Information Criterion (AIC), and score 
+tests. Comparing two nested models via either LRTs or AIC means 
  using maximised log-likelihood values to assess the quality of
 each model, while applying a penalty for model
-complexity. Conducting a LRT requires twice the difference of each
+complexity. For instance, conducting a LRT requires twice the difference of each
 model's maximised log-likelihood. This is 
 compared to a null distribution, where
 the degrees of freedom can be thought of as containing the penalty for
 model complexity \parencite{vaartAsymptoticStatistics2012}. 
-Using AIC values means directly adding a penalty term to each
+Using AIC involves directly adding a penalty term to each
 maximised log-likelihood and comparing the results \parencite{burnham2002}. 
 
 To compare two nested models using a score test, a score test
 statistic is calculated and compared to the same null
-distribution as the LRT statistic. However, unlike the LRT, the score test statistic
+distribution as the LRT statistic. However, unlike the LRT, the score
+test does not require both models to be fitted, but instead
 employs gradients to inform the improvement in fit available by
 perturbing the parameter estimates from the simpler model
 \parencite{rao2005}. Specifically, the score test statistic is
@@ -230,15 +231,15 @@ evaluated at the parameter estimates of the simpler model. See
 \textcite{rao2005} for an overview and recent developments of score
 tests. 
 
-Each method has its own advantages and
+Each method has advantages and
 disadvantages. It is straightforward to perform the
-calculations required to compare models via LRTs or AIC values. However, both
+calculations required to compare models via LRTs or AIC. However, both
 models must be fitted. To conduct score tests, only the simpler of the
 two models needs to be fitted \parencite{rao2005}. However, the required
 gradients can be challenging to obtain, often acting as a
 deterrent for conducting these tests. 
 
-Historically, LRTs and AIC values have been widely-used methods
+Historically, LRTs and AIC have been the most widely-used methods
 of model selection. However, when the models under comparison require
 considerable time and resources to fit, these methods of comparison can
 become inconvenient. This issue is amplified when considering
@@ -246,30 +247,26 @@ multiple potential models for a data set, as every model in the
 candidate set must be fitted, potentially rendering comprehensive
 model selection impractical.
 
-In such cases, turning to score tests would be
-beneficial as fitting fewer models makes model selection more
-practical. However, for usability, we require a straightforward way of
-calculating the gradients required by the score test
+In such cases, turning to score tests may be
+beneficial, but for usability, we require a straightforward way of
+calculating the gradients needed for the score test
 statistic. Traditionally, options for obtaining these gradients
 included symbolic differentiation and numeric approximations. The former
 can quickly become unrealistic as model complexity grows, while the
 latter often produces unstable and inaccurate
-results \parencite{ADMBpaper}. In this paper, we demonstrate that
-due to recent developments in statistical software, automatic
-differentiation (AD) tools make previously
-unfeasible tasks, such as model selection via score tests, viable in a
-way previously unseen. Repurposing the model-fitting capabilities of AD tools allows
-for convenient procurement of the necessary gradients, and 
-therefore a newly straightforward implementation of score tests. 
+results \parencite{ADMBpaper}. However, a third option that has not so
+far been widely used is automatic differentiation (AD). In this paper,
+we demonstrate that recent AD tools developed for optimisation can be
+repurposed to provide a newly straightforward implementation of score tests. 
 
 By algorithmically harnessing the chain rule of differentiation, AD tools produce exact
 gradients of any given function \parencite{ADMBpaper}. Using these
 tools only requires the practitioner to supply the objective function 
 \parencite{TMBpaper}. For statistical models, these tools are 
 mainly used for model-fitting or calculating 
-the Laplace approximation. Utilising the side-effects of these
+the Laplace approximation. We show that utilising the side-effects of these
 capabilities -- repurposing their ability to calculate
-exact log-likelihood gradients -- now facilitates a
+exact log-likelihood gradients -- facilitates a
 convenient implementation of score tests.
 
 This has implications for a wide range of models. For instance, for
@@ -280,33 +277,27 @@ a host of challenges. Model fitting previously required tailored
 software, even for relatively simple examples such as
 generalised linear mixed models (GLMMs), although gradients remained
 elusive \parencite{lme4-pkg}. \textcite{wang2022} present extensive derivations
-to obtain GLMM gradients, enabling valuable yet previously
+to obtain GLMM gradients, enabling previously
 inaccessible tasks such as score tests.
 However, there remain many random effects 
 models for which such solutions and derivations don't exist. Random effects
 models are just one illustration of the  
-advancements offered by AD. For many classes of models, the
-convenience of fitting models and obtaining gradients via AD tools
-makes endeavours such as model selection via
-score tests newly accessible.
+advancements offered by AD. 
 
 To illustrate the benefits of score tests 
 and AD tools, we will focus on the class of random effects models known as
-spatial capture-recapture (SCR) models. Model selection is often difficult 
+spatial capture-recapture (SCR) models, used for estimating population
+size of spatially-structured animal populations. Model selection is often difficult 
 for SCR models. Likelihood equations for these models involve products of two-dimensional spatial
 integrals \parencite{borchersEfford2008}. This makes model-fitting, and therefore
-using AIC values to compare 
-models, time consuming and resource intensive,
+using AIC to compare models, time consuming and resource intensive,
 especially when many models are being considered. However, an absence
-of suitable alternatives means comparison via AIC values is the
-primary method of SCR model selection (e.g. \cite{secr-aic-ex}). Due  
-to the difficulties in symbolic differentiation or numerically 
-approximating gradients, score tests have not generally been
-used. Removing the barriers
-to conducting score tests 
-presents a new and potentially impactful solution to this issue. 
+of suitable alternatives means comparison via AIC is the
+primary method of SCR model selection
+(e.g. \cite{secr-aic-ex}). Removing the barriers to conducting score
+tests  presents a new and potentially impactful solution to this issue. 
 
-We will explore the newfound gains of conducting score tests using AD tools
+We will explore the gains of conducting score tests using AD tools
 via the framework introduced by \textcite{catchpoleMorgan1996}, and
 later developed by \textcite{mccreaMorgan2011}. Following the
 convention of organising the
@@ -327,10 +318,9 @@ methods, we examine how our approach enhances the
 convenience and accessibility of model selection, while accommodating
 potentially common issues such as non-nested models.
 
-Our proposed model selection approach is widely applicable, it does not only
-apply to SCR models or random effects models. We present a general
-method, allowing accessible model selection for many classes of
-models across a vast range of fields. 
+Our proposed model selection approach is widely applicable, enabling
+accessible model selection for many classes of models across a vast
+range of fields.  
 
 \section{Model selection using score tests}
 \label{sec:model-sel}
@@ -536,8 +526,8 @@ degenerate, and therefore uninformative, score statistics
 In such cases, we propose separating the
 candidate set into groups -- where models in each group fall into a
 nested structure with no boundary or identifiability problems -- and carrying out the
-framework of \textcite{catchpoleMorgan1996} on each group, using AIC values to
-make a final selection from the chosen models. Using the AIC like this
+framework of \textcite{catchpoleMorgan1996} on each group, using AIC to
+make a final selection from the chosen models. Using AIC like this
 is unlikely to require any extra models be fitted. See Section
 \ref{sec:ovenbirds} for an example of this. 
 
@@ -548,7 +538,7 @@ is unlikely to require any extra models be fitted. See Section
 \label{sec:data-set}
 
 In \textcite{borchersEfford2008},
-the authors illustrate SCR model selection using AIC values. The data
+the authors illustrate SCR model selection using AIC. The data
 set used consists of captures of birds 
 (red-eyed vireos) from a mist-netting survey on the Patuxent Research Refuge 
 in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. Considering
@@ -582,7 +572,7 @@ day.
 To construct an accurate picture of the benefits afforded by model
 selection via score tests and AD tools, alongside our proposed
 approach, we implement model selection via
-AIC values. Using an extensive candidate
+AIC. Using an extensive candidate
 set, we conduct a comprehensive comparison of a novel, more efficient,
 method of model selection with a traditional approach. 
 
@@ -594,7 +584,7 @@ two-dimensional integrals, where each integral is an infinite sum over
 the model's random effects \parencite{borchersEfford2008}. Therefore,
 fitting every model in a comprehensive candidate set 
 such as ours requires significant resources and time. Despite this,
-the convenience of calculating AIC values means they are often used for
+the convenience of calculating AIC means they are often used for
 SCR model selection \parencite{efford-schofield}. Although popular models
 for estimating animal abundance, the complexity of SCR likelihoods
 meant derivatives and therefore tools such as score tests were
@@ -640,13 +630,13 @@ of the Appendix, we efficiently conduct score tests comparing the
 Level 0 model to all Level 1 models. We continue with the score test
 framework as described in Section \ref{sec:implementing-framework},
 stopping at the level where p-values are no longer significant. Using
-AIC values, we compare the final model selected for each group,
+AIC, we compare the final model selected for each group,
 selecting the model with the smallest AIC as the final model. 
 
 To illustrate the benefits of this approach, we also implement model selection as
 it would likely currently be done in practice. We fit every model using the
 \lstinline{secr.fit} function from the \lstinline{secr} R package, and
-compare them using AIC values found using the \lstinline{AIC}
+compare them using AIC, calculated using the \lstinline{AIC}
 function from the same package.  
 
 \subsection{Results}
@@ -655,7 +645,7 @@ function from the same package.
 Implementing model selection using the approach outlined in Section
 \ref{sec:implementing-for-ex}, harnessing score tests via \lstinline{RTMB}
 to select a final model takes approximately 13.4 minutes. In contrast,
-implementing model selection via AIC values takes approximately 24.8
+implementing model selection via AIC takes approximately 24.8
 hours. Both approaches select the same final model -- a model with constant $D$ and
 $\sigma$ for all individuals across the survey years, and a behaviour
 response for $g_0$ -- confirming the reliability of the proposed 
@@ -680,7 +670,7 @@ p-values, we provide LRT statistics and differences in AIC
 ($\Delta$AIC) values,
 further confirming the reliability of the results. These values are also
 calculated using \lstinline{RTMB}, but are not 
-included in the time taken above. Note the alignment in the $\Delta$AIC values
+included in the time taken above. Note the alignment in the $\Delta$AIC
 across both model selection procedures. 
 
 As in Section \ref{sec:overview-candidate-models}
@@ -692,43 +682,112 @@ details.
 \section{Discussion}
 \label{sec:discussion}
 
-Our proposed approach for model selection via score tests can be
-applied to a wide range of models. The potential benefits are not
-restricted to SCR or random effects models. The only applicability
-requirements are standard regularity assumptions, similar to those 
-underlying LRTs. However, unlike LRTs, these 
-regularity assumptions do not need to hold globally across the $H_1$
-parameter space. Due to the local nature of score tests, these assumptions
-only need to hold in a neighbourhood around $\thetaOneTilde$. For example, 
-in Section \ref{sec:non-nested-and-boundary-consid} we only consider
-boundary estimates and unidentifiability for $\thetaOneTilde$. Our
-approach is more robust to `irregular' $H_1$ models, and therefore
-more widely applicable, than well-established model selection methods
-such as LRTs. 
+\subsection{General considerations for the score test framework}
+\label{sec:disc-general}
+
+Generally, when performing model selection, it is necessary to take model
+uncertainty into account, e.g. via a bootstrap simulation, so standard
+errors are not underestimated \textbf{(Claeskens and Hart
+  2008?)}. Furthermore, texts such as \textcite{mccreaMorgan2011} 
+recommend using simulation to select an appropriate conservative
+level, mitigating against an inflated false positive rate due to multiple
+tests. Refer to the text for more details. Lastly, with hierarchical
+model selection it is generally 
+possible to lose important model features. Therefore,
+\textcite{mccreaMorgan2011} suggest the incorporation of step-down
+tests, such as LRTs, in conjunction with score tests for model
+selection.
+
+\subsection{Applicability}
+\label{sec:disc-applicability}
+
+Our proposed model selection approach can be
+applied to a wide range of models, the only requirements are those
+underlying score tests. Therefore, applicability only requires
+standard regularity assumptions, similar to those   
+underlying LRTs. However, unlike LRTs, the local nature of score tests
+requires these assumptions only hold in a neighbourhood around
+$\thetaOneTilde$, rather than globally across the $H_1$ parameter
+space. For example, in Section
+\ref{sec:non-nested-and-boundary-consid} we only consider boundary
+estimates and unidentifiability at $\thetaOneTilde$. The applicability
+of our approach is therefore similar to, if not wider than, that of the
+commonly-used LRT. 
+
+\subsection{Observed vs expected information matrix}
+\label{sec:disc-obs-exp-mat}
 
 It is possible to use the observed or expected information matrix to
-calculate score statistics, both produce the same asymptotic
-distribution \parencite{catchpoleMorgan1996}. As shown in Section
-\ref{sec:rtmb-appendix} of the Appendix, implementing the observed
-information matrix is convenient. However, as discussed in
-\textcite{morgan2007}, a poor fit under $H_0$ may occasionally result in negative,
-and therefore unusable, score statistics as the observed information
-matrix is not positive definite. In such cases, despite its
-added complexity, the expected information matrix may be
-preferred. \textbf{However, it may not be feasible to obtain this matrix,
-e.g. for sophisticated models}, and so we recommend using the estimated
-expected information matrix instead. Specifically, we
-propose... {\textit{Outline approach for estimated expected info matrix}}.  
+calculate score statistics, both have the same asymptotic
+distribution \parencite{catchpoleMorgan1996}. Due to the considerable
+gain in convenience, we generally recommend using the observed
+information matrix. As illustrated in Section \ref{sec:rtmb-appendix},
+with our approach this requires only a few lines of code that are
+quick to run. In contrast, the expected information matrix requires
+potentially extensive symbolic calculations, if tractable. For
+sophisticated models, intractability often means numerical integration or
+Monte Carlo simulation is needed to obtain an estimate of the expected
+information matrix. As mentioned in Section \ref{sec:introduction}, the former
+can be unrealistic as model complexity grows, while the latter can
+require extensive time and resources.
 
-% (Use `reframing' structure, including info
-% from paragraph below!) 
+Texts such as \textcite{catchpoleMorgan1996} and
+\textcite{mccreaMorgan2011} explore the benefits afforded by the
+expected information matrix. However, with the advancement of AD, these
+benefits are now outweighed by the convenience of the observed
+information matrix. \textcite{catchpoleMorgan1996} report closer  
+alignment between score and LRT statistics with the expected information
+matrix. As shown in Section \ref{sec:ex-results}, this does not
+exclude close alignment when using the observed information  
+matrix. Using simulation, \textcite{mccreaMorgan2011} find improvement in 
+model selection accuracy from the expected information
+matrix. The reported effect is not large and decreases as sample size
+increases. Furthermore, observed information score statistics found
+using AD over numeric approximations are more accurate, potentially
+reducing these benefits.  
 
-% As discussed in \textcite{morgan2007}, when using the observed
-% information matrix to calculate score statistics, a poor fit under
-% $H_0$ may result in negative, and therefore unusable, score
-% statistics. This is due to the observed information matrix not being
-% positive definite. \textbf{(Note that in Morgan 2007 -- only recommends not
-% using obs info for zero-modified distributions.)}
+% In \textcite{mccreaMorgan2011}, the authors mention that a
+% by-product of using the expected information matrix is detecting
+% unidentifiability. While this is likely useful for large candidate
+% sets of sophisticated models, the presence of alternative (likely more
+% convenient) methods for detecting unidentifiability
+% means this is insufficient to recommend the expected
+% information matrix.  *** Check with Ben and Rachel -- OK to
+% exclude?? 
+ 
+A scenario where we recommend considering the expected information
+matrix is when negative score statistics arise. As
+explored in \textcite{morgan2007}, the observed information
+matrix may occasionally result in a negative statistic, as a poor
+fit under $H_0$ produces an observed information matrix that is not
+positive definite. In this case, alternatives include
+using the expected information matrix or the LRT
+statistic. Specifically, when dealing with sophisticated models where
+the required calculations are intractable
+(e.g. SCR models), we recommend Monte Carlo methods to estimate
+the former. For our purposes, this
+means simulating data under the fitted $H_0$ model, evaluating the
+$H_1$ observed information matrix at the $H_0$ MLEs for each data set,
+and then averaging across all matrices. However, due to the likely loss in
+efficiency, using the LRT statistic may be more
+convenient. The asymptotic equivalence of score and LRT
+statistics means accuracy is likely to be preserved.
+
+\subsection{Concluding remarks}
+\label{sec:disc-conclusion}
+
+Harnessing recent software advancements with AD and the local nature
+of score tests, we present an approach that considerably improves the
+convenience of comprehensive model selection,
+applicable to a wide range of statistical models. Through the lens of
+the framework of \textcite{catchpoleMorgan1996}, only a small subset
+of the candidate set must be fitted, further enhancing the time
+savings. 
+
+Further work includes simulation to confirm the absence of material
+benefit when using the expected instead of the observed information
+matrix, and further investigating the implementation of the considerations
+in Section \ref{sec:disc-general}. 
 
 \section{Appendix}
 \label{sec:appendix}
