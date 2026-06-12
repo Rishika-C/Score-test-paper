@@ -286,8 +286,8 @@ advancements offered by AD.
 
 To illustrate the benefits of score tests 
 and AD tools, we will focus on the class of random effects models known as
-spatial capture-recapture (SCR) models, used for estimating population
-size of spatially-structured animal populations. Model selection is often difficult 
+spatial capture-recapture (SCR) models, used for estimating density
+and distribution of animal populations. Model selection is often difficult 
 for SCR models. Likelihood equations for these models involve products of two-dimensional spatial
 integrals \parencite{borchersEfford2008}. This makes model-fitting, and therefore
 using AIC to compare models, time consuming and resource intensive,
@@ -339,9 +339,10 @@ $\thetaOne$, respectively. We define $\thetaOneTilde$ as the
 $\thetaOne$ vector that shares the constraints of the $H_0$ model and
 uses the estimates of $\thetaZeroMLE$. By definition, this vector
 makes the $H_1$ model equivalent to the fitted $H_0$
-model, see below for an example. Lastly, we refer to $\boldsymbol{u}_1 (\thetaOne)$ as the gradient
+model; see below for an example. Lastly, we refer to $\boldsymbol{u}_1
+(\boldsymbol{\theta})$ as the gradient 
 vector, also called the score, of the $H_1$ log-likelihood at
-$\thetaOne$.
+$\boldsymbol{\theta}$.
 
 For a simple illustrative example to clarify $\thetaOneTilde$, consider $Y_i \sim
 \text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \alpha$ and $H_1: \mu_i
@@ -352,23 +353,27 @@ $\thetaOneMLE$, respectively. For this model, $\thetaZeroMLE =
 $\thetaOneTilde = (\hat{\alpha}, 0)$, as under the $H_0$
 model, $\beta=0$.
 
-Briefly, score tests are essentially z-tests summarising how `surprising'
+Briefly, score tests are z-tests summarising how `surprising'
 $\scoreU$ is under $H_0$. Under $H_0$, the
 expectation of this gradient is 
-$0$ -- i.e. $E[\boldsymbol{u}_1
+$0$. That is, $E[\boldsymbol{u}_1
 (\thetaOneTilde^*)]=0$, where $\thetaOneTilde^*$ is the true
-vector under $H_0$ -- as shown in Section \ref{sec:exp-zero-proof} of
+vector under $H_0$, as shown in Section \ref{sec:exp-zero-proof} of
 the Appendix. Using one dimension for illustration, the z-test
-statistic is therefore $\frac{\scoreUOneDim - 
-  E[u_1(\thetaOneTildeOD^*)]}{\sqrt{\text{Var}\lrbr{\scoreUOneDim}}} =
-\frac{\scoreUOneDim}{\sqrt{\text{Var}\lrbr{\scoreUOneDim}}}$. Algebraically,
-this is equivalent to the intuitive approach of dividing
+statistic is therefore $\left.
+  \lrbr{\scoreUOneDim - E[u_1(\thetaOneTildeOD^*)]}
+  \middle/
+  \sqrt{\text{Var}\lrbr{\scoreUOneDim}}
+\right. = \left.
+  \scoreUOneDim \middle/ \sqrt{\text{Var}\lrbr{\scoreUOneDim}}
+\right.$. It can be shown that $\text{Var}\lrbr{\scoreUOneDim} =
+\mathcal{I}(\thetaOneTildeOD)$. Therefore, this is equivalent to dividing
 $\scoreUOneDim$ by the curvature at $\thetaOneTildeOD$, taking into
 account the overall shape of the likelihood to assess the
 magnitude of $\scoreUOneDim$. Refer to Section
-\ref{sec:var-info-equiv-proof} of the Appendix for this algebraic
+\ref{sec:var-info-equiv-proof} of the Appendix for the algebraic
 justification. Therefore, the z-test statistic can also be expressed as
-$\frac{\scoreUOneDim}{\sqrt{\mathcal{I}(\thetaOneTildeOD)}}$. 
+$\left. \scoreUOneDim \middle/ \sqrt{\mathcal{I}(\thetaOneTildeOD)} \right.$. 
 
 Figure \ref{fig:fig1a} highlights the necessity of standardising via a
 z-statistic, as
@@ -394,7 +399,7 @@ $S = \scoreU^T \scoreI^{-1}
 \scoreU$, where $\scoreU$ is the score vector of the $H_1$ model
 evaluated at $\thetaOneTilde$ and $\scoreI$ is the information
 matrix. In calculating
-$S$, we will focus on using the observed information matrix, see the
+$S$, we will focus on using the observed information matrix. See the
 Discussion for more details.
 
 % -- as in z-test, rely on asymptotic Normality to produce a p-value
@@ -405,13 +410,13 @@ Discussion for more details.
 % -- squaring means that the test becomes two-sided. Also gives same
 % chi-sq distribution as LRT, for example
 
-As shown in one dimension in Figure \ref{fig:fig1b}, $S$ is obtainable
-as an approximation-based LRT statistic under a quadratic approximation to the
+As shown in one dimension in Figure \ref{fig:fig1b}, $S$ is also obtainable
+as an approximation-based LRT statistic based on a quadratic approximation to the
 log-likelihood. This is derived in one dimension in Section \ref{sec:lrt-s-equiv-proof} of
 the Appendix. Therefore, when the log-likelihood is quadratic, the LRT
-statistic and score statistic are exactly equal, and otherwise are
-asymptotically equal. As with the LRT statistic, to 
-produce a p-value assessing $H_0$, we compare $S$ to a Chi-squared
+statistic and score statistic are exactly equal, and otherwise they are
+asymptotically equal. The null distribution for both score tests and
+LRTs is a Chi-squared
 distribution where the degrees of freedom is the difference in the
 number of parameters for the $H_0$ and $H_1$ model.
 
@@ -430,14 +435,14 @@ number of parameters for the $H_0$ and $H_1$ model.
     \caption{}
     \label{fig:fig1b}
   \end{subfigure}
-  \caption{Figure (a) shows log-likelihood curves under $H_1$ for different
+  \caption{(a) Log-likelihood curves under $H_1$ for different
     samples, where $Y_i \sim \text{Normal}(\mu, 1)$, with $H_0: \mu = 
     0$ and $H_1: \mu = \alpha$. The log-likelihood
-    curves have been shifted, as indicated on the y-axes, for
-    interpretability. In Figure (b), the blue curve
+    curves have been shifted -- as indicated on the y-axes -- for
+    interpretability (b) The blue curve
     represents a non-parabolic $H_1$ log-likelihood, and the dashed
     pink line is the second-order Taylor series expansion about
-    $\thetaOneTildeOD$. In both figures,
+    $\thetaOneTildeOD$. 
     `LRT' and `S' represent the LRT and score statistic,
     respectively.}   
   \label{fig:fig1}
@@ -453,22 +458,23 @@ an R function, it becomes straightforward to extract the score vector
 and information matrix. Using AD to also fit
 the $H_0$ model can provide time savings, especially for sophisticated models.
 
-See \ref{sec:score-test-rtmb-ex} of the Appendix for an illustration
-of using \lstinline{RTMB} and symbolic differentiation
-to calculate $S$ for the example with $Y_i \sim
+An illustration of using \lstinline{RTMB} and symbolic differentiation
+is given in Section \ref{sec:score-test-rtmb-ex}, where $S$ is found
+for the example with $Y_i \sim 
 \text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \alpha$ and $H_1: \mu_i
-= \alpha + \beta x_i$ for some covariate $\boldsymbol{x}$. We emphasise that
-this example is particularly simple. The symbolic
+= \alpha + \beta x_i$ for some covariate $\boldsymbol{x}$. We
+emphasise that although these models are particularly simple,
+obtaining $\scoreU$ and $\scoreI$ is surprisingly
+involved. Furthermore, the symbolic
 differentiation required to calculate $S$ increases considerably as
-model complexity increases, often becoming impractical, if not
-impossible.
+model complexity increases, typically becoming impractical.
 
 \subsection{Implementing the score test framework}
 \label{sec:implementing-framework}
 
 By organising the candidate set into a tree structure, the model
 selection framework of \textcite{catchpoleMorgan1996}
-defines an efficient path to the final
+defines an efficient path to the final selected
 model, beginning by considering the simplest models. This is done
 through the construction of `levels', and the use of score tests to
 select the best model at each level.
@@ -488,9 +494,9 @@ models'. The $H_1$ model associated with the smallest significant
 p-value defines the new null hypothesis -- that is, it becomes the new
 $H_0$ model. Level 2 is then constructed, consisting of all models with one
 additional parameter dependence relative to this model, and the
-process is repeated. We stop at the level where none of the score
-tests produce
-significant p-values. At this point, the $H_0$ model becomes the
+process is repeated. We stop at the level where all of the score
+tests produce p-values that are large enough for the analyst to be
+satisfied with the $H_0$ model. At this point, the $H_0$ model becomes the
 chosen model.  
 
 Due to the level structure, implementing this
@@ -510,7 +516,7 @@ replaced by accessible calculations and fitting a few models.
 \label{sec:non-nested-and-boundary-consid}
 
 When models are non-nested, it is impossible 
-to obtain the $H_0$ model from the $H_1$ model, i.e. no
+to obtain the $H_0$ model from the $H_1$ model. No
 $\thetaOneTilde$ vector exists, so a
 score test statistic cannot be calculated.
 
@@ -518,10 +524,33 @@ Issues also occur when the regularity conditions underlying score
 tests do not hold. Most commonly, problems arise when values in
 $\thetaOneTilde$ lie on the boundary of the parameter space or are
 unidentifiable under the $H_0$ model. The null Chi-squared distribution no
-longer holds, so any p-values are unusable
-\parencite{andrews-2001}. Unidentifiability can also cause
-degenerate, and therefore uninformative, score statistics
-\parencite{lee-chesher-1986}. 
+longer holds, so the null distribution must be obtained symbolically
+or via simulation. For example, \textcite{andrews-2001}
+symbolically obtains the null distribution of the score
+statistic when unidentifiability and boundary estimates arise for
+selected models.
+
+Unidentifiability can also cause
+identically zero and therefore uninformative score
+statistics. For
+further information, refer to texts such as
+\textcite{cox-hinkley-1979} and \textcite{lee-chesher-1986}. Briefly,
+this occurs when the parameters that 
+distinguish the $H_1$ model from the $H_0$ model are unidentifiable. For
+example, consider a $H_0$ non-mixture model with
+likelihood $f(\boldsymbol{y}|\theta)$, and a $H_1$ two-component mixture model
+with likelihood $(1-\pi)f(\boldsymbol{y}|\theta_A) +
+\pi f(\boldsymbol{y}|\theta_B)$, for observations
+$Y_1,...,Y_n$. Under
+$H_1$, observations can fall into group A or B, with probability
+$(1-\pi)$ and $\pi$ respectively, and under $H_0$ all observations
+are in the same group. Therefore, parameters $\pi$ and $\theta_B$ distinguish
+the $H_1$ and $H_0$ model and
+are unidentifiable under $H_0$. No matter how $\thetaOneTilde$ is constructed to
+align with $H_0$ constraints (e.g. setting $\theta_A=\theta_B$ or $\pi=0$),
+$\scoreU$ in the direction of these parameters will
+always be $0$. As the score test `depends' on these derivatives, this
+results in an identically zero score vector.  
 
 In such cases, we propose separating the
 candidate set into groups -- where models in each group fall into a
@@ -529,7 +558,7 @@ nested structure with no boundary or identifiability problems -- and carrying ou
 framework of \textcite{catchpoleMorgan1996} on each group, using AIC to
 make a final selection from the chosen models. Using AIC like this
 is unlikely to require any extra models be fitted. See Section
-\ref{sec:ovenbirds} for an example of this. 
+\ref{sec:ovenbirds} for an example. 
 
 \section{Application: ovenbirds}
 \label{sec:ovenbirds}
@@ -601,15 +630,13 @@ have forty five models in our candidate set. See \textbf{Tables (no)} in
 the Results for a complete list of models.
 
 Due to the comprehensive nature of the candidate set, we encounter
-boundary considerations as described in Section
-\ref{sec:non-nested-and-boundary-consid} as we consider models with
-and without mixture components. Specifically, in the
+unidentifiability as described in Section
+\ref{sec:non-nested-and-boundary-consid}, potentially resulting in identically
+zero score statistics. Specifically, in the
 candidate set, we consider models with a two-component finite mixture
-for $g_0$ and/or $\sigma$. For example, if we try to use a score test
-to compare a SCR model with a $g_0$ mixture dependency to a nested
-model with no mixture dependencies, the mixing probability will lie on
-the boundary of the parameter space under $H_0$ -- that is,
-$\thetaOneTilde$ will contain boundary values. To resolve this, we
+for $g_0$ and/or $\sigma$. Unidentifiability issues arise when
+comparing models that don't share these mixture components, as in the
+example of Section \ref{sec:non-nested-and-boundary-consid}. To resolve this, we
 only conduct score tests comparing models with the same mixture
 dependencies for $g_0$ and $\sigma$. Therefore, we construct four
 groups for model selection: one with no mixture dependencies, one with
