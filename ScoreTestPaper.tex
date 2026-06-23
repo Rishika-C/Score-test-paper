@@ -360,20 +360,21 @@ $0$. That is, $E[\boldsymbol{u}_1
 (\thetaOneTilde^*)]=0$, where $\thetaOneTilde^*$ is the true
 vector under $H_0$, as shown in Section \ref{sec:exp-zero-proof} of
 the Appendix. Using one dimension for illustration, the z-test
-statistic is therefore $\left.
-  \lrbr{\scoreUOneDim - E[u_1(\thetaOneTildeOD^*)]}
+statistic is therefore $
+\left.
+  \{\scoreUOneDim - E[u_1(\thetaOneTildeOD^*)]\}
   \middle/
-  \sqrt{\text{Var}\lrbr{\scoreUOneDim}}
-\right. = \left.
-  \scoreUOneDim \middle/ \sqrt{\text{Var}\lrbr{\scoreUOneDim}}
-\right.$. It can be shown that $\text{Var}\lrbr{\scoreUOneDim} =
-\mathcal{I}(\thetaOneTildeOD)$. Therefore, this is equivalent to dividing
-$\scoreUOneDim$ by the curvature at $\thetaOneTildeOD$, taking into
-account the overall shape of the likelihood to assess the
-magnitude of $\scoreUOneDim$. Refer to Section
+  \sqrt{\text{Var}\{\scoreUOneDim}\}
+\right. =
+\left.
+  \scoreUOneDim \middle/ \sqrt{\text{Var}\{\scoreUOneDim}\}
+\right.$. It can be shown that $\text{Var}\{\scoreUOneDim\} =
+\mathcal{I}(\thetaOneTildeOD)$ -- refer to Section
 \ref{sec:var-info-equiv-proof} of the Appendix for the algebraic
-justification. Therefore, the z-test statistic can also be expressed as
-$\left. \scoreUOneDim \middle/ \sqrt{\mathcal{I}(\thetaOneTildeOD)} \right.$. 
+justification. Therefore, the z-statistic can also be expressed as
+$\left. \scoreUOneDim \middle/ \sqrt{\mathcal{I}(\thetaOneTildeOD)}
+\right.$, taking into account the overall shape of the likelihood to
+assess the magnitude of $\scoreUOneDim$. 
 
 Figure \ref{fig:fig1a} highlights the necessity of standardising via a
 z-statistic, as
@@ -439,7 +440,7 @@ number of parameters for the $H_0$ and $H_1$ model.
     samples, where $Y_i \sim \text{Normal}(\mu, 1)$, with $H_0: \mu = 
     0$ and $H_1: \mu = \alpha$. The log-likelihood
     curves have been shifted -- as indicated on the y-axes -- for
-    interpretability (b) The blue curve
+    interpretability. (b) The blue curve
     represents a non-parabolic $H_1$ log-likelihood, and the dashed
     pink line is the second-order Taylor series expansion about
     $\thetaOneTildeOD$. 
@@ -525,34 +526,31 @@ tests do not hold. Most commonly, problems arise when values in
 $\thetaOneTilde$ lie on the boundary of the parameter space or are
 unidentifiable under the $H_0$ model. The null Chi-squared distribution no
 longer holds, so the null distribution must be obtained symbolically
-or via simulation. For example, \textcite{andrews-2001}
-symbolically obtains the null distribution of the score
-statistic when unidentifiability and boundary estimates arise for
-selected models.
+or via simulation. For example, texts such as
+\textcite{andrews-2001} symbolically obtain null distributions for
+selected models. 
 
-Unidentifiability can also cause
-identically zero and therefore uninformative score
-statistics. For
+Specifically, unidentifiability can cause identically zero and
+therefore uninformative score statistics. For
 further information, refer to texts such as
 \textcite{cox-hinkley-1979} and \textcite{lee-chesher-1986}. Briefly,
-this occurs when the parameters that 
-distinguish the $H_1$ model from the $H_0$ model are unidentifiable. For
+identically zero statistics arise when all parameters that 
+distinguish the $H_1$ and $H_0$ model are unidentifiable. For
 example, consider a $H_0$ non-mixture model with
 likelihood $f(\boldsymbol{y}|\theta)$, and a $H_1$ two-component mixture model
 with likelihood $(1-\pi)f(\boldsymbol{y}|\theta_A) +
-\pi f(\boldsymbol{y}|\theta_B)$, for observations
-$Y_1,...,Y_n$. Under
+\pi f(\boldsymbol{y}|\theta_B)$. Under
 $H_1$, observations can fall into group A or B, with probability
 $(1-\pi)$ and $\pi$ respectively, and under $H_0$ all observations
-are in the same group. Therefore, parameters $\pi$ and $\theta_B$ distinguish
-the $H_1$ and $H_0$ model and
+are in the same group. Therefore, parameters $\pi$ and $\theta_B$
+distinguish both models and
 are unidentifiable under $H_0$. No matter how $\thetaOneTilde$ is constructed to
 align with $H_0$ constraints (e.g. setting $\theta_A=\theta_B$ or $\pi=0$),
 $\scoreU$ in the direction of these parameters will
-always be $0$. As the score test `depends' on these derivatives, this
-results in an identically zero score vector.  
+always be $0$. As the score test `depends' on these derivatives, the
+score statistic is identically zero. 
 
-In such cases, we propose separating the
+When such issues arise, we propose separating the
 candidate set into groups -- where models in each group fall into a
 nested structure with no boundary or identifiability problems -- and carrying out the
 framework of \textcite{catchpoleMorgan1996} on each group, using AIC to
