@@ -344,7 +344,7 @@ model; see below for an example. Lastly, we refer to $\boldsymbol{u}_1
 vector, also called the score, of the $H_1$ log-likelihood at
 $\boldsymbol{\theta}$.
 
-For a simple illustrative example to clarify $\thetaOneTilde$, consider $Y_i \sim
+For a simple illustrative example, consider $Y_i \sim
 \text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \alpha$ and $H_1: \mu_i
 = \alpha + \beta x_i$ for some covariate $\boldsymbol{x}$, with
 maximum likelihood estimate (MLE) vectors $\thetaZeroMLE$ and
@@ -359,49 +359,55 @@ expectation of this gradient is
 $0$. That is, $E[\boldsymbol{u}_1
 (\thetaOneTilde^*)]=0$, where $\thetaOneTilde^*$ is the true
 vector under $H_0$, as shown in Section \ref{sec:exp-zero-proof} of
-the Appendix. Using one dimension for illustration, the z-test
-statistic is therefore $
-\left.
-  \{\scoreUOneDim - E[u_1(\thetaOneTildeOD^*)]\}
-  \middle/
-  \sqrt{\text{Var}\{\scoreUOneDim}\}
-\right. =
-\left.
-  \scoreUOneDim \middle/ \sqrt{\text{Var}\{\scoreUOneDim}\}
-\right.$. It can be shown that $\text{Var}\{\scoreUOneDim\} =
-\mathcal{I}(\thetaOneTildeOD)$ -- refer to Section
+the Appendix.
+
+Using one dimension for illustration, the z-test
+statistic is
+% $$
+% \left.
+%   \{\scoreUOneDim - E[u_1(\thetaOneTildeOD^*)]\}
+%   \middle/
+%   \sqrt{\text{Var}\{\scoreUOneDim}\}
+% \right. =
+% \left.
+%   \scoreUOneDim \middle/ \sqrt{\text{Var}\{\scoreUOneDim}\}
+% \right.
+% $$
+$$
+\frac{\scoreUOneDim - E[u_1(\thetaOneTildeOD^*)]}
+  {\sqrt{\text{Var}\{\scoreUOneDim}\}}  =
+  \frac{\scoreUOneDim}{\sqrt{\text{Var}\{\scoreUOneDim}\}}
+$$
+It can be shown that $\text{Var}\{\scoreUOneDim\} =
+\mathcal{I}_1(\thetaOneTildeOD)$, where $\mathcal{I}_1(\thetaOneTildeOD)$ is
+the $H_1$ information matrix evaluated
+at $\thetaOneTildeOD$. Refer to Section
 \ref{sec:var-info-equiv-proof} of the Appendix for the algebraic
 justification. Therefore, the z-statistic can also be expressed as
-$\left. \scoreUOneDim \middle/ \sqrt{\mathcal{I}(\thetaOneTildeOD)}
-\right.$, taking into account the overall shape of the likelihood to
+$\scoreUOneDim / \{\mathcal{I}_1(\thetaOneTildeOD)\}^{1/2}$, which can be interpreted
+geometrically as taking into account the
+overall shape of the likelihood to
 assess the magnitude of $\scoreUOneDim$. 
 
-Figure \ref{fig:fig1a} highlights the necessity of standardising via a
-z-statistic, as
-the value of $\scoreUOneDim$ alone is insufficient. In this
-figure, we consider $Y_i \sim \text{Normal}(\mu, 1)$, where
+Figure \ref{fig:fig1a} illustrates the one-dimensional scenario with
+$Y_i \sim \text{Normal}(\mu, 1)$, where
 $H_0: \mu = 0$ and $H_1: \mu = \alpha$, and both log-likelihood curves
-share $\scoreUOneDim=5$. However, as 
-confirmed by the LRT statistics, the $H_0$ model is adequate for the
+share $\scoreUOneDim=5$. Both the score test and LRT statistics indicate
+that the $H_0$ model is adequate for the 
 data of the orange curve, yet inadequate for the data of the blue
-curve.
-
-As $\scoreUOneDim$ is a sum of independent contributions, the
-z-statistic is asymptotically Normal$(0,1)$ under $H_0$, as is
-customary. Therefore, a two-tailed 
+curve. As $\scoreUOneDim$ is a sum of independent contributions, the
+z-statistic is asymptotically Normal$(0,1)$ under $H_0$, so a two-tailed 
 p-value may be obtained to assess $H_0$. However, following convention, the score test
 statistic is found by squaring this standardised value,
-i.e. $S=\frac{\scoreUOneDim^2}{\mathcal{I}(\thetaOneTildeOD)}$,
-resulting in 
-an asymptotic Chi-squared distribution.
+i.e., $S=\scoreUOneDim^2/\mathcal{I}_1(\thetaOneTildeOD)$,
+resulting in an asymptotic Chi-squared distribution.
 
 The above reasoning holds as model dimension increases. Therefore, in general,
 $S = \scoreU^T \scoreI^{-1}
 \scoreU$, where $\scoreU$ is the score vector of the $H_1$ model
 evaluated at $\thetaOneTilde$ and $\scoreI$ is the information
-matrix. In calculating
-$S$, we will focus on using the observed information matrix. See the
-Discussion for more details.
+matrix. For practical calculations, we will focus on using the observed information
+matrix; see the Discussion for further details and alternative options.
 
 % -- as in z-test, rely on asymptotic Normality to produce a p-value
 % assessing model fit 
@@ -411,9 +417,9 @@ Discussion for more details.
 % -- squaring means that the test becomes two-sided. Also gives same
 % chi-sq distribution as LRT, for example
 
-As shown in one dimension in Figure \ref{fig:fig1b}, $S$ is also obtainable
-as an approximation-based LRT statistic based on a quadratic approximation to the
-log-likelihood. This is derived in one dimension in Section \ref{sec:lrt-s-equiv-proof} of
+As shown in one dimension in Figure \ref{fig:fig1b}, $S$ is equivalent
+to a LRT statistic if a quadratic approximation is used for the log-likelihood.
+This is derived in one dimension in Section \ref{sec:lrt-s-equiv-proof} of
 the Appendix. Therefore, when the log-likelihood is quadratic, the LRT
 statistic and score statistic are exactly equal, and otherwise they are
 asymptotically equal. The null distribution for both score tests and
@@ -436,11 +442,10 @@ number of parameters for the $H_0$ and $H_1$ model.
     \caption{}
     \label{fig:fig1b}
   \end{subfigure}
-  \caption{(a) Log-likelihood curves under $H_1$ for different
-    samples, where $Y_i \sim \text{Normal}(\mu, 1)$, with $H_0: \mu = 
+  \caption{(a) Log-likelihood curves under $H_1$ for samples of different
+    sizes, where $Y_i \sim \text{Normal}(\mu, 1)$, with $H_0: \mu = 
     0$ and $H_1: \mu = \alpha$. The log-likelihood
-    curves have been shifted -- as indicated on the y-axes -- for
-    interpretability. (b) The blue curve
+    curves have been shifted for interpretability, as indicated on the y-axes. (b) The blue curve
     represents a non-parabolic $H_1$ log-likelihood, and the dashed
     pink line is the second-order Taylor series expansion about
     $\thetaOneTildeOD$. 
@@ -452,19 +457,19 @@ number of parameters for the $H_0$ and $H_1$ model.
 Previously, the obstacle in implementing score tests was obtaining the
 score vector, $\boldsymbol{u}_1 (\thetaOne)$, and information
 matrix, $\mathcal{I}_1 (\thetaOne)$, to evaluate at
-$\thetaOneTilde$. Using recent software advancements, we employ 
-the \lstinline{RTMB} R package -- a commonly-used AD tool -- to do
-this. Translating the $H_1$ log-likelihood into 
-an R function, it becomes straightforward to extract the score vector
-and information matrix. Using AD to also fit
+$\thetaOneTilde$. However, following recent software advancements, we
+can readily perform these calculations using the \lstinline{RTMB} R package,
+a commonly-used AD tool. By writing the $H_1$ log-likelihood as 
+an R function, it is straightforward to extract the score vector
+and information matrix. Furthermore, using AD to also fit
 the $H_0$ model can provide time savings, especially for sophisticated models.
 
-An illustration of using \lstinline{RTMB} and symbolic differentiation
+An illustration of using \lstinline{RTMB} versus symbolic differentiation
 is given in Section \ref{sec:score-test-rtmb-ex}, where $S$ is found
 for the example with $Y_i \sim 
 \text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \alpha$ and $H_1: \mu_i
-= \alpha + \beta x_i$ for some covariate $\boldsymbol{x}$. We
-emphasise that although these models are particularly simple,
+= \alpha + \beta x_i$ for some covariate $\boldsymbol{x}$. Although these
+models are particularly simple,
 obtaining $\scoreU$ and $\scoreI$ is surprisingly
 involved. Furthermore, the symbolic
 differentiation required to calculate $S$ increases considerably as
@@ -483,7 +488,7 @@ select the best model at each level.
 As described in \textcite{mccreaMorgan2011}, 
 the most basic model defines Level 0 of the candidate set, and Level 1
 contains all models 
-with one added parameter dependence. For instance, in the example
+with one added model term. For instance, in the example
 introduced in Section \ref{sec:calculating-score-stat} with $Y_i \sim
 \text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \alpha$ and $H_1: \mu_i
 = \alpha + \beta x_i$, if $H_0$ is the Level 0 model, then $H_1$ is a
@@ -494,7 +499,7 @@ model as the `$H_0$ model', and the Level 1 models as `$H_1$
 models'. The $H_1$ model associated with the smallest significant
 p-value defines the new null hypothesis -- that is, it becomes the new
 $H_0$ model. Level 2 is then constructed, consisting of all models with one
-additional parameter dependence relative to this model, and the
+additional term relative to this model, and the
 process is repeated. We stop at the level where all of the score
 tests produce p-values that are large enough for the analyst to be
 satisfied with the $H_0$ model. At this point, the $H_0$ model becomes the
@@ -525,10 +530,9 @@ Issues also occur when the regularity conditions underlying score
 tests do not hold. Most commonly, problems arise when values in
 $\thetaOneTilde$ lie on the boundary of the parameter space or are
 unidentifiable under the $H_0$ model. The null Chi-squared distribution no
-longer holds, so the null distribution must be obtained symbolically
-or via simulation. For example, texts such as
-\textcite{andrews-2001} symbolically obtain null distributions for
-selected models. 
+longer holds, so the null distribution must be derived explicitly
+or via simulation. For example,
+\textcite{andrews-2001} derive bespoke null distributions for selected models. 
 
 Specifically, unidentifiability can cause identically zero and
 therefore uninformative score statistics. For
@@ -566,42 +570,40 @@ is unlikely to require any extra models be fitted. See Section
 
 In \textcite{borchersEfford2008},
 the authors illustrate SCR model selection using AIC. The data
-set used consists of captures of birds 
+set consists of captures of birds 
 (red-eyed vireos) from a mist-netting survey on the Patuxent Research Refuge 
-in Maryland, USA, conducted by C.S. Robbins from 1961 to 1972. Considering
-a range of parameter dependencies, a candidate set of 
-fifteen potential models is considered, and the model with the lowest
-AIC value is selected as the final model.
+in Maryland, USA, conducted from 1961 to 1972. Considering
+a range of parametrisation choices, the authors examine a candidate set of 
+fifteen potential models, and the model with the lowest
+AIC is selected as the final model.
 
 Working with a similar data set allows consideration of the same
-parameter dependencies, and comparison to a well-known
-example. The `ovenbird' data set, 
-available via the `secr' R package, contains adult captures from a 
+parametrisation choices for comparative purposes. The `ovenbird' data set, 
+available via the `secr' R package \parencite{secr-pkg}, contains adult captures from a 
 mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
-Research Refuge by D. K. Dawson and M. G. Efford. As
+Research Refuge. As
 described in the package documentation, the forest in the area has
-changed little since the previous survey conducted by C.S. Robbins
-\parencite{secr-pkg}. As we are only illustrating model selection, not
-drawing model-based inference, it seems reasonable to consider the 
-same parameter dependencies as 
-\textcite{borchersEfford2008}. By considering all possible
-combinations of these dependencies, we construct a comprehensive
-candidate set of forty five models. 
+changed little since the previous survey in the 1960s. Therefore, to
+illustrate model selection, we employ the same model terms as 
+\textcite{borchersEfford2008}. Considering all possible
+combinations of these terms yields a
+candidate set of 45 models. Harnessing the convenience afforded by AD and score tests,
+it becomes practically feasible to consider a candidate set beyond the original
+15 models considered. 
 
 Forty four mist nets were passively operated for nine or
-ten non-consecutive days in late May and June of each year. One bird
-was killed by a predator while in a net 
-in 2009 \parencite{secr-pkg}, and for our analysis we remove this loss
-from the data set. We retain any 
+ten non-consecutive days in late May and June of each year. We retain any 
 records of individual birds being captured more than once in a
-day. 
+day. Below, we compare our score test approach to the traditional
+approach of model selection using AIC. 
 
-To construct an accurate picture of the benefits afforded by model
-selection via score tests and AD tools, alongside our proposed
-approach, we implement model selection via
-AIC. Using an extensive candidate
-set, we conduct a comprehensive comparison of a novel, more efficient,
-method of model selection with a traditional approach. 
+% To construct an accurate picture of the benefits afforded by model
+% selection via score tests and AD tools, alongside our proposed
+% approach, we implement model selection via
+% AIC. Using an extensive candidate
+% set, we conduct a comprehensive comparison of a novel, more efficient,
+% method of model selection with a traditional approach.
+
 
 \subsection{Implementing model selection}
 \label{sec:implementing-for-ex}
@@ -621,25 +623,24 @@ model selection for these models.
 
 Please refer to Section \ref{sec:overview-candidate-models} of the Appendix
 for an overview of the parametrisation of the SCR models in our
-candidate set. Briefly, each model estimates three parameters -- $D$,
-$g_0$ and $\sigma$ -- and we consider a range of possible dependencies
-for these parameters. By considering all combinations of these dependencies, we 
-have forty five models in our candidate set. See \textbf{Tables (no)} in
-the Results for a complete list of models.
+candidate set. Briefly, each model estimates three parameters: $D$,
+$g_0$ and $\sigma$. We consider a range of parametrisation choices
+for $D$, $g_0$ and $\sigma$, and considering all combinations of these parametrisations
+yields the forty five models in our candidate set. See \textbf{Tables (no)} in Section
+\textbf{()} of the Appendix for a complete list of models.
 
 Due to the comprehensive nature of the candidate set, we encounter
 unidentifiability as described in Section
 \ref{sec:non-nested-and-boundary-consid}, potentially resulting in identically
 zero score statistics. Specifically, in the
 candidate set, we consider models with a two-component finite mixture
-for $g_0$ and/or $\sigma$. Unidentifiability issues arise when
-comparing models that don't share these mixture components, as in the
-example of Section \ref{sec:non-nested-and-boundary-consid}. To resolve this, we
-only conduct score tests comparing models with the same mixture
-dependencies for $g_0$ and $\sigma$. Therefore, we construct four
-groups for model selection: one with no mixture dependencies, one with
-mixture dependencies for $g_0$ only, one with mixture dependencies for
-$\sigma$ only, and one with mixture dependencies for $g_0$ and
+for $g_0$ and/or $\sigma$. To avoid issues with unidentifiability, as
+described in Section \ref{sec:non-nested-and-boundary-consid}, we
+only compare models with matching mixture
+terms for $g_0$ and $\sigma$. Therefore, we construct four
+groups for model selection: models with no mixture terms, models with
+mixture terms for $g_0$ only, models with mixture terms for
+$\sigma$ only, and models with mixture terms for $g_0$ and
 $\sigma$. If we were also considering models with different detection
 functions -- i.e. non-nested models, as described in Section
 \ref{sec:non-nested-and-boundary-consid} -- we would also separate
@@ -1272,21 +1273,20 @@ parameters are $g_0$ and $\sigma$.
 
 In summary, our candidate SCR models estimate three parameters: $D$,
 $g_0$ and $\sigma$. When fitting a SCR model, along with the
-state/observation models, it is standard to specify any dependencies for $D$
+state/observation models, it is standard to specify parametrisation choices for $D$
 and the detection parameters. Following the example set by
 \textcite{borchersEfford2008}, we 
-consider models with the dependencies shown in Table
-\ref{table:dependencies}, where we specify the dependencies using the
+consider models with the parametrisations shown in Table
+\ref{table:dependencies}, specified using the
 parlance of the \lstinline{secr} R package. Considering all possible combinations of
-these dependencies produces the forty five candidate models.
+these parametrisations produces the forty five candidate models.
 
 \begin{table}[h!]
   \centering
 \begin{tabular} { |c|c|c|c|  }
   \hline
-  \textbf{$D$ dependencies} & \textbf{$\sigma$ dependencies} &
-                                             \multicolumn{2}{|c|}{\textbf{$g_0$
-                                                               dependencies}} 
+  \textbf{$D$} & \textbf{$\sigma$} &
+                                             \multicolumn{2}{|c|}{\textbf{$g_0$}} 
   \\
   \hline
   $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim \text{b}$ \\
@@ -1299,7 +1299,7 @@ these dependencies produces the forty five candidate models.
                                                       \text{h2}$ & \\
   \hline
 \end{tabular}
-\caption{All parameter dependencies considered in our candidate set.}
+\caption{All parametrisations considered in our candidate set.}
 \label{table:dependencies}
 \end{table}
 
