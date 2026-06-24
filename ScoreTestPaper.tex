@@ -17,6 +17,7 @@
 \usepackage{amsmath}
 \usepackage{xcolor}
 \usepackage{multicol}
+\usepackage{tabularx}
 %\usepackage{subfig}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -1333,6 +1334,25 @@ In Table \ref{table:dependencies} (see \textcite{secr-book} for further detail):
   each session: one for previously captured individuals, and one for
   individuals not caught yet. 
 \end{itemize}
+
+\subsection{AIC results}
+\label{sec:aic-res-app}
+
+\begin{table}[h]
+  \caption{AIC values for all 45 models in the candidate set, where all models are fitted and the AIC calculated using the \lstinline{secr} package. The `Model' column contains the model description in \lstinline{secr} parlance, `k' represents the number of model parameters and `$\Delta$AIC' provides the difference in AIC from the final selected model (model with the lowest AIC).}
+  \label{table:aic-table}
+\centering
+\begin{tabularx}{0.8\textwidth} { 
+   >{\centering\arraybackslash}X 
+   >{\centering\arraybackslash}X 
+   >{\centering\arraybackslash}X  }
+  \hline
+  \hline
+  Model & k & $\Delta$AIC \\
+  \hline
+  
+\end{tabularx}
+\end{table}
 
 \printbibliography
 
