@@ -18,7 +18,6 @@
 \usepackage{xcolor}
 \usepackage{multicol}
 \usepackage{tabularx}
-%\usepackage{subfig}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{graphicx}
@@ -187,6 +186,22 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex}
 \newcommand{\ellTilde}{\ell_1(\thetaOneTildeOD)}
 \newcommand{\ellTildeFirstDeriv}{\ell'_1(\thetaOneTildeOD)}
 \newcommand{\ellTildeSecondDeriv}{\ell''_1(\thetaOneTildeOD)}
+
+%% Commands for tables of results
+\newcommand{\til}{$\sim$}
+\newcommand{\Dconst}{D\til 1}
+\newcommand{\DSession}{D\til Session}
+\newcommand{\Dsession}{D\til session}
+\newcommand{\gconst}{$g_0$\til 1}
+\newcommand{\gSession}{$g_0$\til Session}
+\newcommand{\gsession}{$g_0$\til session}
+\newcommand{\gbehav}{$g_0$\til b}
+\newcommand{\gsessionbehav}{$g_0$\til session + b}
+\newcommand{\gmix}{$g_0$\til h2}
+\newcommand{\sigmaconst}{$\sigma$\til 1}
+\newcommand{\sigmaSession}{$\sigma$\til Session}
+\newcommand{\sigmasession}{$\sigma$\til session}
+\newcommand{\sigmamix}{$\sigma$\til h2}
 
 
 \title{Harnessing score tests for model selection}
@@ -1338,21 +1353,74 @@ In Table \ref{table:dependencies} (see \textcite{secr-book} for further detail):
 \subsection{AIC results}
 \label{sec:aic-res-app}
 
-\begin{table}[h]
-  \caption{AIC values for all 45 models in the candidate set, where all models are fitted and the AIC calculated using the \lstinline{secr} package. The `Model' column contains the model description in \lstinline{secr} parlance, `k' represents the number of model parameters and `$\Delta$AIC' provides the difference in AIC from the final selected model (model with the lowest AIC).}
+\begin{table}[h!]
+  \caption{AIC values for all 45 models in the candidate set, where
+    all models are fitted and the AIC calculated using the
+    \lstinline{secr} package. The `Model' column contains the model
+    description in \lstinline{secr} parlance, `Number of parameters'
+    provides the number of model parameters and `$\Delta$AIC'
+    represents the difference in AIC from the final selected model
+    (model with the lowest AIC).} 
   \label{table:aic-table}
 \centering
 \begin{tabularx}{0.8\textwidth} { 
-   >{\centering\arraybackslash}X 
-   >{\centering\arraybackslash}X 
-   >{\centering\arraybackslash}X  }
+    >{\centering\arraybackslash \hsize=1.5\hsize}X 
+    >{\centering\arraybackslash \hsize=0.5\hsize}X 
+    >{\centering\arraybackslash \hsize=1\hsize}X  }
   \hline
   \hline
-  Model & k & $\Delta$AIC \\
+  Model & Number of parameters & $\Delta$AIC \\
   \hline
-  
+  \Dconst, \gbehav, \sigmaconst & 4 & 0 \\
+  \DSession, \gbehav, \sigmaconst & 5 & 0.97 \\
+  \Dconst, \gbehav, \sigmamix & 6 & 1.3 \\
+  \Dconst, \gbehav, \sigmasession & 8 & 2.0 \\
+  \DSession, \gbehav, \sigmamix & 7 & 2.3 \\
+  \Dconst, \gsessionbehav, \sigmaconst & 8 & 2.7 \\
+  \DSession, \gbehav, \sigmasession & 9 & 4.0 \\
+  \DSession, \gsessionbehav, \sigmaconst & 9 & 4.5 \\
+  \Dconst, \gsessionbehav, \sigmamix & 10 & 4.8 \\
+  \Dsession, \gbehav, \sigmaconst & 8 & 4.8 \\
+  \Dsession, \gbehav, \sigmamix & 10 & 6.1 \\
+  \Dconst, \gconst, \sigmaconst & 3 & 6.4 \\
+  \Dsession, \gbehav, \sigmasession & 12 & 6.6 \\
+  \DSession, \gsessionbehav, \sigmamix & 11 & 6.7 \\
+  \Dconst, \gmix, \sigmaconst & 5 & 7.1 \\
+  \DSession, \gconst, \sigmaconst & 4 & 7.3 \\
+  \Dconst, \gsessionbehav, \sigmasession & 12 & 7.7 \\
+  \DSession, \gmix, \sigmaconst & 6 & 8.0 \\
+  \Dconst, \gconst, \sigmamix & 5 & 8.1 \\
+  \DSession, \gconst, \sigmamix & 6 & 8.95 \\
+  \Dsession, \gsessionbehav, \sigmaconst & 12 & 8.97 \\
+  \Dconst, \gmix, \sigmamix& 6 & 9.37 \\
+  \Dconst, \gconst, \sigmasession & 7 & 9.4 \\
+  \DSession, \gsessionbehav, \sigmasession & 13 & 9.66 \\
+  \Dconst, \gsession, \sigmaconst & 7 & 9.7 \\
+  \DSession, \gmix, \sigmamix & 7 & 10.2 \\
+  \Dconst, \gmix, \sigmasession & 9 & 11.0 \\
+  \Dsession, \gconst, \sigmaconst & 7 & 11.2 \\
+  \DSession, \gconst, \sigmasession & 8 & 11.36 \\
+  \Dsession, \gsessionbehav, \sigmamix & 14 & 11.4 \\
+  \Dconst, \gsession, \sigmamix & 9 & 11.5 \\
+  \DSession, \gsession, \sigmaconst & 8 & 11.6 \\
+  \Dsession, \gmix, \sigmaconst & 9 & 11.9 \\
+  \Dsession, \gmix, \sigmamix & 10 & 11.91 \\
+  \Dsession, \gsessionbehav, \sigmasession & 16 & 12.1 \\
+  \Dsession, \gconst, \sigmamix & 9 & 12.85 \\
+  \DSession, \gmix, \sigmasession & 10 & 12.9 \\
+  \DSession, \gsession, \sigmamix & 10 & 13.5 \\
+  \Dsession, \gconst, \sigmasession & 11 & 13.9 \\
+  \Dconst, \gsession, \sigmasession & 11 & 14.9 \\
+  \Dsession,  \gmix, \sigmasession & 13 & 15.3 \\
+  \Dsession, \gsession, \sigmaconst & 11 & 16.3 \\
+  \DSession, \gsession, \sigmasession & 12 & 16.9 \\
+  \Dsession, \gsession, \sigmamix & 13 & 18.5 \\
+  \Dsession, \gsession, \sigmasession & 15 & 19.7 \\
+  \hline
 \end{tabularx}
 \end{table}
+
+\newpage
 
 \printbibliography
 
