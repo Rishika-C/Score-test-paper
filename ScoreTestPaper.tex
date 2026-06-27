@@ -17,6 +17,7 @@
 \usepackage{amsmath}
 \usepackage{xcolor}
 \usepackage{multicol}
+\usepackage{multirow}
 \usepackage{tabularx}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -704,22 +705,112 @@ calculating score statistics for these
 complex models, as iterative and potentially impractical procedures
 are replaced with calculations involving exact gradients. 
 
-In Table \textbf{(no)}, we provide results from using AIC
-values. In Tables \textbf{(no-no)}, we provide results
-from the score tests. For the latter, the model selected at each level is provided in  
-bold. In addition to score statistics and
-p-values, we provide LRT statistics and differences in AIC
-($\Delta$AIC) values,
-further confirming the reliability of the results. These values are also
-calculated using \lstinline{RTMB}, but are not 
-included in the time taken above. Note the alignment in the $\Delta$AIC
-across both model selection procedures. 
+In Table \ref{table:aic-table}, we provide results from using AIC
+values. In Table \ref{table:score-table}, we provide results
+from using score tests for model selection for each group, stopping at
+levels where p-values are no longer significant based on a 5\% 
+threshold. The null model selected at each level is in bold, and AIC is reported for
+the final model for each group. Score statistics and LRT
+statistics are provided, the close alignment
+between the two confirming the accuracy of the score tests. Due to
+negligible differences, we only report score test p-values. Note that
+\lstinline{RTMB} is used to fit models required for the LRT
+statistics, but as this is not relevant to model selection, it is
+excluded from the time taken given above.  
+
+\textbf{(Doesn't seem worthwhile containing delta-AIC values... if is
+  relative to final model, are just repeating results from the AIC
+  table? Is more a confirmation that our objective values are correct?)}
 
 As in Section \ref{sec:overview-candidate-models}
 of the Appendix, the model descriptions in these tables are provided in
-the parlance of the \lstinline{secr} package. Refer to Section
-\ref{sec:overview-candidate-models} for more
-details.
+the parlance of the \lstinline{secr} package, refer to this section
+for more details.
+
+\begin{table}[h!]
+  \caption{Results from the score test approach for the four
+    constructed groups. We provide: the level each model 
+    falls into within the score test framework (`Level'), the model
+    description in \lstinline{secr} parlance (`Model'), the number of
+    model parameters (`npar'), the score statistic (`$S$'), the LRT
+    statistic (`$LRT$'), the score test p-value (`p-value') and the
+    AIC for the model selected from each group (`AIC'). All values are
+    reported to 1 dp.}  
+  \label{table:score-table}
+  \centering
+  \begin{tabularx}{0.8\textwidth} { 
+    >{\centering\arraybackslash \hsize=0.3\hsize}X 
+    >{\centering\arraybackslash \hsize=4\hsize}X 
+    >{\centering\arraybackslash \hsize=0.5\hsize}X
+    >{\centering\arraybackslash \hsize=0.5\hsize}X
+    >{\centering\arraybackslash \hsize=0.5\hsize}X
+    >{\centering\arraybackslash \hsize=0.7\hsize}X
+    >{\centering\arraybackslash \hsize=0.5\hsize}X
+    }
+    \hline
+    \multicolumn{7}{ c }{Group 1} \\ 
+    \hline
+    \hline
+    Level & Model & npar & $S$ & $LRT$ & p-value & AIC \\
+    \hline
+    0 & \textbf{\Dconst}, $\boldsymbol{g_0\sim 1}$,
+        $\boldsymbol{\sigma\sim 1}$ & 3 & - & - & - & \\
+    1 & \textbf{\Dconst}, $\boldsymbol{g_0\sim \textbf{b}}$,
+            $\boldsymbol{\sigma\sim 1}$ & 4 & 10.8 & 8.4 & 0.001 &
+                                                                   1726.8 \\
+          & \DSession, \gconst, \sigmaconst & 4 & 1.1 & 1.1 & 0.3 &  \\
+          & \Dsession, \gconst, \sigmaconst & 7 & 3.2 & 3.2 & 0.5 &  \\
+          & \Dconst, \gsession, \sigmaconst & 7 & 4.8 & 4.7 & 0.3 &  \\
+          & \Dconst, \gconst, \sigmasession & 7 & 5.2 & 5.0 & 0.3 &  \\
+    2 & \DSession, \gbehav, \sigmaconst & 5 & 1.0 & 1.0 & 0.3 &  \\
+          & \Dsession, \gbehav, \sigmaconst & 8 & 3.2 & 3.2 & 0.5 &  \\
+          & \Dconst, \gsessionbehav, \sigmaconst & 8 & 5.6 & 5.3 & 0.2
+                                                 &  \\
+          & \Dconst, \gbehav, \sigmasession & 8 & 6.3 & 6.0 & 0.2 & 
+    \\
+    \hline
+    \multicolumn{7}{ c }{Group 2} \\ 
+    \hline
+    \hline
+    Level & Model & npar & $S$ & $LRT$ & p-value & AIC \\
+    \hline
+    0 & \textbf{\Dconst}, $\boldsymbol{g_0\sim \textbf{h2}}$,
+        $\boldsymbol{\sigma\sim 1}$ & 5 & - & - & - & 1733.9 \\
+    1 & \DSession, \gmix, \sigmaconst & 6 & 1.1 & 1.1 & 0.3 &  \\
+          & \Dsession, \gmix, \sigmaconst & 9 & 3.2 & 3.2 & 0.5 &  \\
+          & \Dconst, \gmix, \sigmasession & 9 & 4.2 & 4.2 & 0.4 &  \\
+    \hline
+    \multicolumn{7}{ c }{Group 3} \\ 
+    \hline
+    \hline
+    Level & Model & npar & $S$ & $LRT$ & p-value & AIC \\
+    \hline
+    0 & \textbf{\Dconst}, $\boldsymbol{g_0\sim 1}$,
+        $\boldsymbol{\sigma\sim \textbf{h2}}$ & 5 & - & - & - & \\
+    1 & \textbf{\Dconst}, $\boldsymbol{g_0\sim \textbf{b}}$,
+        $\boldsymbol{\sigma\sim \textbf{h2}}$ & 6 & 11.4 & 8.7 & 0.0007 &
+                                                                      1728.2
+    \\
+          & \DSession, \gconst, \sigmamix & 6 & 1.1 & 1.1 & 0.3 & \\
+          & \Dsession, \gconst, \sigmamix & 9 & 3.2 & 3.2 & 0.5 & \\
+          & \Dconst, \gsession, \sigmamix & 9 & 4.3 & 4.5 & 0.4 & \\
+    2 & \DSession, \gbehav, \sigmamix & 7 & 1.0 & 1.0 & 0.3 & \\
+          & \Dsession, \gbehav, \sigmamix & 10 & 3.2 & 3.2 & 0.5 & \\
+          & \Dconst, \gsessionbehav, \sigmamix & 10 & 4.4 & 4.6 & 0.4
+    \\
+    \hline
+    \multicolumn{7}{ c }{Group 4} \\ 
+    \hline
+    \hline
+    Level & Model & npar & $S$ & $LRT$ & p-value & AIC \\
+    \hline
+    0 & \textbf{\Dconst}, $\boldsymbol{g_0\sim \textbf{h2}}$,
+        $\boldsymbol{\sigma\sim \textbf{h2}}$ & 6 & - & - & - & 1736.2
+    \\
+    1 & \DSession, \gmix, \sigmamix & 7 & 1.1 & 1.1 & 0.3 & \\
+          & \Dsession, \gmix, \sigmamix & 10 & 3.2 & 3.2 & 0.5 & \\
+  \end{tabularx}
+\end{table}
 
 \section{Discussion}
 \label{sec:discussion}
@@ -1360,7 +1451,8 @@ In Table \ref{table:dependencies} (see \textcite{secr-book} for further detail):
     description in \lstinline{secr} parlance, `Number of parameters'
     provides the number of model parameters and `$\Delta$AIC'
     represents the difference in AIC from the final selected model
-    (model with the lowest AIC).} 
+    (model with the lowest AIC). All values are reported to 1 dp,
+    except for when this would result in identical $\Delta$AIC values.} 
   \label{table:aic-table}
 \centering
 \begin{tabularx}{0.8\textwidth} { 
@@ -1392,7 +1484,7 @@ In Table \ref{table:dependencies} (see \textcite{secr-book} for further detail):
   \Dconst, \gconst, \sigmamix & 5 & 8.1 \\
   \DSession, \gconst, \sigmamix & 6 & 8.95 \\
   \Dsession, \gsessionbehav, \sigmaconst & 12 & 8.97 \\
-  \Dconst, \gmix, \sigmamix& 6 & 9.37 \\
+  \Dconst, \gmix, \sigmamix & 6 & 9.37 \\
   \Dconst, \gconst, \sigmasession & 7 & 9.4 \\
   \DSession, \gsessionbehav, \sigmasession & 13 & 9.66 \\
   \Dconst, \gsession, \sigmaconst & 7 & 9.7 \\
