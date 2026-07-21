@@ -677,13 +677,15 @@ model selection techniques.
 
 However, SCR likelihoods are generally elaborate, making model selection
 potentially fraught. For example, 
-Equation \ref{eq:scr-lik} represents a standard SCR 
-likelihood as described in \textcite{borchersEfford2008}, illustrating
-how SCR likelihoods require evaluation of a product of two-dimensional
-integrals. As described in \textcite{borchersEfford2008}, each
-integral is an infinite sum over the model's random effects. We omit
-explanations of the terms in this equation for simplicity, refer to
-\textcite{borchersEfford2008} for these details. 
+Equation \ref{eq:scr-lik} represents a relatively simple SCR 
+likelihood using a homogeneous Poisson process as described in
+\textcite{borchersEfford2008}, illustrating how even basic SCR likelihoods
+require evaluation of a product of two-dimensional
+integrals.  We omit explanations of the terms in this equation for
+simplicity, refer to \textcite{borchersEfford2008} for these
+details. Selecting a different spatial point process would increase
+the complexity of the likelihood further, potentially requiring
+considerable resources for tasks such as model fitting. 
 
 % SCR likelihoods are generally elaborate, making
 % tasks such as model selection potentially fraught.
