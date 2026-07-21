@@ -675,19 +675,33 @@ Specifically, misspecification of the detection function is known to
 result in misleading results, emphasising the importance of reliable
 model selection techniques.
 
-SCR likelihoods are generally elaborate, making
-tasks such as model selection potentially fraught. As shown in
-Equation \ref{eq:scr-lik}, evaluating an SCR likelihood requires a product of two-dimensional
-integrals, where each integral is an infinite sum over the model's
-random effects \parencite{borchersEfford2008}. We omit explanations of
-the terms involved in Equation \ref{eq:scr-lik} for simplicity, refer to texts
-such as \textcite{borchersEfford2008} for these details.  
+However, SCR likelihoods are generally elaborate, making model selection
+potentially fraught. For example, 
+Equation \ref{eq:scr-lik} represents a standard SCR 
+likelihood as described in \textcite{borchersEfford2008}, illustrating
+how SCR likelihoods require evaluation of a product of two-dimensional
+integrals. As described in \textcite{borchersEfford2008}, each
+integral is an infinite sum over the model's random effects. We omit
+explanations of the terms in this equation for simplicity, refer to
+\textcite{borchersEfford2008} for these details. 
+
+% SCR likelihoods are generally elaborate, making
+% tasks such as model selection potentially fraught.
+
+% Specifically, 
+% evaluating an SCR likelihood requires a product of two-dimensional
+% integrals, where each integral is an infinite sum over the model's
+% random effects. For example, a standard SCR likelihood as described in
+% \parencite{borchersEfford2008} is given in Equation \ref{eq:scr-lik}
+% below. We omit explanations of the terms involved for simplicity,
+% refer to this text for more details. 
+
 \begin{equation} \label{eq:scr-lik}
-  L = \frac{\exp \lrbr{- \int_{\mathcal{R}^2} D(\boldsymbol{s}' |
-      \boldsymbol{\phi}) p_{.} (\boldsymbol{s}' | \boldsymbol{\theta})
-      d \boldsymbol{s}'}}{n!} \prod_{i=1}^n \int_{\mathcal{R}^2}
-  \mathbb{P}(\boldsymbol{\omega}_i| \boldsymbol{\theta},
-  \boldsymbol{s}) D(\boldsymbol{s} | \boldsymbol{\phi}) d \boldsymbol{s}
+  L = \frac{\exp \lrbr{- \int_{\mathcal{R}^2} D(\boldsymbol{X}' ;
+      \boldsymbol{\phi}) p_{.} (\boldsymbol{X}' ; \boldsymbol{\theta})
+      d \boldsymbol{X}'}}{n!} \prod_{i=1}^n \int_{\mathcal{R}^2}
+  \mathbb{P}(\boldsymbol{\omega}_i ; \boldsymbol{\theta},
+  \boldsymbol{X}) D(\boldsymbol{X} ; \boldsymbol{\phi}) d \boldsymbol{X}
 \end{equation}
 
 Thus, fitting every model in a comprehensive candidate set 
