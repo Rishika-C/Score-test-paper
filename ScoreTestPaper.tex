@@ -1,16 +1,16 @@
 %% Paper implementing score test framework for SCR :)
 
-% %% Uncomment to knit for Ben and Rachel:
-% \documentclass[14pt]{extarticle}
-% \usepackage{geometry}
-% \geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
-%  headheight=5mm, marginpar=5mm}
-
-%% Uncomment to knit for writing: 
-\documentclass{article}
+%% Uncomment to knit for Ben and Rachel:
+\documentclass[14pt]{extarticle}
 \usepackage{geometry}
-\geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
+\geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
  headheight=5mm, marginpar=5mm}
+
+% %% Uncomment to knit for writing: 
+% \documentclass{article}
+% \usepackage{geometry}
+% \geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
+%  headheight=5mm, marginpar=5mm}
 
 \usepackage{layout}
 \usepackage{blindtext}
@@ -345,11 +345,11 @@ range of fields.
 \subsection{Calculating score test statistics}
 \label{sec:calculating-score-stat}
 
-We begin with a brief overview of score tests, refer to texts such
+We begin with a brief overview of score tests, and refer to texts such
 as \textcite{rao2005} for more detailed information. When
 comparing two nested models 
 using a score test, the null hypothesis 
-states the simpler model is adequate. We will refer to this
+states the simpler model is adequate. We refer to this
  model as the `$H_0$ model', and the more complex model as the `$H_1$
 model', with parameter vectors $\thetaZero$ and
 $\thetaOne$, respectively. We define $\thetaOneTilde$ as the
@@ -370,7 +370,7 @@ $\thetaOneMLE$, respectively. For this model, $\thetaZeroMLE =
 $\thetaOneTilde = (\hat{\alpha}, 0)$, as under the $H_0$
 model, $\beta=0$.
 
-Briefly, score tests are z-tests summarising how `surprising'
+Briefly, score tests are effectively z-tests summarising how `surprising'
 $\scoreU$ is under $H_0$. Under $H_0$, the
 expectation of this gradient is 
 $0$. That is, $E[\boldsymbol{u}_1
@@ -379,7 +379,7 @@ vector under $H_0$, as shown in Section \ref{sec:exp-zero-proof} of
 the Appendix.
 
 Using one dimension for illustration, the z-test
-statistic is
+statistic is therefore
 % $$
 % \left.
 %   \{\scoreUOneDim - E[u_1(\thetaOneTildeOD^*)]\}
@@ -492,15 +492,24 @@ involved. Furthermore, the symbolic
 differentiation required to calculate $S$ increases considerably as
 model complexity increases, typically becoming impractical.
 
-\subsection{Implementing the score test framework}
+\subsection{Implementing level-based model selection}
 \label{sec:implementing-framework}
 
-By organising the candidate set into a tree structure, the model
-selection framework of \textcite{catchpoleMorgan1996}
-defines an efficient path to the final selected
-model, beginning by considering the simplest models. This is done
-through the construction of `levels', and the use of score tests to
-select the best model at each level.
+The key advantage of model selection via score tests is you don't need
+to fit all models under consideration. However, we do require a
+principled way to decide which models to fit, and which not to
+fit. One way to do this is by organising the candidate set into a tree
+structure to perform level-based model selection, as proposed by
+\textcite{catchpoleMorgan1996}. Through the construction of `levels',
+this framework defines an efficient path to the final selected model,
+beginning by considering the simplest models. Score tests are used to
+select the best model at each level. 
+
+% The approach 
+% defines an efficient path to the final selected model, beginning by
+% considering the simplest models. This is done through the construction
+% of `levels', and the use of score tests to select the best model at
+% each level. 
 
 As described in \textcite{mccreaMorgan2011}, 
 the most basic model defines Level 0 of the candidate set, and Level 1
@@ -517,23 +526,30 @@ models'. The $H_1$ model associated with the smallest significant
 p-value defines the new null hypothesis -- that is, it becomes the new
 $H_0$ model. Level 2 is then constructed, consisting of all models with one
 additional term relative to this model, and the
-process is repeated. We stop at the level where all of the score
-tests produce p-values that are large enough for the analyst to be
-satisfied with the $H_0$ model. At this point, the $H_0$ model becomes the
-chosen model.  
+process is repeated. We stop at the
+level where all of the score tests produce p-values 
+that are large enough for the analyst to be satisfied with the $H_0$
+model. At this point, the $H_0$ model becomes the chosen model.
 
-Due to the level structure, implementing this
-framework on a comprehensive candidate set typically only requires a
-few models be fitted, as only the $H_0$ models need to be fitted for
-the score tests. Furthermore, the stepwise nature of the  
-framework promotes convenient model-fitting -- the MLEs
-from a given $H_0$ model may provide appropriate starting values for
-the next $H_0$ model \parencite{mccreaMorgan2011}. Combining these
-benefits with the convenience of AD, using the framework of
-\textcite{catchpoleMorgan1996} requires fewer resources and less time
-than traditional model selection techniques, especially for a
-comprehensive candidate set. Fitting all models under consideration is
-replaced by accessible calculations and fitting a few models. 
+Although this method can be generalised beyond score tests -- AIC values
+or LRT statistics could be used instead, for example
+-- it allows for especially convenient model selection when used to
+harness the utility of score tests. Specifically, implementing the approach on a
+comprehensive candidate set typically only requires
+a few models be fitted when using score tests (as only the $H_0$
+models need to be fitted).  
+
+The stepwise nature of the method also promotes
+convenient model-fitting -- the MLEs from a given $H_0$ model may
+provide appropriate starting values for the next $H_0$ model
+\parencite{mccreaMorgan2011}.
+
+Combining the benefits of level-based
+score test model selection with the convenience of AD, we require
+fewer resources and less time than traditional model selection
+techniques, especially for large candidate sets. Fitting all models
+under consideration is replaced by accessible calculations and fitting
+a few models.   
 
 \subsection{Non-nested models, boundary considerations and unidentifiability}
 \label{sec:non-nested-and-boundary-consid}
@@ -544,8 +560,8 @@ $\thetaOneTilde$ vector exists, so a
 score test statistic cannot be calculated.
 
 Issues also occur when the regularity conditions underlying score
-tests do not hold. Most commonly, problems arise when values in
-$\thetaOneTilde$ lie on the boundary of the parameter space or are
+tests do not hold. Most commonly, problems arise when
+$\thetaOneTilde$ lies on the boundary of the parameter space or is
 unidentifiable under the $H_0$ model. The null Chi-squared distribution no
 longer holds, so the null distribution must be derived explicitly
 or via simulation. For example,
@@ -558,7 +574,7 @@ statistics. For further information, refer to texts such as
 identically zero statistics arise when all parameters distinguishing
 the $H_1$ and $H_0$ models have first derivatives equal to zero. For
 example, consider a $H_0$ non-mixture model with likelihood
-$f(\boldsymbol{y}|\theta)$, and a $H_1$ two-component mixture model
+$f(\boldsymbol{y}|\theta)$ that is nested under a $H_1$ two-component mixture model
 with likelihood $(1-\pi)f(\boldsymbol{y}|\theta_A) + \pi
 f(\boldsymbol{y}|\theta_B)$. Under $H_1$, observations can fall into
 group A or B, with probability $(1-\pi)$ and $\pi$ respectively, and
@@ -572,11 +588,10 @@ relies on these derivatives, the score statistic is identically zero.
 When such issues arise, we propose separating the
 candidate set into groups -- where models in each group fall into a
 nested structure with no boundary, identifiability or gradient
-problems -- and carrying out the 
-framework of \textcite{catchpoleMorgan1996} on each group, using AIC to
-make a final selection from the chosen models. Using AIC like this
-is unlikely to require any extra models be fitted. See Section
-\ref{sec:ovenbirds} for an example. 
+problems -- and carrying out level-based model selection on each 
+group, using AIC to make a final selection from the chosen
+models. Using AIC like this is unlikely to require any extra models be
+fitted. See Section \ref{sec:ovenbirds} for an example. 
 
 \section{Application: ovenbirds}
 \label{sec:ovenbirds}
@@ -588,12 +603,12 @@ is unlikely to require any extra models be fitted. See Section
 set consists of captures of 
 red-eyed vireos from a mist-netting survey on the Patuxent Research Refuge 
 in Maryland, USA, conducted in the 1960s. Considering
-a range of parametrisation choices, the authors examine a candidate set of 
+a range of modelling choices, the authors examine a candidate set of 
 fifteen potential models, and the model with the lowest
 AIC is selected as the final model.
 
 Working with a similar data set allows consideration of the same
-parametrisation choices for comparative purposes. The `ovenbird' data set, 
+modelling choices for comparative purposes. The `ovenbird' data set, 
 available via the `secr' R package \parencite{secr-pkg}, contains adult captures from a 
 mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
 Research Refuge. The forest in the area has
@@ -601,9 +616,14 @@ changed little since the previous survey in the 1960s. Therefore, to
 illustrate model selection, we employ the same model terms as 
 \textcite{borchersEfford2008}. Considering all possible
 combinations of these terms yields a
-candidate set of 45 models. Harnessing the convenience afforded by AD and score tests,
-it becomes practically feasible to consider a candidate set beyond the original
-15 models considered. 
+candidate set of 45 models. Harnessing the convenience of score tests
+and AD via level-based model selection, it becomes practically
+feasible to consider a candidate set beyond the original 15 models
+considered.  
+
+% afforded by AD and score tests,
+% it becomes practically feasible to consider a candidate set beyond the original
+% 15 models considered. 
 
 A total of 44 mist nets were passively operated for nine or
 ten non-consecutive days in late May and June of each year. We retain any 
@@ -618,28 +638,76 @@ approach of model selection using AIC.
 % set, we conduct a comprehensive comparison of a novel, more efficient,
 % method of model selection with a traditional approach.
 
-\subsection{Implementing model selection}
+\subsection{Implementing level-based model selection}
 \label{sec:implementing-for-ex}
 
-Evaluating an SCR likelihood requires a product of 
-two-dimensional integrals, where each integral is an infinite sum over
-the model's random effects \parencite{borchersEfford2008}. Therefore,
-fitting every model in a comprehensive candidate set 
+% Simply put, the likelihood of our relatively basic SCR models can be
+% written as follows: 
+% \begin{equation}
+%   L = \frac{e^{-E[n]}}{n!} \prod_{i=1}^n \int_{\mathcal{R}^2} \mathbb{P} \left(
+%     \begin{tabular}{ c }
+%       capture history \\
+%       i \\
+%     \end{tabular}
+%     \middle| g_0, \sigma, \boldsymbol{s} \;
+%   \right)
+%   \left(
+%     \begin{tabular}{ c }
+%       intensity function \\
+%       at \boldsymbol{s} \\
+%     \end{tabular}
+%     \middle| \boldsymbol{\phi} \;
+%   \right)
+%   % \mathbb{P} \begin{pmatrix} \text{capture history } i, \text{given }\\
+%   %   \text{the animal is at } \boldsymbol{s} \end{pmatrix}
+%   % \times \begin{pmatrix} \text{expected number of animals} \\ \text{per
+%   %     unit area at } \boldsymbol{s} \end{pmatrix}
+%   d \boldsymbol{s}
+% \end{equation}
+
+As described in Section \ref{sec:overview-candidate-models} of the
+Appendix and in texts such as \textcite{secr-book}, specifying an SCR
+likelihood involves selecting a spatial 
+point process to describe animal distribution in the area of interest,
+and a detection function to describe the sampling process. Making
+accurate selections enhances the validity of inference.
+Specifically, misspecification of the detection function is known to
+result in misleading results, emphasising the importance of reliable
+model selection techniques.
+
+SCR likelihoods are generally elaborate, making
+tasks such as model selection potentially fraught. As shown in
+Equation \ref{eq:scr-lik}, evaluating an SCR likelihood requires a product of two-dimensional
+integrals, where each integral is an infinite sum over the model's
+random effects \parencite{borchersEfford2008}. We omit explanations of
+the terms involved in Equation \ref{eq:scr-lik} for simplicity, refer to texts
+such as \textcite{borchersEfford2008} for these details.  
+\begin{equation} \label{eq:scr-lik}
+  L = \frac{\exp \lrbr{- \int_{\mathcal{R}^2} D(\boldsymbol{s}' |
+      \boldsymbol{\phi}) p_{.} (\boldsymbol{s}' | \boldsymbol{\theta})
+      d \boldsymbol{s}'}}{n!} \prod_{i=1}^n \int_{\mathcal{R}^2}
+  \mathbb{P}(\boldsymbol{\omega}_i| \boldsymbol{\theta},
+  \boldsymbol{s}) D(\boldsymbol{s} | \boldsymbol{\phi}) d \boldsymbol{s}
+\end{equation}
+
+Thus, fitting every model in a comprehensive candidate set 
 such as ours requires significant resources and time. Despite this,
 the convenience of calculating AIC means it is often used for
-SCR model selection \parencite{efford-schofield}. Although popular models
+SCR model selection \parencite{efford-schofield}, often making model
+selection laborious and potentially impractical. Although popular models
 for estimating animal abundance, the complexity of SCR likelihoods
 means derivatives and therefore tools such as score tests were
 previously elusive. % The benefits of simplifying model selection via
 % our proposed approach are substantial, allowing newly accessible
-% model selection for these models. 
+% model selection for these models.
 
-Please refer to Section \ref{sec:overview-candidate-models} of the Appendix
-for an overview of the parametrisation of the SCR models in our
-candidate set. Briefly, each model estimates three parameters: $D$,
-$g_0$ and $\sigma$. We consider a range of parametrisation choices
-for $D$, $g_0$ and $\sigma$, and considering all combinations of these parametrisations
-yields the forty five models in our candidate set. See
+Please refer to Section \ref{sec:overview-candidate-models} of the Appendix for an
+overview of the models in our candidate set. Briefly, as we use a
+homogeneous Poisson point process and half-normal detection function, 
+our parameters of interest are: $D$, $g_0$ and $\sigma$. We
+consider a range of modelling choices for these parameters, and
+considering all possible combinations of the resulting model terms
+yields the forty five models in our candidate set. See Table
 \ref{table:aic-table} in Section \ref{sec:aic-res-app} of the Appendix
 for the complete list of models. 
 
@@ -647,8 +715,7 @@ Due to the comprehensive nature of the candidate set, we encounter
 potentially identically zero score statistics, as described in Section
 \ref{sec:non-nested-and-boundary-consid}. Specifically, we consider models with a
 two-component finite mixture for $g_0$ and/or $\sigma$. To avoid
-issues arising from distinguishing parameters having first derivatives
-equal to zero, we only compare models with matching mixture
+these issues, we only compare models with matching mixture
 terms for $g_0$ and $\sigma$. Therefore, we construct four
 groups for model selection: models with no mixture terms, models with
 mixture terms for $g_0$ only, models with mixture terms for
@@ -658,8 +725,8 @@ functions -- i.e. non-nested models, as mentioned in Section
 \ref{sec:non-nested-and-boundary-consid} -- we would further separate
 models by detection function. 
 
-To conduct model selection, we apply the framework of
-\textcite{catchpoleMorgan1996} to each group. To conduct the score
+To conduct model selection, we apply the level-based framework of
+\textcite{catchpoleMorgan1996} to each group. To conduct the score 
 tests, we write the objective function
 (the negative log-likelihood) for every candidate model as an R 
 function and follow the approach outlined in Section \ref{sec:rtmb-appendix}  
@@ -817,7 +884,26 @@ for more details.
 \section{Discussion}
 \label{sec:discussion}
 
-\subsection{General considerations for the score test framework}
+We propose and outline the use of AD via \lstinline{RTMB} to implement
+score tests for more convenient and accessible model selection when
+compared to traditional, widely-used model selection techniques such
+as AIC values and LRTs. Additionally, we recommend the level-based model
+selection framework of \textcite{catchpoleMorgan1996} to amplify these
+benefits. When this framework is used in conjunction with score tests,
+only a few models from the candidate set typically need to be fitted
+to select a final model. We also extend the framework to
+accommodate potential issues when comparing models via score tests. We
+focus on applying our new approach to SCR models, using the `ovenbird' data set
+available via the \lstinline{secr} R package, and illustrate the significant time
+savings afforded by the approach. Traditional model selection
+techniques are often impractical for models of similar complexity, due
+to the time and resources required to fit all models in the candidate set.
+
+\textbf{(Update sentence mentioning results -- 'We illustrate...' --
+  once have updated results.)
+}
+
+\subsection{General considerations}
 \label{sec:disc-general}
 
 Generally, when performing model selection, it is necessary to take model
@@ -915,7 +1001,7 @@ Harnessing recent software advancements with AD and the local nature
 of score tests, we present an approach that considerably improves the
 convenience of comprehensive model selection,
 applicable to a wide range of statistical models. Through the lens of
-the framework of \textcite{catchpoleMorgan1996}, only a small subset
+the level-based framework of \textcite{catchpoleMorgan1996}, only a small subset 
 of the candidate set must be fitted, further enhancing the time
 savings. 
 
@@ -1363,8 +1449,10 @@ describe the distribution of animals in the survey area
 Poisson process \parencite{secr-book}. Specifically, following the
 example of \parencite{borchersEfford2008}, we use a
 homogeneous Poisson process, so animals are assumed to be
-distributed uniformly across the survey area. Therefore, 
-we only estimate the parameter $D$, animal density in the area of interest.
+distributed uniformly across the survey area for each year. Therefore, we
+estimate a constant density parameter $D$ for each year. As we see
+below, for some models we assume animal density is constant across all
+years. For others, we assume density varies by year. 
 
 To specify the observation process, we select a detection
 function. This describes how an animal's probability of detection 
@@ -1375,19 +1463,18 @@ the `detection' parameters
 to be estimated. Although \textcite{borchersEfford2008} consider
 SCR models with half-normal and hazard rate detection functions, we
 only consider models with a 
-half-normal detection function. Hazard rate detection
-functions are seldom used and generally not recommended due to their
-long tail \parencite{secr-pkg}. Therefore, we estimate parameters
-$g_0$ and $\sigma$.  
+half-normal detection function, which has parameters $g_0$ and
+$\sigma$. Hazard rate detection functions are seldom used and
+generally not recommended due to their long tail
+\parencite{secr-pkg}.
 
-Thus, our candidate models estimate three parameters: $D$,
-$g_0$ and $\sigma$. When defining a SCR model, it is standard to
-specify effects (e.g. behavioural effects, covariate effects, etc.) for the
-density and detection parameters. Following the example set by
-\textcite{borchersEfford2008}, we 
-consider models with the parametrisations shown in Table
-\ref{table:dependencies}, specified using the
-parlance of the \lstinline{secr} R package. Considering all possible combinations of
+When defining a SCR model, it is standard to specify effects
+(e.g. behavioural effects, covariate effects, etc.) for the parameters
+of interest, which are $D$, $g_0$ and $\sigma$ in our
+case. Therefore, as in \textcite{borchersEfford2008}, we consider
+models with the effects shown in Table \ref{table:dependencies},
+specified using the parlance of the \lstinline{secr}
+package. Considering all possible combinations of
 these parametrisations yields our forty five candidate models.
 
 \begin{table}[h!]
