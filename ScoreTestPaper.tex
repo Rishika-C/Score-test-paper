@@ -667,25 +667,29 @@ approach of model selection using AIC.
 
 As described in Section \ref{sec:overview-candidate-models} of the
 Appendix and in texts such as \textcite{secr-book}, specifying an SCR
-likelihood involves selecting a spatial 
-point process to describe animal distribution in the area of interest,
-and a detection function to describe the sampling process. Making
-accurate selections enhances the validity of inference.
-Specifically, misspecification of the detection function is known to
-result in misleading results, emphasising the importance of reliable
-model selection techniques.
+model involves selecting a spatial point process to describe
+animal distribution in the area of interest, and a detection function
+to describe the sampling process. As discussed in Section
+\ref{sec:overview-candidate-models} of the Appendix, we select a
+homogeneous Poisson point process and a half-normal detection
+function for our models, following the example of
+\textcite{borchersEfford2008}. In practice, making accurate selections
+enhances the validity of inference. Specifically, misspecification of
+the detection function is known to produce misleading results,
+emphasising the importance of reliable model selection techniques.  
 
 However, SCR likelihoods are generally elaborate, making model selection
 potentially fraught. For example, 
-Equation \ref{eq:scr-lik} represents a relatively simple SCR 
-likelihood using a homogeneous Poisson process as described in
-\textcite{borchersEfford2008}, illustrating how even basic SCR likelihoods
-require evaluation of a product of two-dimensional
-integrals.  We omit explanations of the terms in this equation for
-simplicity, refer to \textcite{borchersEfford2008} for these
-details. Selecting a different spatial point process would increase
-the complexity of the likelihood further, potentially requiring
-considerable resources for tasks such as model fitting. 
+Equation \ref{eq:scr-lik} represents a relatively simple SCR
+likelihood as described in \textcite{borchersEfford2008}. We omit
+explanations of the terms in this equation for simplicity, refer to
+the text for more details. This expression illustrates how even basic 
+SCR likelihoods require evaluation of a product of 
+two-dimensional integrals. It is applicable to the SCR
+models we consider, and as we see below, its complexity makes
+traditional model selection techniques time consuming. Selecting a
+different spatial point process would increase the complexity of the
+likelihood further, escalating barriers for model selection.  
 
 % SCR likelihoods are generally elaborate, making
 % tasks such as model selection potentially fraught.
@@ -706,7 +710,8 @@ considerable resources for tasks such as model fitting.
   \boldsymbol{X}) D(\boldsymbol{X} ; \boldsymbol{\phi}) d \boldsymbol{X}
 \end{equation}
 
-Thus, fitting every model in a comprehensive candidate set 
+Specifically, due to the complexity of the likelihoods involved,
+fitting every model in a comprehensive candidate set  
 such as ours requires significant resources and time. Despite this,
 the convenience of calculating AIC means it is often used for
 SCR model selection \parencite{efford-schofield}, often making model
