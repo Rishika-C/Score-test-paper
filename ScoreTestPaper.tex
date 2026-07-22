@@ -680,16 +680,24 @@ emphasising the importance of reliable model selection techniques.
 
 However, SCR likelihoods are generally elaborate, making model selection
 potentially fraught. For example, 
-Equation \ref{eq:scr-lik} represents a relatively simple SCR
+Equation \ref{eq:scr-lik} represents a simple SCR
 likelihood as described in \textcite{borchersEfford2008}. We omit
 explanations of the terms in this equation for simplicity, refer to
 the text for more details. This expression illustrates how even basic 
 SCR likelihoods require evaluation of a product of 
-two-dimensional integrals. It is applicable to the SCR
-models we consider, and as we see below, its complexity makes
+two-dimensional integrals. It is used to calculate likelihood values for the SCR
+models we consider \textbf{(confirm)}, and as we see below, its complexity makes
 traditional model selection techniques time consuming. Selecting a
 different spatial point process would increase the complexity of the
-likelihood further, escalating barriers for model selection.  
+likelihood further, escalating barriers for model selection.
+
+\begin{equation} \label{eq:scr-lik}
+L = \frac{\{Da(\boldsymbol{\theta})\}^n \exp
+  \{-Da(\boldsymbol{\theta})\}}{n!} \times \binom{n}{n_1,...,n_c}
+\prod_{i=1}^n \frac{\int_{\mathbb{R}^2}
+  \mathbb{P}(\boldsymbol{\omega}_i | \boldsymbol{X}; \boldsymbol{\theta}) d
+  \boldsymbol{X}}{a(\boldsymbol{\theta})} 
+\end{equation}
 
 % SCR likelihoods are generally elaborate, making
 % tasks such as model selection potentially fraught.
@@ -702,13 +710,13 @@ likelihood further, escalating barriers for model selection.
 % below. We omit explanations of the terms involved for simplicity,
 % refer to this text for more details. 
 
-\begin{equation} \label{eq:scr-lik}
-  L = \frac{\exp \lrbr{- \int_{\mathcal{R}^2} D(\boldsymbol{X}' ;
-      \boldsymbol{\phi}) p_{.} (\boldsymbol{X}' ; \boldsymbol{\theta})
-      d \boldsymbol{X}'}}{n!} \prod_{i=1}^n \int_{\mathcal{R}^2}
-  \mathbb{P}(\boldsymbol{\omega}_i ; \boldsymbol{\theta},
-  \boldsymbol{X}) D(\boldsymbol{X} ; \boldsymbol{\phi}) d \boldsymbol{X}
-\end{equation}
+% \begin{equation} \label{eq:scr-lik}
+%   L = \frac{\exp \lrbr{- \int_{\mathcal{R}^2} D(\boldsymbol{X}' ;
+%       \boldsymbol{\phi}) p_{.} (\boldsymbol{X}' ; \boldsymbol{\theta})
+%       d \boldsymbol{X}'}}{n!} \prod_{i=1}^n \int_{\mathcal{R}^2}
+%   \mathbb{P}(\boldsymbol{\omega}_i ; \boldsymbol{\theta},
+%   \boldsymbol{X}) D(\boldsymbol{X} ; \boldsymbol{\phi}) d \boldsymbol{X}
+% \end{equation}
 
 Specifically, due to the complexity of the likelihoods involved,
 fitting every model in a comprehensive candidate set  
