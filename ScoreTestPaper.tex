@@ -1,16 +1,16 @@
 %% Paper implementing score test framework for SCR :)
 
-%% Uncomment to knit for Ben and Rachel:
-\documentclass[14pt]{extarticle}
-\usepackage{geometry}
-\geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
- headheight=5mm, marginpar=5mm}
-
-% %% Uncomment to knit for writing: 
-% \documentclass{article}
+% %% Uncomment to knit for Ben and Rachel:
+% \documentclass[14pt]{extarticle}
 % \usepackage{geometry}
-% \geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
+% \geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
 %  headheight=5mm, marginpar=5mm}
+
+%% Uncomment to knit for writing: 
+\documentclass{article}
+\usepackage{geometry}
+\geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
+ headheight=5mm, marginpar=5mm}
 
 \usepackage{layout}
 \usepackage{blindtext}
@@ -680,13 +680,14 @@ emphasising the importance of reliable model selection techniques.
 
 However, SCR likelihoods are generally elaborate, making model selection
 potentially fraught. For example, 
-Equation \ref{eq:scr-lik} represents a simple SCR
+Equation \ref{eq:scr-lik} represents a relatively simple SCR
 likelihood as described in \textcite{borchersEfford2008}. We omit
 explanations of the terms in this equation for simplicity, refer to
-the text for more details. This expression illustrates how even basic 
+the text for more details. This expression illustrates how even
+relatively basic 
 SCR likelihoods require evaluation of a product of 
 two-dimensional integrals. It is used to calculate likelihood values for the SCR
-models we consider \textbf{(confirm)}, and as we see below, its complexity makes
+models we consider, and as we see below, its complexity makes
 traditional model selection techniques time consuming. Selecting a
 different spatial point process would increase the complexity of the
 likelihood further, escalating barriers for model selection.
@@ -759,61 +760,103 @@ To conduct model selection, we apply the level-based framework of
 tests, we write the objective function
 (the negative log-likelihood) for every candidate model as an R 
 function and follow the approach outlined in Section \ref{sec:rtmb-appendix}  
-of the Appendix. We stop at the level of the framework  where p-values
-are no longer significant  according to a 5\% threshold. Using AIC, we
+of the Appendix, using \lstinline{RTMB} to fit the $H_0$ model and
+obtain the required gradients. We stop at the level of the framework  where p-values
+are no longer significant  according to the commonly-used 5\% threshold. Using AIC, we
 compare the chosen model from each group, selecting the model
-with the smallest AIC as the final model.
+with the smallest AIC as the final model. 
 
-To comprehensively illustrate the benefits of this approach, we also
+For a thorough examination of the benefits of this approach, we also
 implement model selection according to standard
 practices. Specifically, we fit every model using
 \lstinline{secr.fit()}, and compare them using AIC values obtained via
 \lstinline{AIC()} (both functions are available via the
-\lstinline{secr} package).  
+\lstinline{secr} package). Furthermore, to enhance the accuracy of comparison,
+we consider our score test approach with a significance threshold of
+16\%, chosen based on the findings of \textcite{sutherland2023}. Lastly, we
+implement the level-based framework using AIC values in place of score
+tests, completing a comprehensive assessment of our proposed approach. 
 
 \subsection{Results}
 \label{sec:ex-results}
 
-Implementing model selection using the approach outlined in Section
-\ref{sec:implementing-for-ex}, harnessing score tests via \lstinline{RTMB}
-to select a final model takes approximately 13.4 minutes. In contrast,
-implementing model selection via AIC takes approximately 24.8
+Implementing model selection using score tests and a significance
+threshold of 5\%, selecting a final model takes approximately 13.4
+minutes. In contrast, implementing model selection via the
+\lstinline{secr} package and AIC takes approximately 24.8
 hours. Both approaches select the same final model -- a model with constant $D$ and
 $\sigma$ for all individuals across the survey years, and a behaviour
 response for $g_0$ -- confirming the reliability of the proposed 
 approach.
 
-This significant time saving can be attributed to the reduced number
-of models to fit, and the use of AD via \lstinline{RTMB} for model
-fitting and score tests. By using the framework of \textcite{catchpoleMorgan1996} for
-each constructed group, as described in Section
-\ref{sec:implementing-for-ex}, only
-6 of the 45 candidate models need to be fitted for model selection. Furthermore, 
-using \lstinline{RTMB} significantly speeds up model fitting and
-calculating score statistics for these
-complex models, as iterative and potentially impractical procedures
-are replaced with calculations involving exact gradients. 
+As described in \textcite{sutherland2023}, when two models differ by
+one term, using AIC for comparison is equivalent to conducting a LRT
+with a significance level of 0.157. The two approaches select
+the same model. By the asymptotic equivalence between LRTs and score
+tests, using AIC is therefore asymptotically
+equivalent to a score test with a p-value threshold of
+0.157. Thus, to ensure the accuracy of the above comparison, we can
+implement our score tests using this threshold, although as shown in Table
+\ref{table:score-table}, the results remain unchanged. 
 
-In Table \ref{table:aic-table}, we provide results from using AIC
-values. In Table \ref{table:score-table}, we provide results
-from using score tests for model selection for each group, stopping at
-levels where p-values are no longer significant based on a 5\% 
-threshold. The model selected from each group is displayed in bold,
-with AIC given. Score statistics and LRT statistics are provided, the
-close alignment between the two confirming the accuracy of the score
-tests. Due to negligible differences, we only report score test
-p-values. Note that \lstinline{RTMB} is used to fit models required
-for the LRT statistics, but as this is not relevant to model
-selection, it is excluded from the time taken given above.  
+% \textit{
+% \textbf{Confirm with Ben and Rachel -- bottom of p4 in Sutherland
+%   paper, why shouldn't lambda be at least 0? Wouldn't that give
+%   delta-AIC < 2, instead of lambda at least 2?}
+% }
+
+The significant time savings we see can be attributed to the reduced number
+of models to fit, and the use of AD. By using the level-based
+framework of \textcite{catchpoleMorgan1996} for each constructed
+group, only 6 of the 45 candidate models need to be
+fitted. Furthermore, using \lstinline{RTMB} significantly speeds 
+up model fitting and calculating score statistics, as
+potentially impractical iterative procedures are 
+replaced with accessible calculations using conveniently-obtained
+exact gradients. For instance, if we run the level-based framework using AIC values in
+place of score tests and use \lstinline{RTMB} to fit all models, we
+see similar time savings. However, the time taken remains greater than
+when using score tests. As model complexity and quantity increases, the time
+savings provided by score tests -- i.e. the time savings from only
+needing to fit one model in each pair -- will also increase. As can be seen
+in Table \ref{table:score-table}, when using AIC, 
+the choice of final model remains 
+unchanged, further confirming the validity of our results. Note that we also
+ran the level-based framework on the four groups described in Section
+\ref{sec:implementing-for-ex} to reduce the effect of AIC favouring
+larger mixture models, due to a violation of regularity conditions
+with mixture models \parencite{mcL-Peel2000}.    
+
+In Table \ref{table:score-table}, we provide results
+from using score tests for model selection for each group, stopping
+where p-values are no longer significant based on a 5\%  
+threshold. The model selected from
+each group is displayed in bold -- comparing AIC for each model, we
+can confirm the potential issue of considering AIC for mixture models does not
+affect our final choice. The close alignment between score
+statistics, LRT statistics and AIC values confirm the accuracy of the
+score tests. Due to negligible differences, we only report score test
+p-values (and not LRT p-values). All results in the table were found
+using \lstinline{RTMB} for model-fitting and obtaining
+derivatives. Due to relevance, the time to conduct the LRTs and obtain AIC
+values via \lstinline{RTMB} are excluded from the time taken
+above.
+
+For interest, in Table \ref{table:aic-table} from Section
+\ref{sec:aic-res-app} of the Appendix we provide
+results from using AIC values, calculated for every model in the
+candidate set via the \lstinline{secr} package. As in Section \ref{sec:overview-candidate-models}
+of the Appendix, the model descriptions in both tables are provided in
+the parlance of the \lstinline{secr} package, refer to this section
+for more details.
+
+\textbf{(Need to add all AIC values to table (delta-AICs) and amend
+  caption accordingly.)}
 
 % \textbf{(Doesn't seem worthwhile containing delta-AIC values... if is
 %   relative to final model, are just repeating results from the AIC
 %   table? Is more a confirmation that our objective values are correct?)}
 
-As in Section \ref{sec:overview-candidate-models}
-of the Appendix, the model descriptions in these tables are provided in
-the parlance of the \lstinline{secr} package, refer to this section
-for more details.
 
 \begin{table}[h!]
   \caption{Results from the score test approach for the four
@@ -928,10 +971,6 @@ savings afforded by the approach. Traditional model selection
 techniques are often impractical for models of similar complexity, due
 to the time and resources required to fit all models in the candidate set.
 
-\textbf{(Update sentence mentioning results -- 'We illustrate...' --
-  once have updated results.)
-}
-
 \subsection{General considerations}
 \label{sec:disc-general}
 
@@ -1032,12 +1071,16 @@ convenience of comprehensive model selection,
 applicable to a wide range of statistical models. Through the lens of
 the level-based framework of \textcite{catchpoleMorgan1996}, only a small subset 
 of the candidate set must be fitted, further enhancing the time
-savings. 
+savings. As mentioned above, significance thresholds can be selected
+to ensure equivalence to well-established methods of model selection,
+such as AIC. 
 
-Further work includes simulation to confirm the absence of material
-benefit when using the expected instead of the observed information
-matrix, and further investigating the implementation of the considerations
-in Section \ref{sec:disc-general}. 
+Further work includes investigation of an alternative method to choose
+the final model when running the level-based framework on multiple
+groups, due to potential bias in AIC when considering mixture
+models. Additionally, there is scope for simulation to confirm the absence of material
+benefit when using the expected information matrix, and further
+exploration of the implementation of considerations in Section \ref{sec:disc-general}.
 
 \section{Appendix}
 \label{sec:appendix}
