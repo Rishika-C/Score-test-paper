@@ -1,16 +1,16 @@
 %% Paper implementing score test framework for SCR :)
 
 % %% Uncomment to knit for Ben and Rachel:
-% \documentclass[14pt]{extarticle}
-% \usepackage{geometry}
-% \geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
-%  headheight=5mm, marginpar=5mm}
+\documentclass[14pt]{extarticle}
+\usepackage{geometry}
+\geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
+ headheight=5mm, marginpar=5mm}
 
 %% Uncomment to knit for writing: 
-\documentclass{article}
-\usepackage{geometry}
-\geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
- headheight=5mm, marginpar=5mm}
+% \documentclass{article}
+% \usepackage{geometry}
+% \geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
+%  headheight=5mm, marginpar=5mm}
 
 \usepackage{layout}
 \usepackage{blindtext}
@@ -26,6 +26,7 @@
 \usepackage[parfill]{parskip} % Want line break between paragraphs instead of indentation
 \usepackage{setspace} % For line spacing
 \usepackage{lineno,xcolor} % For numbering lines
+\usepackage{arydshln}
 
  % For R code, for now :)
 \usepackage{listings}
@@ -680,12 +681,12 @@ emphasising the importance of reliable model selection techniques.
 
 However, SCR likelihoods are generally elaborate, making model selection
 potentially fraught. For example, 
-Equation \ref{eq:scr-lik} represents a relatively simple SCR
+Equation \ref{eq:scr-lik} represents a relatively basic simplified SCR
 likelihood as described in \textcite{borchersEfford2008}. We omit
 explanations of the terms in this equation for simplicity, refer to
 the text for more details. This expression illustrates how even
-relatively basic 
-SCR likelihoods require evaluation of a product of 
+relatively simple 
+SCR models are sophisticated statistical models, requiring evaluation of a product of 
 two-dimensional integrals. It is used to calculate likelihood values for the SCR
 models we consider, and as we see below, its complexity makes
 traditional model selection techniques time consuming. Selecting a
@@ -752,12 +753,12 @@ mixture terms for $g_0$ only, models with mixture terms for
 $\sigma$ only, and models with mixture terms for $g_0$ and
 $\sigma$. If we were also considering models with different detection
 functions -- i.e. non-nested models, as mentioned in Section
-\ref{sec:non-nested-and-boundary-consid} -- we would further separate
-models by detection function. 
+\ref{sec:non-nested-and-boundary-consid} -- we would separate
+models further by detection function. 
 
 To conduct model selection, we apply the level-based framework of
-\textcite{catchpoleMorgan1996} to each group. To conduct the score 
-tests, we write the objective function
+\textcite{catchpoleMorgan1996} to each group, using score tests to
+compare models. We write the objective function
 (the negative log-likelihood) for every candidate model as an R 
 function and follow the approach outlined in Section \ref{sec:rtmb-appendix}  
 of the Appendix, using \lstinline{RTMB} to fit the $H_0$ model and
@@ -819,24 +820,26 @@ see similar time savings. However, the time taken remains greater than
 when using score tests. As model complexity and quantity increases, the time
 savings provided by score tests -- i.e. the time savings from only
 needing to fit one model in each pair -- will also increase. As can be seen
-in Table \ref{table:score-table}, when using AIC, 
+in Tables \ref{table:score-table} and \ref{table:aic-vals-score-tests}, when using AIC, 
 the choice of final model remains 
 unchanged, further confirming the validity of our results. Note that we also
 ran the level-based framework on the four groups described in Section
 \ref{sec:implementing-for-ex} to reduce the effect of AIC favouring
-larger mixture models, due to a violation of regularity conditions
+larger mixture models, occurring due to a violation of regularity conditions
 with mixture models \parencite{mcL-Peel2000}.    
 
-In Table \ref{table:score-table}, we provide results
+In Tables \ref{table:score-table} and \ref{table:aic-vals-score-tests}, we provide results
 from using score tests for model selection for each group, stopping
 where p-values are no longer significant based on a 5\%  
-threshold. The model selected from
-each group is displayed in bold -- comparing AIC for each model, we
-can confirm the potential issue of considering AIC for mixture models does not
-affect our final choice. The close alignment between score
+threshold. In Table \ref{table:score-table}, the model selected from
+each group is displayed in bold. The close alignment between score
 statistics, LRT statistics and AIC values confirm the accuracy of the
 score tests. Due to negligible differences, we only report score test
-p-values (and not LRT p-values). All results in the table were found
+p-values (and not LRT p-values). In Table
+\ref{table:aic-vals-score-tests}, we show AIC values for the model
+selected from each group, leading to our final choice. From these AIC
+values, we can confirm the potential issue of AIC favouring mixture models does not
+affect our final choice. All results in these tables were found
 using \lstinline{RTMB} for model-fitting and obtaining
 derivatives. Due to relevance, the time to conduct the LRTs and obtain AIC
 values via \lstinline{RTMB} are excluded from the time taken
@@ -845,13 +848,18 @@ above.
 For interest, in Table \ref{table:aic-table} from Section
 \ref{sec:aic-res-app} of the Appendix we provide
 results from using AIC values, calculated for every model in the
-candidate set via the \lstinline{secr} package. As in Section \ref{sec:overview-candidate-models}
+candidate set via the \lstinline{secr} package. Simple
+derivations can produce the AIC and $\Delta$AIC values we see in 
+Tables \ref{table:score-table} and
+\ref{table:aic-vals-score-tests}. The resulting values align closely,
+further confirming the validity of our 
+\lstinline{RTMB} results. As in Section
+\ref{sec:overview-candidate-models} 
 of the Appendix, the model descriptions in both tables are provided in
 the parlance of the \lstinline{secr} package, refer to this section
 for more details.
 
-\textbf{(Need to add all AIC values to table (delta-AICs) and amend
-  caption accordingly.)}
+% \textbf{Confirm equivalence of delta-AIC values :)}
 
 % \textbf{(Doesn't seem worthwhile containing delta-AIC values... if is
 %   relative to final model, are just repeating results from the AIC
@@ -864,9 +872,12 @@ for more details.
     falls into within the score test framework (`Level'), the model
     description in \lstinline{secr} parlance (`Model'), the number of
     model parameters (`npar'), the score statistic (`$S$'), the LRT
-    statistic (`$LRT$'), the score test p-value (`p-value') and the
-    AIC for the model selected from each group (`AIC'). The selected
-    model from each group is shown in bold. All values are reported to 1 dp.}  
+    statistic (`$LRT$') and the score test p-value (`p-value'). We
+    also supply the 
+    difference in AIC for all $H_1$ models, relative to the $H_0$ model
+    from the previous level (`$\Delta$AIC'). The selected
+    model from each group is shown in bold. All values are reported to
+    1 dp (or 1 sf, where appropriate).}  
   \label{table:score-table}
   \centering
   \begin{tabularx}{0.8\textwidth} { 
@@ -882,75 +893,104 @@ for more details.
     \multicolumn{7}{ c }{Group 1} \\ 
     \hline
     \hline
-    Level & Model & npar & $S$ & $LRT$ & p-value & AIC \\
+    Level & Model & npar & $S$ & $LRT$ & p-value & $\Delta$AIC \\
     \hline
-    0 & \Dconst, \gconst, \sigmaconst & 3 & - & - & - & \\
+    0 & \Dconst, \gconst, \sigmaconst & 3 & - & - & - & - \\
+    \hdashline
     1 & \textbf{\Dconst}, $\boldsymbol{g_0\sim \textbf{b}}$,
             $\boldsymbol{\sigma\sim 1}$ & $\boldsymbol{4}$ &
                                                              $\boldsymbol{10.8}$
                                & $\boldsymbol{8.4}$ &
                                                       $\boldsymbol{0.001}$
                                                  &
-                                                   $\boldsymbol{1726.8}$    \\
-          & \DSession, \gconst, \sigmaconst & 4 & 1.1 & 1.1 & 0.3 &  \\
-          & \Dsession, \gconst, \sigmaconst & 7 & 3.2 & 3.2 & 0.5 &  \\
-          & \Dconst, \gsession, \sigmaconst & 7 & 4.8 & 4.7 & 0.3 &  \\
-          & \Dconst, \gconst, \sigmasession & 7 & 5.2 & 5.0 & 0.3 &  \\
-    2 & \DSession, \gbehav, \sigmaconst & 5 & 1.0 & 1.0 & 0.3 &  \\
-          & \Dsession, \gbehav, \sigmaconst & 8 & 3.2 & 3.2 & 0.5 &  \\
+                                                   $\boldsymbol{-6.4}$    \\
+          & \DSession, \gconst, \sigmaconst & 4 & 1.1 & 1.1 & 0.3 & 0.9 \\
+          & \Dsession, \gconst, \sigmaconst & 7 & 3.2 & 3.2 & 0.5 & 4.8 \\
+          & \Dconst, \gsession, \sigmaconst & 7 & 4.8 & 4.7 & 0.3 & 3.3 \\
+          & \Dconst, \gconst, \sigmasession & 7 & 5.2 & 5.0 & 0.3 & 3
+    \\
+    \hdashline
+    2 & \DSession, \gbehav, \sigmaconst & 5 & 1.0 & 1.0 & 0.3 & 1.0 \\
+          & \Dsession, \gbehav, \sigmaconst & 8 & 3.2 & 3.2 & 0.5 & 4.8 \\
           & \Dconst, \gsessionbehav, \sigmaconst & 8 & 5.6 & 5.3 & 0.2
-                                                 &  \\
-          & \Dconst, \gbehav, \sigmasession & 8 & 6.3 & 6.0 & 0.2 & 
+                                                 & 2.7 \\
+          & \Dconst, \gbehav, \sigmasession & 8 & 6.3 & 6.0 & 0.2 & 2.0
     \\
     \hline
     \multicolumn{7}{ c }{Group 2} \\ 
     \hline
     \hline
-    Level & Model & npar & $S$ & $LRT$ & p-value & AIC \\
+    Level & Model & npar & $S$ & $LRT$ & p-value & $\Delta$AIC \\
     \hline
     0 & \textbf{\Dconst}, $\boldsymbol{g_0\sim \textbf{h2}}$,
         $\boldsymbol{\sigma\sim 1}$ & $\boldsymbol{5}$ & \textbf{-} &
                                                                       \textbf{-}
                                        & \textbf{-} &
-                                                      $\boldsymbol{1733.9}$ \\
-    1 & \DSession, \gmix, \sigmaconst & 6 & 1.1 & 1.1 & 0.3 &  \\
-          & \Dsession, \gmix, \sigmaconst & 9 & 3.2 & 3.2 & 0.5 &  \\
-          & \Dconst, \gmix, \sigmasession & 9 & 4.2 & 4.2 & 0.4 &  \\
+                                                      \textbf{-}
+    \\
+    \hdashline
+    1 & \DSession, \gmix, \sigmaconst & 6 & 1.1 & 1.1 & 0.3 & 0.9 \\
+          & \Dsession, \gmix, \sigmaconst & 9 & 3.2 & 3.2 & 0.5 & 4.8 \\
+          & \Dconst, \gmix, \sigmasession & 9 & 4.2 & 4.2 & 0.4 & 3.8 \\
     \hline
     \multicolumn{7}{ c }{Group 3} \\ 
     \hline
     \hline
-    Level & Model & npar & $S$ & $LRT$ & p-value & AIC \\
+    Level & Model & npar & $S$ & $LRT$ & p-value & $\Delta$AIC \\
     \hline
     0 & \Dconst, \gconst, \sigmamix & 5 & - & - & - & \\
+    \hdashline
     1 & \textbf{\Dconst}, $\boldsymbol{g_0\sim \textbf{b}}$,
         $\boldsymbol{\sigma\sim \textbf{h2}}$ & $\boldsymbol{6}$ &
                                                                    $\boldsymbol{11.4}$
                                & $\boldsymbol{8.7}$ &
                                                       $\boldsymbol{0.0007}$
                                                  &
-                                                   $\boldsymbol{1728.2}$  \\
-          & \DSession, \gconst, \sigmamix & 6 & 1.1 & 1.1 & 0.3 & \\
-          & \Dsession, \gconst, \sigmamix & 9 & 3.2 & 3.2 & 0.5 & \\
-          & \Dconst, \gsession, \sigmamix & 9 & 4.3 & 4.5 & 0.4 & \\
-    2 & \DSession, \gbehav, \sigmamix & 7 & 1.0 & 1.0 & 0.3 & \\
-          & \Dsession, \gbehav, \sigmamix & 10 & 3.2 & 3.2 & 0.5 & \\
+                                                   $\boldsymbol{-6.7}$  \\
+          & \DSession, \gconst, \sigmamix & 6 & 1.1 & 1.1 & 0.3 & 0.9 \\
+          & \Dsession, \gconst, \sigmamix & 9 & 3.2 & 3.2 & 0.5 & 4.8 \\
+          & \Dconst, \gsession, \sigmamix & 9 & 4.3 & 4.5 & 0.4 & 3.5 \\
+    \hdashline
+    2 & \DSession, \gbehav, \sigmamix & 7 & 1.0 & 1.0 & 0.3 & 1.0 \\
+          & \Dsession, \gbehav, \sigmamix & 10 & 3.2 & 3.2 & 0.5 & 4.8
+    \\
           & \Dconst, \gsessionbehav, \sigmamix & 10 & 4.4 & 4.6 & 0.4
+                                                 & 3.4
     \\
     \hline
     \multicolumn{7}{ c }{Group 4} \\ 
     \hline
     \hline
-    Level & Model & npar & $S$ & $LRT$ & p-value & AIC \\
+    Level & Model & npar & $S$ & $LRT$ & p-value & $\Delta$AIC \\
     \hline
     0 & \textbf{\Dconst}, $\boldsymbol{g_0\sim \textbf{h2}}$,
         $\boldsymbol{\sigma\sim \textbf{h2}}$ & $\boldsymbol{6}$ &
                                                                    \textbf{-}
-                               & \textbf{-} &\textbf{ -} &
-                                                           $\boldsymbol{1736.2}$ \\
-    1 & \DSession, \gmix, \sigmamix & 7 & 1.1 & 1.1 & 0.3 & \\
-          & \Dsession, \gmix, \sigmamix & 10 & 3.2 & 3.2 & 0.5 & \\
+                               & \textbf{-} & \textbf{-} &
+                                                            \textbf{-} 
+    \\
+    \hdashline
+    1 & \DSession, \gmix, \sigmamix & 7 & 1.1 & 1.1 & 0.3 & 0.9 \\
+          & \Dsession, \gmix, \sigmamix & 10 & 3.2 & 3.2 & 0.5 & 4.8 \\
   \end{tabularx}
+\end{table}
+
+\begin{table}
+  \centering
+  \begin{tabular} { | c | c | c | }
+    \hline
+    Group & Model & AIC \\
+    \hline
+    1 & \Dconst, \gbehav,
+        \sigmaconst & 1726.8 \\
+    2 & \Dconst, \gmix, \sigmaconst & 1733.9 \\
+    3 & \Dconst, \gbehav, \sigmamix & 1728.1 \\
+    4 & \Dconst, \gmix, \sigmamix & 1736.2 \\
+    \hline
+  \end{tabular}
+  \caption{AIC values for the model selected from each group using the
+    level-based framework with score tests.}
+  \label{table:aic-vals-score-tests}
 \end{table}
 
 \section{Discussion}
