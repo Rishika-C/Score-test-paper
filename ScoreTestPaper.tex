@@ -1,16 +1,16 @@
 %% Paper implementing score test framework for SCR :)
 
 % %% Uncomment to knit for Ben and Rachel:
-\documentclass[14pt]{extarticle}
-\usepackage{geometry}
-\geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
- headheight=5mm, marginpar=5mm}
+% \documentclass[14pt]{extarticle}
+% \usepackage{geometry}
+% \geometry{left=20mm, right=20mm, top=5mm, bottom=5mm,
+%  headheight=5mm, marginpar=5mm}
 
 %% Uncomment to knit for writing: 
-% \documentclass{article}
-% \usepackage{geometry}
-% \geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
-%  headheight=5mm, marginpar=5mm}
+\documentclass{article}
+\usepackage{geometry}
+\geometry{left=15mm, right=15mm, top=5mm, bottom=5mm,
+ headheight=5mm, marginpar=5mm}
 
 \usepackage{layout}
 \usepackage{blindtext}
@@ -362,7 +362,7 @@ model; see below for an example. Lastly, we refer to $\boldsymbol{u}_1
 vector, also called the score, of the $H_1$ log-likelihood at
 $\boldsymbol{\theta}$.
 
-For a simple illustrative example, consider $Y_i \sim
+For a simple example, consider $Y_i \sim
 \text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \alpha$ and $H_1: \mu_i
 = \alpha + \beta x_i$ for some covariate $\boldsymbol{x}$, with
 maximum likelihood estimate (MLE) vectors $\thetaZeroMLE$ and
@@ -371,7 +371,7 @@ $\thetaOneMLE$, respectively. For this model, $\thetaZeroMLE =
 $\thetaOneTilde = (\hat{\alpha}, 0)$, as under the $H_0$
 model, $\beta=0$.
 
-Briefly, score tests are effectively z-tests summarising how `surprising'
+Briefly, score tests are $z$-tests summarising how `surprising'
 $\scoreU$ is under $H_0$. Under $H_0$, the
 expectation of this gradient is 
 $0$. That is, $E[\boldsymbol{u}_1
@@ -379,7 +379,7 @@ $0$. That is, $E[\boldsymbol{u}_1
 vector under $H_0$, as shown in Section \ref{sec:exp-zero-proof} of
 the Appendix.
 
-Using one dimension for illustration, the z-test
+Using one dimension for illustration, the $z$-test
 statistic is therefore
 % $$
 % \left.
@@ -393,9 +393,10 @@ statistic is therefore
 % $$
 $$
 \frac{\scoreUOneDim - E[u_1(\thetaOneTildeOD^*)]}
-  {\sqrt{\text{Var}\{\scoreUOneDim}\}}  =
-  \frac{\scoreUOneDim}{\sqrt{\text{Var}\{\scoreUOneDim}\}}
+{\sqrt{\text{Var}\{\scoreUOneDim}\}}  =
+\frac{\scoreUOneDim}{\sqrt{\text{Var}\{\scoreUOneDim}\}}.
 $$
+
 It can be shown that $\text{Var}\{\scoreUOneDim\} =
 \mathcal{I}_1(\thetaOneTildeOD)$, where $\mathcal{I}_1(\thetaOneTildeOD)$ is
 the $H_1$ information matrix evaluated
@@ -407,18 +408,19 @@ geometrically as taking into account the
 overall shape of the likelihood to
 assess the magnitude of $\scoreUOneDim$. 
 
-Figure \ref{fig:fig1a} illustrates the one-dimensional scenario with
+Figure \ref{fig:fig1a} illustrates a one-dimensional scenario with
 $Y_i \sim \text{Normal}(\mu, 1)$, where
-$H_0: \mu = 0$ and $H_1: \mu = \alpha$, and both log-likelihood curves
-share $\scoreUOneDim=5$. Both the score test and LRT statistics indicate
-that the $H_0$ model is adequate for the 
-data of the orange curve, yet inadequate for the data of the blue
+$H_0: \mu = 0$ and $H_1: \mu = \alpha$, and two log-likelihood curves
+with different sample sizes that share $\scoreUOneDim=5$. Both the
+score test and LRT statistics indicate no evidence against the
+$H_0$ model for the data of the orange curve, but that $H_0$ is
+inadequate for the data of the blue 
 curve. As $\scoreUOneDim$ is a sum of independent contributions, the
 z-statistic is asymptotically Normal$(0,1)$ under $H_0$, so a two-tailed 
-p-value may be obtained to assess $H_0$. However, following convention, the score test
+$p$-value may be obtained to assess $H_0$. However, following convention, the score test
 statistic is found by squaring this standardised value,
 i.e., $S=\scoreUOneDim^2/\mathcal{I}_1(\thetaOneTildeOD)$,
-resulting in an asymptotic Chi-squared distribution.
+resulting in an asymptotic chi-squared distribution.
 
 The above reasoning holds as model dimension increases. Therefore, in general,
 $S = \scoreU^T \scoreI^{-1}
@@ -441,7 +443,7 @@ This is derived in one dimension in Section \ref{sec:lrt-s-equiv-proof} of
 the Appendix. Therefore, when the log-likelihood is quadratic, the LRT
 statistic and score statistic are exactly equal, and otherwise they are
 asymptotically equal. The null distribution for both score tests and
-LRTs is a Chi-squared
+LRTs is a chi-squared
 distribution where the degrees of freedom is the difference in the
 number of parameters for the $H_0$ and $H_1$ model.
 
@@ -465,17 +467,16 @@ number of parameters for the $H_0$ and $H_1$ model.
     0$ and $H_1: \mu = \alpha$. The log-likelihood
     curves have been shifted for interpretability, as indicated on the y-axes. (b) The blue curve
     represents a non-parabolic $H_1$ log-likelihood, and the dashed
-    pink line is the second-order Taylor series expansion about
-    $\thetaOneTildeOD$. 
+    pink line is the second-order Taylor series expansion of this
+    log-likelihood about $\thetaOneTildeOD$. 
     `LRT' and `S' represent the LRT and score statistic,
     respectively.}   
   \label{fig:fig1}
 \end{figure}
 
-Previously, the obstacle in implementing score tests was obtaining the
-score vector, $\boldsymbol{u}_1 (\thetaOne)$, and information
-matrix, $\mathcal{I}_1 (\thetaOne)$, to evaluate at
-$\thetaOneTilde$. However, following recent software advancements, we
+Previously, obtaining the score vector, $\boldsymbol{u}_1 (\thetaOneTilde)$, and information
+matrix, $\mathcal{I}_1 (\thetaOneTilde)$, posed an obstacle to
+implementing score tests. However, following recent software advancements, we
 can readily perform these calculations using the \lstinline{RTMB} R package,
 a commonly-used AD tool. By writing the $H_1$ log-likelihood as 
 an R function, it is straightforward to extract the score vector
@@ -489,19 +490,19 @@ for the example with $Y_i \sim
 = \alpha + \beta x_i$ for some covariate $\boldsymbol{x}$. Although these
 models are particularly simple,
 obtaining $\scoreU$ and $\scoreI$ is surprisingly
-involved. Furthermore, the symbolic
-differentiation required to calculate $S$ increases considerably as
-model complexity increases, typically becoming impractical.
+involved. The symbolic differentiation required to calculate $S$
+increases considerably as model complexity increases, typically
+becoming impractical. 
 
 \subsection{Implementing level-based model selection}
 \label{sec:implementing-framework}
 
-The key advantage of model selection via score tests is you don't need
-to fit all models under consideration. However, we do require a
-principled way to decide which models to fit, and which not to
-fit. One way to do this is by organising the candidate set into a tree
+The key advantage of model selection via score tests is that not all 
+models under consideration need to be fitted. However, we require a
+principled way to decide which models to fit. One way to do this is by
+organising the candidate set into a tree 
 structure to perform level-based model selection, as proposed by
-\textcite{catchpoleMorgan1996}. Through the construction of `levels',
+\textcite{catchpoleMorgan1996}. Through the construction of levels,
 this framework defines an efficient path to the final selected model,
 beginning by considering the simplest models. Score tests are used to
 select the best model at each level. 
@@ -514,33 +515,27 @@ select the best model at each level.
 
 As described in \textcite{mccreaMorgan2011}, 
 the most basic model defines Level 0 of the candidate set, and Level 1
-contains all models 
-with one added model term. For instance, in the example
-introduced in Section \ref{sec:calculating-score-stat} with $Y_i \sim
-\text{Normal}(\mu_i, 1)$, where $H_0: \mu_i = \alpha$ and $H_1: \mu_i
-= \alpha + \beta x_i$, if $H_0$ is the Level 0 model, then $H_1$ is a
-Level 1 model. Score tests are used to compare all Level 1 
-models to the Level 0 model. As in 
+contains all models with one added model term. For instance, in the
+example with $Y_i \sim \text{Normal}(\mu_i, 1)$ where $H_0: \mu_i =
+\alpha$ and $H_1: \mu_i = \alpha + \beta x_i$, if $H_0$ is the Level 0
+model, then $H_1$ is a Level 1 model. Score tests are used to compare
+all Level 1  models to the Level 0 model. As in 
 Section \ref{sec:calculating-score-stat}, we refer to the Level 0
 model as the `$H_0$ model', and the Level 1 models as `$H_1$
 models'. The $H_1$ model associated with the smallest significant
-p-value defines the new null hypothesis -- that is, it becomes the new
+$p$-value defines the new null hypothesis -- that is, it becomes the new
 $H_0$ model. Level 2 is then constructed, consisting of all models with one
 additional term relative to this model, and the
 process is repeated. We stop at the
-level where all of the score tests produce p-values 
+level where all of the score tests produce $p$-values 
 that are large enough for the analyst to be satisfied with the $H_0$
 model. At this point, the $H_0$ model becomes the chosen model.
 
-Although this method can be generalised beyond score tests -- AIC values
+Although this tree structure can be generalized beyond score tests -- AIC values
 or LRT statistics could be used instead, for example
--- it allows for especially convenient model selection when used to
-harness the utility of score tests. Specifically, implementing the approach on a
-comprehensive candidate set typically only requires
-a few models be fitted when using score tests (as only the $H_0$
-models need to be fitted).  
-
-The stepwise nature of the method also promotes
+-- it allows for especially convenient model selection when using
+score tests because only the $H_0$ models need to be fitted. The
+stepwise nature of the method also promotes 
 convenient model-fitting -- the MLEs from a given $H_0$ model may
 provide appropriate starting values for the next $H_0$ model
 \parencite{mccreaMorgan2011}.
@@ -555,20 +550,20 @@ a few models.
 \subsection{Non-nested models, boundary considerations and unidentifiability}
 \label{sec:non-nested-and-boundary-consid}
 
-When models are non-nested, it is impossible 
-to obtain the $H_0$ model from the $H_1$ model. No
-$\thetaOneTilde$ vector exists, so a
-score test statistic cannot be calculated.
+When models are non-nested, the $H_0$ model cannot be obtained from
+the $H_1$ model. No $\thetaOneTilde$ vector exists, so a score test
+statistic cannot be calculated. 
 
-Issues also occur when the regularity conditions underlying score
-tests do not hold. Most commonly, problems arise when
+Problems also arise when the regularity conditions underlying score
+tests do not hold. This may occur because 
 $\thetaOneTilde$ lies on the boundary of the parameter space or is
-unidentifiable under the $H_0$ model. The null Chi-squared distribution no
-longer holds, so the null distribution must be derived explicitly
-or via simulation. For example,
-\textcite{andrews-2001} derives bespoke null distributions for selected models. 
+unidentifiable under the $H_0$ model. The chi-squared distribution no
+longer holds for the null distribution, so the distribution must be
+derived explicitly or via simulation. For example,
+\textcite{andrews-2001} derives bespoke null distributions for
+selected models.  
 
-Furthermore, specific elements of $\scoreU$ being equal to zero can
+Specific elements of $\scoreU$ being equal to zero can also 
 produce identically zero and therefore uninformative score
 statistics. For further information, refer to texts such as
 \textcite{cox-hinkley-1979} and \textcite{lee-chesher-1986}. Briefly,
@@ -578,7 +573,7 @@ example, consider a $H_0$ non-mixture model with likelihood
 $f(\boldsymbol{y}|\theta)$ that is nested under a $H_1$ two-component mixture model
 with likelihood $(1-\pi)f(\boldsymbol{y}|\theta_A) + \pi
 f(\boldsymbol{y}|\theta_B)$. Under $H_1$, observations can fall into
-group A or B, with probability $(1-\pi)$ and $\pi$ respectively, and
+group A or B, with probability $(1-\pi)$ and $\pi$ respectively, whereas
 under $H_0$ all observations are in the same group. Parameters $\pi$
 and $\theta_B$ distinguish both models, and no matter how
 $\thetaOneTilde$ is constructed to  align with $H_0$ constraints
@@ -586,13 +581,16 @@ $\thetaOneTilde$ is constructed to  align with $H_0$ constraints
 direction of these parameters will always be $0$. As the score test
 relies on these derivatives, the score statistic is identically zero. 
 
-When such issues arise, we propose separating the
-candidate set into groups -- where models in each group fall into a
-nested structure with no boundary, identifiability or gradient
-problems -- and carrying out level-based model selection on each 
-group, using AIC to make a final selection from the chosen
-models. Using AIC like this is unlikely to require any extra models be
-fitted. See Section \ref{sec:ovenbirds} for an example. 
+When such issues arise, we propose separating the candidate set into
+groups -- where models in each group fall into a nested structure with
+no boundary, identifiability or gradient problems -- and carrying out
+level-based model selection on each  group. We then use AIC to make a
+final selection from the chosen models in each group. See Section
+\ref{sec:ovenbirds} for an example. Using AIC like this is unlikely to
+require any extra models be fitted, as it is only if we conduct score
+tests to the end of a group's tree (due to significant $p$-values
+occurring at each level) that
+the final chosen model will not already be fitted as an $H_0$ model.
 
 \section{Application: ovenbirds}
 \label{sec:ovenbirds}
@@ -604,19 +602,22 @@ fitted. See Section \ref{sec:ovenbirds} for an example.
 set consists of captures of 
 red-eyed vireos from a mist-netting survey on the Patuxent Research Refuge 
 in Maryland, USA, conducted in the 1960s. Considering
-a range of modelling choices, the authors examine a candidate set of 
-fifteen potential models, and the model with the lowest
-AIC is selected as the final model.
+a range of modeling choices, the authors examine a candidate set of 
+fifteen potential models, and select the model with the lowest
+AIC as the final model.
 
 Working with a similar data set allows consideration of the same
-modelling choices for comparative purposes. The `ovenbird' data set, 
+modeling choices for comparative purposes. The `ovenbird' data set, 
 available via the `secr' R package \parencite{secr-pkg}, contains adult captures from a 
 mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
 Research Refuge. The forest in the area has
 changed little since the previous survey in the 1960s. Therefore, to
 illustrate model selection, we employ the same model terms as 
-\textcite{borchersEfford2008}. Considering all possible
-combinations of these terms yields a
+\textcite{borchersEfford2008}. As described below, each model
+estimates three parameters, $D$, $g_0$ and $\sigma$.
+\textcite{borchersEfford2008} employ five distinct
+modeling choices for $g_0$ and three for $D$ and $\sigma$, and considering all possible
+combinations of these yields our
 candidate set of 45 models. Harnessing the convenience of score tests
 and AD via level-based model selection, it becomes practically
 feasible to consider a candidate set beyond the original 15 models
@@ -736,7 +737,7 @@ Please refer to Section \ref{sec:overview-candidate-models} of the Appendix for 
 overview of the models in our candidate set. Briefly, as we use a
 homogeneous Poisson point process and half-normal detection function, 
 our parameters of interest are: $D$, $g_0$ and $\sigma$. We
-consider a range of modelling choices for these parameters, and
+consider a range of modeling choices for these parameters, and
 considering all possible combinations of the resulting model terms
 yields the forty five models in our candidate set. See Table
 \ref{table:aic-table} in Section \ref{sec:aic-res-app} of the Appendix
@@ -762,7 +763,7 @@ compare models. We write the objective function
 (the negative log-likelihood) for every candidate model as an R 
 function and follow the approach outlined in Section \ref{sec:rtmb-appendix}  
 of the Appendix, using \lstinline{RTMB} to fit the $H_0$ model and
-obtain the required gradients. We stop at the level of the framework  where p-values
+obtain the required gradients. We stop at the level of the framework  where $p$-values
 are no longer significant  according to the commonly-used 5\% threshold. Using AIC, we
 compare the chosen model from each group, selecting the model
 with the smallest AIC as the final model. 
@@ -795,7 +796,7 @@ one term, using AIC for comparison is equivalent to conducting a LRT
 with a significance level of 0.157. The two approaches select
 the same model. By the asymptotic equivalence between LRTs and score
 tests, using AIC is therefore asymptotically
-equivalent to a score test with a p-value threshold of
+equivalent to a score test with a $p$-value threshold of
 0.157. Thus, to ensure the accuracy of the above comparison, we can
 implement our score tests using this threshold, although as shown in Table
 \ref{table:score-table}, the results remain unchanged. 
@@ -830,12 +831,12 @@ with mixture models \parencite{mcL-Peel2000}.
 
 In Tables \ref{table:score-table} and \ref{table:aic-vals-score-tests}, we provide results
 from using score tests for model selection for each group, stopping
-where p-values are no longer significant based on a 5\%  
+where $p$-values are no longer significant based on a 5\%  
 threshold. In Table \ref{table:score-table}, the model selected from
 each group is displayed in bold. The close alignment between score
 statistics, LRT statistics and AIC values confirm the accuracy of the
 score tests. Due to negligible differences, we only report score test
-p-values (and not LRT p-values). In Table
+$p$-values (and not LRT $p$-values). In Table
 \ref{table:aic-vals-score-tests}, we show AIC values for the model
 selected from each group, leading to our final choice. From these AIC
 values, we can confirm the potential issue of AIC favouring mixture models does not
@@ -872,7 +873,7 @@ for more details.
     falls into within the score test framework (`Level'), the model
     description in \lstinline{secr} parlance (`Model'), the number of
     model parameters (`npar'), the score statistic (`$S$'), the LRT
-    statistic (`$LRT$') and the score test p-value (`p-value'). We
+    statistic (`$LRT$') and the score test $p$-value (`$p$-value'). We
     also supply the 
     difference in AIC for all $H_1$ models, relative to the $H_0$ model
     from the previous level (`$\Delta$AIC'). The selected
@@ -893,7 +894,7 @@ for more details.
     \multicolumn{7}{ c }{Group 1} \\ 
     \hline
     \hline
-    Level & Model & npar & $S$ & $LRT$ & p-value & $\Delta$AIC \\
+    Level & Model & npar & $S$ & $LRT$ & $p$-value & $\Delta$AIC \\
     \hline
     0 & \Dconst, \gconst, \sigmaconst & 3 & - & - & - & - \\
     \hdashline
@@ -920,7 +921,7 @@ for more details.
     \multicolumn{7}{ c }{Group 2} \\ 
     \hline
     \hline
-    Level & Model & npar & $S$ & $LRT$ & p-value & $\Delta$AIC \\
+    Level & Model & npar & $S$ & $LRT$ & $p$-value & $\Delta$AIC \\
     \hline
     0 & \textbf{\Dconst}, $\boldsymbol{g_0\sim \textbf{h2}}$,
         $\boldsymbol{\sigma\sim 1}$ & $\boldsymbol{5}$ & \textbf{-} &
@@ -936,7 +937,7 @@ for more details.
     \multicolumn{7}{ c }{Group 3} \\ 
     \hline
     \hline
-    Level & Model & npar & $S$ & $LRT$ & p-value & $\Delta$AIC \\
+    Level & Model & npar & $S$ & $LRT$ & $p$-value & $\Delta$AIC \\
     \hline
     0 & \Dconst, \gconst, \sigmamix & 5 & - & - & - & \\
     \hdashline
@@ -961,7 +962,7 @@ for more details.
     \multicolumn{7}{ c }{Group 4} \\ 
     \hline
     \hline
-    Level & Model & npar & $S$ & $LRT$ & p-value & $\Delta$AIC \\
+    Level & Model & npar & $S$ & $LRT$ & $p$-value & $\Delta$AIC \\
     \hline
     0 & \textbf{\Dconst}, $\boldsymbol{g_0\sim \textbf{h2}}$,
         $\boldsymbol{\sigma\sim \textbf{h2}}$ & $\boldsymbol{6}$ &
@@ -1315,7 +1316,7 @@ score.null <- -obj.alt$gr(pars.null)
 info.null <- obj.alt$he(pars.null)
 \end{lstlisting}
 
-And lastly, we obtain the score statistic and its p-value. 
+And lastly, we obtain the score statistic and its $p$-value. 
 
 \begin{lstlisting}[language=R]
 S <- score.null %*% solve(info.null) %*% t(score.null)
