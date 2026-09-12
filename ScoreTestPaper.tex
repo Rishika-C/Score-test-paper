@@ -822,7 +822,9 @@ terms for $g_0$ and $\sigma$ within a tree. Therefore, we construct four
 trees for model selection: models with no mixture terms, models with
 mixture terms for $g_0$ only, models with mixture terms for
 $\sigma$ only, and models with mixture terms for $g_0$ and
-$\sigma$. 
+$\sigma$. Refer to Appendix \ref{sec:model-sel-trees} for a
+visualisation of model selection using these trees, labelled `Tree 1'
+to `Tree 4', respectively. 
 
 To conduct model selection, we apply the framework we described
 earlier to each tree, using score tests to
@@ -865,7 +867,7 @@ threshold of 5\% also select this model.
 
 For more details, refer to Tables \ref{table:score-table} and
 \ref{table:aic-vals-score-tests}, which contain results for
-model selection via score tests. In Table \ref{table:score-table}, the
+the score tests. In Table \ref{table:score-table}, the
 model selected from each tree is displayed in bold, which we can see is
 unchanged whether we use the 5\% or 15.7\% significance 
 level. Table \ref{table:score-table} also contains LRT statistics
@@ -907,8 +909,8 @@ see similar time savings as above, but the time taken remains greater than
 when using score tests due to all models at each level
 being fitted. As model complexity and quantity increases,
 this time saving will also increase. Note that when replacing score
-tests with AIC values, we retain the four trees \textbf{(shown in
-  Appendix ...)} to reduce the effect
+tests with AIC values, we retain the four trees shown in Appendix
+\ref{sec:model-sel-trees} to reduce the effect
 of AIC favouring larger mixture models, mentioned above.  Therefore,
 the results in Tables \ref{table:score-table} and
 \ref{table:aic-vals-score-tests} illustrate how our choice of final model
@@ -1691,6 +1693,48 @@ similar to the one in Section \ref{sec:rtmb-appendix}.
 %   each session: one for previously captured individuals, and one for
 %   individuals not caught yet. 
 % \end{itemize}
+
+\subsection{Score test model selection trees}
+\label{sec:model-sel-trees}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth, page=1]{TreeDiagrams.pdf}
+  \caption{A visualisation of applying score test model selection via
+    our level-based framework to `Tree 1' for the ovenbird data -- the
+    tree without mixture effects. The $H_0$ model at each level is
+    coloured in blue, and each model considered in a corresponding
+    score test is coloured in red.} 
+  \label{fig:tree-1}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth, page=2]{TreeDiagrams.pdf}
+  \caption{As in Figure \ref{fig:tree-1}, a visualisation of `Tree 2'
+    for the ovenbird data, the tree where models have a mixture effect
+    for $g_0$ and no mixture effect for $\sigma$.} 
+  \label{fig:tree-2}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth, page=3]{TreeDiagrams.pdf}
+  \caption{As in Figure \ref{fig:tree-1}, a visualisation of `Tree 3'
+    for the ovenbird data, the tree where models have a mixture effect
+    for $\sigma$ and no mixture effect for $g_0$.} 
+  \label{fig:tree-3}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth, page=4]{TreeDiagrams.pdf}
+  \caption{Test.} 
+  \caption{As in Figure \ref{fig:tree-1}, a visualisation of `Tree 4'
+    for the ovenbird data, the tree where models have a mixture effect
+    for $g_0$ and $\sigma$.} 
+\end{figure}
+
 
 \subsection{AIC results}
 \label{sec:aic-res-app}
