@@ -1068,8 +1068,7 @@ to fit all models in the candidate set.
 
 Generally, when performing model selection, it is necessary to take model
 uncertainty into account, e.g. via a bootstrap simulation, so standard
-errors are not underestimated \textbf{(Claeskens and Hjort
-  2008?)}. Furthermore, \textcite{mccreaMorgan2011} 
+errors are not underestimated. Furthermore, \textcite{mccreaMorgan2011} 
 recommend using simulation to select an appropriately conservative significance
 level, mitigating against an inflated false positive rate due to multiple
 tests. Lastly, with hierarchical model selection it is generally 
@@ -1697,7 +1696,7 @@ similar to the one in Section \ref{sec:rtmb-appendix}.
 \subsection{Score test model selection trees}
 \label{sec:model-sel-trees}
 
-\begin{figure}[htbp]
+\begin{figure}[htbp!]
   \centering
   \includegraphics[width=\textwidth, page=1]{TreeDiagrams.pdf}
   \caption{A visualisation of applying score test model selection via
@@ -1708,7 +1707,7 @@ similar to the one in Section \ref{sec:rtmb-appendix}.
   \label{fig:tree-1}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[htbp!]
   \centering
   \includegraphics[width=\textwidth, page=2]{TreeDiagrams.pdf}
   \caption{As in Figure \ref{fig:tree-1}, a visualisation of `Tree 2'
@@ -1717,7 +1716,7 @@ similar to the one in Section \ref{sec:rtmb-appendix}.
   \label{fig:tree-2}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[htbp!]
   \centering
   \includegraphics[width=\textwidth, page=3]{TreeDiagrams.pdf}
   \caption{As in Figure \ref{fig:tree-1}, a visualisation of `Tree 3'
@@ -1726,20 +1725,18 @@ similar to the one in Section \ref{sec:rtmb-appendix}.
   \label{fig:tree-3}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[htbp!]
   \centering
   \includegraphics[width=\textwidth, page=4]{TreeDiagrams.pdf}
-  \caption{Test.} 
   \caption{As in Figure \ref{fig:tree-1}, a visualisation of `Tree 4'
     for the ovenbird data, the tree where models have a mixture effect
     for $g_0$ and $\sigma$.} 
 \end{figure}
 
-
 \subsection{AIC results}
 \label{sec:aic-res-app}
 
-\begin{table}[h!]
+\begin{table}[htbp]
   \caption{$\Delta$AIC values for all 45 models in the candidate set,
     obtained via standard practices (i.e. without using AD). The
     `Model' column contains model descriptions, `Number of parameters'
