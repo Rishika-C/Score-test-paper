@@ -593,11 +593,11 @@ the final chosen model will not already be fitted as an $H_0$ model.
 \section{Application to SCR: ovenbirds}
 \label{sec:ovenbirds}
 
-\subsection{Brief overview of SCR}
+\subsection{Brief overview}
 \label{sec:scr-overview}
 
 Spatial capture-recapture (SCR) models use records of when and where
-individuals were captured on different survey occasions to estimate
+individuals were captured to estimate
 animal density and distribution \parencite{borchersEfford2008}. Basic models generally
 estimate three parameters: $D$, $g_0$ and $\sigma$, where $D$
 represents animal density in the survey area, and $g_0$ and $\sigma$ describe
@@ -605,8 +605,62 @@ the probability of detection.
 
 When defining a SCR model, it is standard to specify effects
 (e.g. behavioural effects, covariate effects, etc.) for the model
-parameters. Table \ref{table:dependencies} shows all of the effects we
-will consider in our application. 
+parameters. For example, allowing $D$ to vary over time and/or
+environmental covariates allows understanding of how animal density varies
+over space and time.
+
+Model selection for SCR is typically done by AIC
+\parencite{efford-schofield}, requiring all candidate models to be
+fitted. The likelihood involves a product of two-dimensional
+integrals, e.g., 
+
+\begin{equation} \label{eq:scr-lik}
+L(\boldsymbol{\theta}) = \frac{\{Da(\boldsymbol{\theta})\}^n \exp
+  \{-Da(\boldsymbol{\theta})\}}{n!} \times \binom{n}{n_1,...,n_c}
+\prod_{i=1}^n \frac{\int_{\mathbb{R}^2}
+  \mathbb{P}(\boldsymbol{\omega}_i | \boldsymbol{X}; \boldsymbol{\theta}) d
+  \boldsymbol{X}}{a(\boldsymbol{\theta})},
+\end{equation}
+
+represents a relatively simple SCR likelihood, as described in
+\textcite{borchersEfford2008}. Due to the general complexity of SCR
+likelihoods, model-fitting is  
+time-consuming, suggesting that score tests are likely a more
+efficient option for model selection. Refer to \textcite{secr-book}
+for more details on SCR models. 
+
+\subsection{Ovenbird application}
+\label{sec:data-set}
+
+\textcite{borchersEfford2008} illustrate SCR modeling using a dataset
+of captures of 
+red-eyed vireos from a mist-netting survey at the Patuxent Research Refuge 
+in Maryland, USA, conducted in the 1960s. They examine a candidate set of 
+fifteen potential models, and select the model with the lowest
+AIC as the final model.
+
+Working with a similar dataset allows consideration of the same
+modeling choices for comparative purposes. The `ovenbird' dataset, 
+available via the `secr' R package \parencite{secr-pkg}, contains adult captures from a 
+mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
+Research Refuge. The forest in the area has
+changed little since the previous survey in the 1960s. Therefore, to
+illustrate model selection, we employ the same model terms as 
+\textcite{borchersEfford2008}, shown in Table
+\ref{table:dependencies} and described below. As we can see in this table,
+\textcite{borchersEfford2008} employ five distinct
+modeling choices for $g_0$, and three for $D$ and $\sigma$. Considering all possible
+combinations of these yields our
+candidate set of 45 models, listed in Table \ref{table:aic-table} of
+Appendix \ref{sec:aic-res-app}. Harnessing the convenience of score tests
+and AD via level-based model selection, it becomes practicable to
+consider a candidate set beyond the original 15 models considered.
+
+A total of 44 mist nets were operated for nine or
+ten non-consecutive days in late May and June of each year, where each
+year is referred to as a `session'. We retain any 
+records of individual birds being captured more than once in a
+day. 
 
 \begin{table}[h!]
   \centering
@@ -630,24 +684,28 @@ will consider in our application.
 \label{table:dependencies}
 \end{table}
 
-Specifically,
+The effects for $D$, $g_0$ and $\sigma$ that we consider, represented in Table
+\ref{table:dependencies}, are as follows. Refer to \textcite{secr-book}
+for further details:
 \begin{itemize}[label={}]
 \item `$\sim 1$' represents a parameter being held constant across
-  sessions, i.e. across survey occasions. For example, with $D \sim 1$, we have only one
+  sessions, i.e. across years. For example, with $D \sim 1$, we have only one
   estimate of $D$ and use it for all sessions;
-\item `$\sim \text{session}$' means a parameter has session-specific
+\item `$\sim \text{session}$' means a parameter varies across time ---
+  that is, it has session-specific
   levels. For example, with $D \sim \text{session}$, we have a separate estimate
   of $D$ for each session;
 \item `$\sim \text{session.trend}$' represents a trend across
   sessions. With `$D \sim \text{session.trend}$', we  have $D(y) =
-  exp(\beta_0 + \beta_1 y)$, 
+  \exp(\beta_0 + \beta_1 y)$, 
   where $y$ is the session number \parencite{borchersEfford2008}; 
 \item `$\sim \text{mixture}$' denotes a
   two-class finite mixture model. For example, with `$\sigma \sim \text{mixture}$', we assume
   there are two groups in the population: Group 1 uses $\sigma_1$,
   and Group 2 uses $\sigma_2$. An 
   individual falls in Group 1 with probability $p$ and in Group 2
-  with probability $(1-p)$. These estimates are pooled across sessions; 
+  with probability $(1-p)$, where group membership is unknown. These
+  estimates are pooled across sessions;  
 \item `$\sim \text{behaviour}$' represents a behavioural response to capture. With $g_0 \sim
   \text{behaviour}$, we have two estimates of $g_0$: one for individuals
   captured previously in a session, and one for individuals
@@ -660,160 +718,10 @@ Specifically,
   individuals not caught yet. 
 \end{itemize}
 
-Refer to \textcite{secr-book} for more details on SCR models and the
-effects described above. 
-
-\subsection{Dataset}
-\label{sec:data-set}
-
-\textcite{borchersEfford2008} illustrate SCR modeling using a dataset
-of captures of 
-red-eyed vireos from a mist-netting survey at the Patuxent Research Refuge 
-in Maryland, USA, conducted in the 1960s. They examine a candidate set of 
-fifteen potential models, and select the model with the lowest
-AIC as the final model.
-
-Working with a similar dataset allows consideration of the same
-modeling choices for comparative purposes. The `ovenbird' dataset, 
-available via the `secr' R package \parencite{secr-pkg}, contains adult captures from a 
-mist-netting survey of ovenbirds conducted from 2005 to 2009 at the Patuxent
-Research Refuge. The forest in the area has
-changed little since the previous survey in the 1960s. Therefore, to
-illustrate model selection, we employ the same model terms as 
-\textcite{borchersEfford2008}, shown in Table
-\ref{table:dependencies}. As we can see in this table,
-\textcite{borchersEfford2008} employ five distinct
-modeling choices for $g_0$, and three for $D$ and $\sigma$. Considering all possible
-combinations of these yields our
-candidate set of 45 models. Harnessing the convenience of score tests
-and AD via level-based model selection, it becomes practicable to
-consider a candidate set beyond the original 15 models considered.  
-
-A total of 44 mist nets were operated for nine or
-ten non-consecutive days in late May and June of each year. We retain any 
-records of individual birds being captured more than once in a
-day. % Below, we compare our score test approach to the traditional
-% approach of model selection using AIC.
-
-
-\subsection{Implementing level-based model selection}
+\subsection{Practicalities of model selection with score tests}
 \label{sec:implementing-for-ex}
 
-% Simply put, the likelihood of our relatively basic SCR models can be
-% written as follows: 
-% \begin{equation}
-%   L = \frac{e^{-E[n]}}{n!} \prod_{i=1}^n \int_{\mathcal{R}^2} \mathbb{P} \left(
-%     \begin{tabular}{ c }
-%       capture history \\
-%       i \\
-%     \end{tabular}
-%     \middle| g_0, \sigma, \boldsymbol{s} \;
-%   \right)
-%   \left(
-%     \begin{tabular}{ c }
-%       intensity function \\
-%       at \boldsymbol{s} \\
-%     \end{tabular}
-%     \middle| \boldsymbol{\phi} \;
-%   \right)
-%   % \mathbb{P} \begin{pmatrix} \text{capture history } i, \text{given }\\
-%   %   \text{the animal is at } \boldsymbol{s} \end{pmatrix}
-%   % \times \begin{pmatrix} \text{expected number of animals} \\ \text{per
-%   %     unit area at } \boldsymbol{s} \end{pmatrix}
-%   d \boldsymbol{s}
-% \end{equation}
-
-% As described in Section \ref{sec:overview-candidate-models} of the
-% Appendix and in texts such as \textcite{secr-book}, specifying an SCR
-% model involves selecting a spatial point process to describe
-% animal distribution in the area of interest, and a detection function
-% to describe the sampling process. As discussed in Section
-% \ref{sec:overview-candidate-models} of the Appendix, we select a
-% homogeneous Poisson point process and a half-normal detection
-% function for our models, following the example of
-% \textcite{borchersEfford2008}. In practice, making accurate selections
-% enhances the validity of inference. Specifically, misspecification of
-% the detection function is known to produce misleading results,
-% emphasising the importance of reliable model selection techniques.  
-
-% However, SCR likelihoods are generally elaborate, making model selection
-% potentially fraught. For example, 
-% Equation \ref{eq:scr-lik} represents a relatively basic simplified SCR
-% likelihood as described in \textcite{borchersEfford2008}. We omit
-% explanations of the terms in this equation for simplicity, refer to
-% the text for more details. This expression illustrates how even
-% relatively simple 
-% SCR models are sophisticated statistical models, requiring evaluation of a product of 
-% two-dimensional integrals. It is used to calculate likelihood values for the SCR
-% models we consider, and as we see below, its complexity makes
-% traditional model selection techniques time consuming. Selecting a
-% different spatial point process would increase the complexity of the
-% likelihood further, escalating barriers for model selection.
-
-% SCR likelihoods are generally elaborate, making
-% tasks such as model selection potentially fraught.
-
-% Specifically, 
-% evaluating an SCR likelihood requires a product of two-dimensional
-% integrals, where each integral is an infinite sum over the model's
-% random effects. For example, a standard SCR likelihood as described in
-% \parencite{borchersEfford2008} is given in Equation \ref{eq:scr-lik}
-% below. We omit explanations of the terms involved for simplicity,
-% refer to this text for more details. 
-
-% \begin{equation} \label{eq:scr-lik}
-%   L = \frac{\exp \lrbr{- \int_{\mathcal{R}^2} D(\boldsymbol{X}' ;
-%       \boldsymbol{\phi}) p_{.} (\boldsymbol{X}' ; \boldsymbol{\theta})
-%       d \boldsymbol{X}'}}{n!} \prod_{i=1}^n \int_{\mathcal{R}^2}
-%   \mathbb{P}(\boldsymbol{\omega}_i ; \boldsymbol{\theta},
-%   \boldsymbol{X}) D(\boldsymbol{X} ; \boldsymbol{\phi}) d \boldsymbol{X}
-% \end{equation}
-
-% Specifically, due to the complexity of the likelihoods involved,
-% fitting every model in a comprehensive candidate set  
-% such as ours requires significant resources and time. Despite this,
-% the convenience of calculating AIC means it is often used for
-% SCR model selection \parencite{efford-schofield}, often making model
-% selection laborious and potentially impractical. Although popular models
-% for estimating animal abundance, the complexity of SCR likelihoods
-% means derivatives and therefore tools such as score tests were
-% previously elusive. % The benefits of simplifying model selection via
-% % our proposed approach are substantial, allowing newly accessible
-% % model selection for these models.
-
-% Please refer to Section \ref{sec:overview-candidate-models} of the Appendix for an
-% overview of the models in our candidate set. Briefly, as we use a
-% homogeneous Poisson point process and half-normal detection function, 
-% our parameters of interest are: $D$, $g_0$ and $\sigma$. We
-% consider a range of modeling choices for these parameters, and
-% considering all possible combinations of the resulting model terms
-% yields the forty five models in our candidate set. See Table
-% \ref{table:aic-table} in Section \ref{sec:aic-res-app} of the Appendix
-% for the complete list of models.
-
-Model selection for SCR is typically done by AIC
-\parencite{efford-schofield}, requiring all candidate models to be
-fitted. The likelihood involves a product of two-dimensional
-integrals, e.g., 
-
-\begin{equation} \label{eq:scr-lik}
-L(\boldsymbol{\theta}) = \frac{\{Da(\boldsymbol{\theta})\}^n \exp
-  \{-Da(\boldsymbol{\theta})\}}{n!} \times \binom{n}{n_1,...,n_c}
-\prod_{i=1}^n \frac{\int_{\mathbb{R}^2}
-  \mathbb{P}(\boldsymbol{\omega}_i | \boldsymbol{X}; \boldsymbol{\theta}) d
-  \boldsymbol{X}}{a(\boldsymbol{\theta})},
-\end{equation}
-
-represents a relatively simple SCR likelihood, as described in
-\textcite{borchersEfford2008}. Due to the general complexity of SCR
-likelihoods, model-fitting is  
-time-consuming, suggesting that score tests are likely a more
-efficient option for model selection. The complete list of models for
-$D$, $g_0$ and $\sigma$ is given in Table \ref{table:aic-table} of
-Appendix \ref{sec:aic-res-app}.
-
-To construct tree structures for level-based model selection as
-described in Section \ref{sec:implementing-framework}, we first
+To construct tree structures for level-based model selection, we first
 identify scenarios with identically zero score statistics, as described in Section
 \ref{sec:non-nested-and-boundary-consid}. Our candidate set includes models with
 two-component finite mixtures for $g_0$ and/or $\sigma$. To avoid
@@ -822,9 +730,9 @@ terms for $g_0$ and $\sigma$ within a tree. Therefore, we construct four
 trees for model selection: models with no mixture terms, models with
 mixture terms for $g_0$ only, models with mixture terms for
 $\sigma$ only, and models with mixture terms for $g_0$ and
-$\sigma$. Refer to Appendix \ref{sec:model-sel-trees} for a
-visualisation of model selection using these trees, labelled `Tree 1'
-to `Tree 4', respectively. 
+$\sigma$. \textcolor{red}{Refer to Appendix \ref{sec:model-sel-trees}
+  for diagrams of these trees, labelled `Tree 1'
+to `Tree 4', respectively.}
 
 To conduct model selection, we apply the framework we described
 earlier to each tree, using score tests to
@@ -872,8 +780,8 @@ model selected from each tree is displayed in bold, which we can see is
 unchanged whether we use the 5\% or 15.7\% significance 
 level. Table \ref{table:score-table} also contains LRT statistics
 and AIC values, which show close alignment with our score
-statistics. Therefore, due to negligible differences, we only report
-score test  $p$-values (and not LRT $p$-values). In Table
+statistics (due to negligible differences, we only report
+score test  $p$-values and not LRT $p$-values). In Table
 \ref{table:aic-vals-score-tests}, we show AIC values for the model
 selected from each tree, leading to our final choice. Note that
 when comparing mixture and non-mixture models, there is potential for
@@ -897,7 +805,7 @@ AIC. % Simple
 %   delta-AIC < 2, instead of lambda at least 2?}
 % }
 
-These significant time savings we see can be attributed a reduced number
+The significant time savings can be attributed to having a reduced number
 of models to fit, and the use of AD. Using score tests via the level-based
 framework for each tree, only 6 of the 45 candidate models need to be
 fitted. Furthermore, using AD significantly speeds up model fitting
@@ -911,11 +819,10 @@ being fitted. As model complexity and quantity increases,
 this time saving will also increase. Note that when replacing score
 tests with AIC values, we retain the four trees shown in Appendix
 \ref{sec:model-sel-trees} to reduce the effect
-of AIC favouring larger mixture models, mentioned above.  Therefore,
-the results in Tables \ref{table:score-table} and
-\ref{table:aic-vals-score-tests} illustrate how our choice of final model
-remains unchanged for this implementation. 
-
+of AIC favouring larger mixture models, mentioned above. Thus, Tables
+\ref{table:score-table} and \ref{table:aic-vals-score-tests} provide
+AIC values for this implementation (confirming our choice of final
+model remains unchanged). 
 
 \begin{table}[h!]
   \caption{Results from the score test approach for the four
