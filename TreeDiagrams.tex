@@ -61,16 +61,18 @@
   arrow/.style={-{Latex[length=2mm]}, thick, gray}
 ]
 
-\path[use as bounding box] (-10.5,-0.5) (10.5,8.6);
+\path[use as bounding box] (-13.5,-0.5) (10.5,8.6);
 
 % ------------------------------------------------------------
 % LEVEL 0: base model (no parameters)
 % ------------------------------------------------------------
+\node[title] (L0label) at (-12, 0) {Level 0};
 \node[modelH0] (base) at (0,0) {\Dconst, \gconst, \sigmaconst};
 
 % ------------------------------------------------------------
 % LEVEL 1: one added effect each
 % ------------------------------------------------------------
+\node[title] (L1label) at (-12, 1.45) {Level 1};
 \node[modelH1] (m11) at (-3.95,1.7) {\DSession, \gconst, \sigmaconst};
 \node[modelH1] (m12) at (-3.95,1.2) {\Dsession, \gconst, \sigmaconst};
 \node[modelH1] (m13) at (0.0,1.7) {\Dconst, \gsession, \sigmaconst};
@@ -80,6 +82,7 @@
 % ------------------------------------------------------------
 % LEVEL 2: two added effects (pairwise combinations)
 % ------------------------------------------------------------
+\node[title] (L2label) at (-12, 3.4) {Level 2};
 \node[model] (m21) at (-5.4,3.9) {\DSession, \gconst, \sigmasession};
 \node[model] (m22) at (-5.4,3.4) {\Dsession, \gconst, \sigmasession};
 \node[model] (m23) at (-5.4,2.9) {\DSession, \gsession, \sigmaconst};
@@ -93,6 +96,7 @@
 % ------------------------------------------------------------
 % LEVEL 3: three added effects
 % ------------------------------------------------------------
+\node[title] (L3label) at (-12, 5.6) {Level 3};
 \node[model] (m31) at (-6.4,6.1) {\DSession, \gbehav, \sigmasession};
 \node[model] (m32) at (-6.4,5.6) {\Dsession, \gbehav, \sigmasession};
 \node[model] (m33) at (-6.4,5.1) {\Dsession, \gsession, \sigmasession};
@@ -104,6 +108,7 @@
 % ------------------------------------------------------------
 % LEVEL 4: four added effects 
 % ------------------------------------------------------------
+\node[title] (L4label) at (-12, 7.3) {Level 4};
 \node[model] (m41) at (-6.4,7.3) {\DSession, \gsessionbehav, \sigmasession};
 \node[model] (m42) at (6.4,7.3) {\Dsession, \gsessionbehav,
   \sigmasession};
@@ -148,16 +153,18 @@
   arrow/.style={-{Latex[length=2mm]}, thick, gray}
 ]
 
-\path[use as bounding box] (-10.5,-0.5) (10.5,3.7);
+\path[use as bounding box] (-13.5,-0.5) (10.5,3.7);
 
 % ------------------------------------------------------------
 % LEVEL 0: base model (no parameters)
 % ------------------------------------------------------------
+\node[title] (L0label) at (-12, 0) {Level 0};
 \node[modelH0] (base) at (0,0) {\Dconst, \gmix, \sigmaconst};
 
 % ------------------------------------------------------------
 % LEVEL 1: one added effect each
 % ------------------------------------------------------------
+\node[title] (L1label) at (-12, 1.2) {Level 1};
 \node[modelH1] (m11) at (-5.1,1.2) {\Dsession, \gmix, \sigmaconst};
 \node[modelH1] (m12) at (0.0,1.2) {\DSession, \gmix, \sigmaconst};
 \node[modelH1] (m13) at (5.1,1.2) {\Dconst, \gmix, \sigmasession};
@@ -165,6 +172,7 @@
 % ------------------------------------------------------------
 % LEVEL 2: two added effects (pairwise combinations)
 % ------------------------------------------------------------
+\node[title] (L2label) at (-12, 2.4) {Level 2};
 \node[model] (m21) at (-5.4,2.4) {\DSession, \gmix, \sigmasession};
 \node[model] (m22) at (5.4,2.4) {\Dsession, \gmix, \sigmasession};
 
@@ -205,16 +213,18 @@
   arrow/.style={-{Latex[length=2mm]}, thick, gray}
 ]
 
-\path[use as bounding box] (-10.5,-0.5) (10.5,5.9);
+\path[use as bounding box] (-13.5,-0.5) (10.5,5.9);
 
 % ------------------------------------------------------------
 % LEVEL 0: base model (no parameters)
 % ------------------------------------------------------------
+\node[title] (L0label) at (-12, 0) {Level 0};
 \node[modelH0] (base) at (0,0) {\Dconst, \gconst, \sigmamix};
 
 % ------------------------------------------------------------
 % LEVEL 1: one added effect each
 % ------------------------------------------------------------
+\node[title] (L1label) at (-12, 1.45) {Level 1};
 \node[modelH1] (m11) at (-3.1,1.7) {\DSession, \gconst, \sigmamix};
 \node[modelH1] (m12) at (-3.1,1.2) {\Dsession, \gconst, \sigmamix};
 \node[modelH1] (m13) at (3.1,1.7) {\Dconst, \gsession, \sigmamix};
@@ -223,6 +233,7 @@
 % ------------------------------------------------------------
 % LEVEL 2: two added effects (pairwise combinations)
 % ------------------------------------------------------------
+\node[title] (L2label) at (-12, 3.15) {Level 2};
 \node[modelH1] (m21) at (-6.4,3.4) {\DSession, \gbehav, \sigmamix};
 \node[modelH1] (m22) at (-6.4,2.9) {\Dsession, \gbehav, \sigmamix};
 \node[model] (m23) at (0.0,3.4) {\DSession, \gsession, \sigmamix};
@@ -232,6 +243,7 @@
 % ------------------------------------------------------------
 % LEVEL 3: three added effects (pairwise combinations)
 % ------------------------------------------------------------
+\node[title] (L3label) at (-12, 4.6) {Level 3};
 \node[model] (m31) at (-6.4,4.6) {\DSession, \gsessionbehav, \sigmamix};
 \node[model] (m32) at (6.4,4.6) {\Dsession, \gsessionbehav, \sigmamix};
 
@@ -274,16 +286,18 @@
   arrow/.style={-{Latex[length=2mm]}, thick, gray}
 ]
 
-\path[use as bounding box] (-10.5,-0.5) (10.5,2.5);
+\path[use as bounding box] (-13.5,-0.5) (10.5,2.5);
 
 % ------------------------------------------------------------
 % LEVEL 0: base model (no parameters)
 % ------------------------------------------------------------
+\node[title] (L0label) at (-12, 0) {Level 0};
 \node[modelH0] (base) at (0,0) {\Dconst, \gmix, \sigmamix};
 
 % ------------------------------------------------------------
 % LEVEL 1: one added effect each
 % ------------------------------------------------------------
+\node[title] (L1label) at (-12, 1.2) {Level 1};
 \node[modelH1] (m11) at (-5.1,1.2) {\DSession, \gmix, \sigmamix};
 \node[modelH1] (m12) at (5.1,1.2) {\Dsession, \gmix, \sigmamix};
 % ------------------------------------------------------------

@@ -28,6 +28,8 @@
 \usepackage{lineno,xcolor} % For numbering lines
 \usepackage{arydshln}
 \usepackage{enumitem} % For indented list without bullet points
+\usepackage{pdflscape}
+\usepackage{rotating}
 
  % For R code, for now :)
 \usepackage{listings}
@@ -193,15 +195,15 @@ mincitenames=1,uniquelist=false, style=apa,giveninits=true]{biblatex}
 %% Commands for tables of results
 \newcommand{\til}{$\sim$}
 \newcommand{\Dconst}{D\til 1}
-\newcommand{\DSession}{D\til session.trend}
-\newcommand{\Dsession}{D\til session}
+\newcommand{\DSession}{D\til year.trend}
+\newcommand{\Dsession}{D\til year}
 \newcommand{\gconst}{$g_0$\til 1}
-\newcommand{\gsession}{$g_0$\til session}
+\newcommand{\gsession}{$g_0$\til year}
 \newcommand{\gbehav}{$g_0$\til behaviour}
-\newcommand{\gsessionbehav}{$g_0$\til session + behaviour}
+\newcommand{\gsessionbehav}{$g_0$\til year + behaviour}
 \newcommand{\gmix}{$g_0$\til mixture}
 \newcommand{\sigmaconst}{$\sigma$\til 1}
-\newcommand{\sigmasession}{$\sigma$\til session}
+\newcommand{\sigmasession}{$\sigma$\til year}
 \newcommand{\sigmamix}{$\sigma$\til mixture}
 
 
@@ -598,10 +600,14 @@ the final chosen model will not already be fitted as an $H_0$ model.
 
 Spatial capture-recapture (SCR) models use records of when and where
 individuals were captured to estimate
-animal density and distribution \parencite{borchersEfford2008}. Basic models generally
+animal density and distribution \parencite{borchersEfford2008}. Let
+$\boldsymbol{\omega}_i$ be the capture history (i.e., record of
+captures) for the $i$th detected individual, indicating where and when
+it was detected. Using these capture histories, basic models generally
 estimate three parameters: $D$, $g_0$ and $\sigma$, where $D$
 represents animal density in the survey area, and $g_0$ and $\sigma$ describe
-the probability of detection. 
+the probability of detection as a function of the distance between a
+detector and the animal's activity centre, $\boldsymbol{X}$, a latent variable. 
 
 When defining a SCR model, it is standard to specify effects
 (e.g. behavioural effects, covariate effects, etc.) for the model
@@ -609,22 +615,33 @@ parameters. For example, allowing $D$ to vary over time and/or
 environmental covariates allows understanding of how animal density varies
 over space and time.
 
-Model selection for SCR is typically done by AIC
+Model selection for SCR is typically done via AIC
 \parencite{efford-schofield}, requiring all candidate models to be
-fitted. The likelihood involves a product of two-dimensional
+fitted. However, the likelihood involves a product of two-dimensional
 integrals, e.g., 
 
 \begin{equation} \label{eq:scr-lik}
-L(\boldsymbol{\theta}) = \frac{\{Da(\boldsymbol{\theta})\}^n \exp
-  \{-Da(\boldsymbol{\theta})\}}{n!} \times \binom{n}{n_1,...,n_c}
-\prod_{i=1}^n \frac{\int_{\mathbb{R}^2}
+L(\boldsymbol{\theta}) = % \frac{\{Da(\boldsymbol{\theta})\}^n \exp
+% \{-Da(\boldsymbol{\theta})\}}{n!}
+f(n, Da(\boldsymbol{\theta}))
+\times \binom{n}{n_1,...,n_c}
+\prod_{i=1}^n \lrbr{a(\boldsymbol{\theta})}^{-1} \int_{\mathbb{R}^2}
   \mathbb{P}(\boldsymbol{\omega}_i | \boldsymbol{X}; \boldsymbol{\theta}) d
-  \boldsymbol{X}}{a(\boldsymbol{\theta})},
+  \boldsymbol{X},
 \end{equation}
 
-represents a relatively simple SCR likelihood, as described in
-\textcite{borchersEfford2008}. Due to the general complexity of SCR
-likelihoods, model-fitting is  
+represents a relatively simple SCR likelihood. As described in
+\textcite{borchersEfford2008} the first term in the product, $f(n,
+Da(\boldsymbol{\theta}))$, 
+represents the Poisson probability of observing $n$ animals, where $D$
+represents animal density (assumed to be constant over time and space)
+and $a(\boldsymbol{\theta})$ represents the effective sampling
+area. The second term in the product represents the 
+probability of observing the $\boldsymbol{\omega}_i$'s, conditional
+on activity centres and model parameters. As the activity centres
+are latent (unobserved) variables, we must use a two-dimensional
+integral to integrate over all possible activity centres. Therefore,
+due to the general complexity of SCR likelihoods, model-fitting is   
 time-consuming, suggesting that score tests are likely a more
 efficient option for model selection. Refer to \textcite{secr-book}
 for more details on SCR models. 
@@ -657,8 +674,7 @@ and AD via level-based model selection, it becomes practicable to
 consider a candidate set beyond the original 15 models considered.
 
 A total of 44 mist nets were operated for nine or
-ten non-consecutive days in late May and June of each year, where each
-year is referred to as a `session'. We retain any 
+ten non-consecutive days in late May and June of each year. We retain any 
 records of individual birds being captured more than once in a
 day. 
 
@@ -672,11 +688,11 @@ day.
   \hline
   $D \sim 1$ & $\sigma \sim 1$  & $g_0 \sim 1$ & $g_0 \sim \text{behaviour}$ \\
   \hline
-  $D \sim \text{session}$ & $\sigma \sim \text{session}$ & $g_0 \sim
-                                                           \text{session}$
-             &  $g_0 \sim \text{session} + \text{behaviour}$ \\
+  $D \sim \text{year}$ & $\sigma \sim \text{year}$ & $g_0 \sim
+                                                           \text{year}$
+             &  $g_0 \sim \text{year} + \text{behaviour}$ \\
   \hline
-  $D \sim \text{session.trend}$ & $\sigma \sim \text{mixture}$ & $g_0 \sim
+  $D \sim \text{year.trend}$ & $\sigma \sim \text{mixture}$ & $g_0 \sim
                                                       \text{mixture}$ & \\
   \hline
 \end{tabular}
@@ -689,32 +705,33 @@ The effects for $D$, $g_0$ and $\sigma$ that we consider, represented in Table
 for further details:
 \begin{itemize}[label={}]
 \item `$\sim 1$' represents a parameter being held constant across
-  sessions, i.e. across years. For example, with $D \sim 1$, we have only one
-  estimate of $D$ and use it for all sessions;
-\item `$\sim \text{session}$' means a parameter varies across time ---
-  that is, it has session-specific
-  levels. For example, with $D \sim \text{session}$, we have a separate estimate
-  of $D$ for each session;
-\item `$\sim \text{session.trend}$' represents a trend across
-  sessions. With `$D \sim \text{session.trend}$', we  have $D(y) =
+  years. For example, with $D \sim 1$, we have only one
+  estimate of $D$ and use it for all years;
+\item `$\sim \text{year}$' means a parameter varies across time ---
+  that is, it has year-specific
+  levels. For example, with $D \sim \text{year}$, we have a separate estimate
+  of $D$ for each year;
+\item `$\sim \text{year.trend}$' represents a trend across
+  years. With `$D \sim \text{year.trend}$', we  have $D(y) =
   \exp(\beta_0 + \beta_1 y)$, 
-  where $y$ is the session number \parencite{borchersEfford2008}; 
+  where $y$ is the year number, starting from 1 for the first year of
+  data \parencite{borchersEfford2008};  
 \item `$\sim \text{mixture}$' denotes a
   two-class finite mixture model. For example, with `$\sigma \sim \text{mixture}$', we assume
   there are two groups in the population: Group 1 uses $\sigma_1$,
   and Group 2 uses $\sigma_2$. An 
   individual falls in Group 1 with probability $p$ and in Group 2
   with probability $(1-p)$, where group membership is unknown. These
-  estimates are pooled across sessions;  
+  estimates are pooled across years;  
 \item `$\sim \text{behaviour}$' represents a behavioural response to capture. With $g_0 \sim
   \text{behaviour}$, we have two estimates of $g_0$: one for individuals
-  captured previously in a session, and one for individuals
-  not yet captured in a session. These estimates are pooled
-  across sessions;
-\item `$\sim \text{session} + \text{behaviour}$' means we have
-  session-specific levels and a trap response -- e.g. with $g_0 \sim \text{session} +
+  captured previously in a year, and one for individuals
+  not yet captured in a year. These estimates are pooled
+  across years;
+\item `$\sim \text{year} + \text{behaviour}$' means we have
+  year-specific levels and a trap response -- e.g. with $g_0 \sim \text{year} +
   \text{behaviour}$, we fit a model with two separate estimates of $g_0$ for
-  each session: one for previously captured individuals, and one for
+  each year: one for previously captured individuals, and one for
   individuals not caught yet. 
 \end{itemize}
 
@@ -730,9 +747,9 @@ terms for $g_0$ and $\sigma$ within a tree. Therefore, we construct four
 trees for model selection: models with no mixture terms, models with
 mixture terms for $g_0$ only, models with mixture terms for
 $\sigma$ only, and models with mixture terms for $g_0$ and
-$\sigma$. \textcolor{red}{Refer to Appendix \ref{sec:model-sel-trees}
+$\sigma$. Refer to Appendix \ref{sec:model-sel-trees}
   for diagrams of these trees, labelled `Tree 1'
-to `Tree 4', respectively.}
+to `Tree 4', respectively.
 
 To conduct model selection, we apply the framework we described
 earlier to each tree, using score tests to
@@ -835,7 +852,7 @@ model remains unchanged).
     difference in AIC for all $H_1$ models, relative to the $H_0$ model
     from the previous level (`$\Delta$AIC'). The selected
     model from each group is shown in bold. All values are reported to
-    1 dp (or 1 sf, where appropriate).}  
+    2 dp (or 1 sf, where appropriate).}  
   \label{table:score-table}
   \centering
   \begin{tabularx}{0.8\textwidth} { 
@@ -862,17 +879,17 @@ model remains unchanged).
                                                       $\boldsymbol{0.001}$
                                                  &
                                                    $\boldsymbol{-6.4}$    \\
-          & \DSession, \gconst, \sigmaconst & 4 & 1.1 & 1.1 & 0.3 & 0.9 \\
-          & \Dsession, \gconst, \sigmaconst & 7 & 3.2 & 3.2 & 0.5 & 4.8 \\
-          & \Dconst, \gsession, \sigmaconst & 7 & 4.8 & 4.7 & 0.3 & 3.3 \\
-          & \Dconst, \gconst, \sigmasession & 7 & 5.2 & 5.0 & 0.3 & 3
+          & \DSession, \gconst, \sigmaconst & 4 & 1.1 & 1.1 & 0.29 & 0.9 \\
+          & \Dsession, \gconst, \sigmaconst & 7 & 3.2 & 3.2 & 0.53 & 4.8 \\
+          & \Dconst, \gsession, \sigmaconst & 7 & 4.8 & 4.7 & 0.31 & 3.3 \\
+          & \Dconst, \gconst, \sigmasession & 7 & 5.2 & 5.0 & 0.27 & 3
     \\
     \hdashline
-    2 & \DSession, \gbehav, \sigmaconst & 5 & 1.0 & 1.0 & 0.3 & 1.0 \\
-          & \Dsession, \gbehav, \sigmaconst & 8 & 3.2 & 3.2 & 0.5 & 4.8 \\
-          & \Dconst, \gsessionbehav, \sigmaconst & 8 & 5.6 & 5.3 & 0.2
+    2 & \DSession, \gbehav, \sigmaconst & 5 & 1.0 & 1.0 & 0.31 & 1.0 \\
+          & \Dsession, \gbehav, \sigmaconst & 8 & 3.2 & 3.2 & 0.53 & 4.8 \\
+          & \Dconst, \gsessionbehav, \sigmaconst & 8 & 5.6 & 5.3 & 0.23
                                                  & 2.7 \\
-          & \Dconst, \gbehav, \sigmasession & 8 & 6.3 & 6.0 & 0.2 & 2.0
+          & \Dconst, \gbehav, \sigmasession & 8 & 6.3 & 6.0 & 0.18 & 2.0
     \\
     \hline
     \multicolumn{7}{ c }{Tree 2} \\ 
@@ -887,9 +904,9 @@ model remains unchanged).
                                                       \textbf{-}
     \\
     \hdashline
-    1 & \DSession, \gmix, \sigmaconst & 6 & 1.1 & 1.1 & 0.3 & 0.9 \\
-          & \Dsession, \gmix, \sigmaconst & 9 & 3.2 & 3.2 & 0.5 & 4.8 \\
-          & \Dconst, \gmix, \sigmasession & 9 & 4.2 & 4.2 & 0.4 & 3.8 \\
+    1 & \DSession, \gmix, \sigmaconst & 6 & 1.1 & 1.1 & 0.28 & 0.9 \\
+          & \Dsession, \gmix, \sigmaconst & 9 & 3.2 & 3.2 & 0.53 & 4.8 \\
+          & \Dconst, \gmix, \sigmasession & 9 & 4.2 & 4.2 & 0.38 & 3.8 \\
     \hline
     \multicolumn{7}{ c }{Tree 3} \\ 
     \hline
@@ -905,14 +922,14 @@ model remains unchanged).
                                                       $\boldsymbol{0.0007}$
                                                  &
                                                    $\boldsymbol{-6.7}$  \\
-          & \DSession, \gconst, \sigmamix & 6 & 1.1 & 1.1 & 0.3 & 0.9 \\
-          & \Dsession, \gconst, \sigmamix & 9 & 3.2 & 3.2 & 0.5 & 4.8 \\
-          & \Dconst, \gsession, \sigmamix & 9 & 4.3 & 4.5 & 0.4 & 3.5 \\
+          & \DSession, \gconst, \sigmamix & 6 & 1.1 & 1.1 & 0.29 & 0.9 \\
+          & \Dsession, \gconst, \sigmamix & 9 & 3.2 & 3.2 & 0.53 & 4.8 \\
+          & \Dconst, \gsession, \sigmamix & 9 & 4.3 & 4.5 & 0.37 & 3.5 \\
     \hdashline
-    2 & \DSession, \gbehav, \sigmamix & 7 & 1.0 & 1.0 & 0.3 & 1.0 \\
-          & \Dsession, \gbehav, \sigmamix & 10 & 3.2 & 3.2 & 0.5 & 4.8
+    2 & \DSession, \gbehav, \sigmamix & 7 & 1.0 & 1.0 & 0.31 & 1.0 \\
+          & \Dsession, \gbehav, \sigmamix & 10 & 3.2 & 3.2 & 0.53 & 4.8
     \\
-          & \Dconst, \gsessionbehav, \sigmamix & 10 & 4.4 & 4.6 & 0.4
+          & \Dconst, \gsessionbehav, \sigmamix & 10 & 4.4 & 4.6 & 0.36
                                                  & 3.4
     \\
     \hline
@@ -928,8 +945,8 @@ model remains unchanged).
                                                             \textbf{-} 
     \\
     \hdashline
-    1 & \DSession, \gmix, \sigmamix & 7 & 1.1 & 1.1 & 0.3 & 0.9 \\
-          & \Dsession, \gmix, \sigmamix & 10 & 3.2 & 3.2 & 0.5 & 4.8 \\
+    1 & \DSession, \gmix, \sigmamix & 7 & 1.1 & 1.1 & 0.29 & 0.9 \\
+          & \Dsession, \gmix, \sigmamix & 10 & 3.2 & 3.2 & 0.53 & 4.8 \\
   \end{tabularx}
 \end{table}
 
@@ -970,38 +987,14 @@ techniques such as LRTs and comparing AIC values are often impractical for
 models of similar complexity, due to the time and resources required
 to fit all models in the candidate set. 
 
-\subsection{General considerations}
-\label{sec:disc-general}
-
-Generally, when performing model selection, it is necessary to take model
-uncertainty into account, e.g. via a bootstrap simulation, so standard
-errors are not underestimated. Furthermore, \textcite{mccreaMorgan2011} 
-recommend using simulation to select an appropriately conservative significance
-level, mitigating against an inflated false positive rate due to multiple
-tests. Lastly, with hierarchical model selection it is generally 
-possible to lose important model features. Therefore,
-\textcite{mccreaMorgan2011} suggest the incorporation of step-down
-tests, such as LRTs, in conjunction with score tests for model
-selection.
-
-\subsection{Applicability}
-\label{sec:disc-applicability}
-
-Our proposed model selection approach can be
-applied to a wide range of models, the only requirements are those
-underlying score tests. Therefore, applicability only requires
-standard regularity assumptions, similar to those   
-underlying LRTs. However, unlike LRTs, the local nature of score tests
-requires these assumptions only hold in a neighbourhood around
-$\thetaOneTilde$, rather than globally across the $H_1$ parameter
-space. For example, in Section
-\ref{sec:non-nested-and-boundary-consid} we only consider boundary
-estimates and unidentifiability at $\thetaOneTilde$. The applicability
-of our approach is therefore similar to, if not wider than, that of the
-commonly-used LRT. 
-
-\subsection{Observed vs expected information matrix}
-\label{sec:disc-obs-exp-mat}
+% Furthermore, \textcite{mccreaMorgan2011} 
+% recommend using simulation to select an appropriately conservative significance
+% level, mitigating against an inflated false positive rate due to multiple
+% tests. Lastly, with hierarchical model selection it is generally 
+% possible to lose important model features. Therefore,
+% \textcite{mccreaMorgan2011} suggest the incorporation of step-down
+% tests, such as LRTs, in conjunction with score tests for model
+% selection.
 
 It is possible to use the observed or expected information matrix to
 calculate score statistics, both have the same asymptotic
@@ -1058,8 +1051,22 @@ efficiency, using the LRT statistic may be more
 convenient. The asymptotic equivalence of score and LRT
 statistics means accuracy is likely to be preserved.
 
-\subsection{Concluding remarks}
-\label{sec:disc-conclusion}
+\textcolor{red}{Our proposed model selection approach can be
+applied to a wide range of models, the only requirements are those
+underlying score tests. Therefore, applicability only requires
+standard regularity assumptions, similar to those   
+underlying LRTs. However, unlike LRTs, the local nature of score tests
+requires these assumptions only hold in a neighbourhood around
+$\thetaOneTilde$, rather than globally across the $H_1$ parameter
+space. For example, in Section
+\ref{sec:non-nested-and-boundary-consid} we only consider boundary
+estimates and unidentifiability at $\thetaOneTilde$. The applicability
+of our approach is therefore similar to, if not wider than, that of the
+commonly-used LRT.}
+
+\textcolor{red}{Generally, when performing model selection, it is necessary to take model
+uncertainty into account, e.g. via a bootstrap simulation, so standard
+errors are not underestimated.}
 
 Harnessing recent software advancements with AD and the local nature
 of score tests, we present an approach that considerably improves the
@@ -1076,9 +1083,18 @@ the final model when running the level-based framework on multiple
 groups, due to potential bias in AIC when considering mixture
 models. Additionally, there is scope for simulation to confirm the absence of material
 benefit when using the expected information matrix, and further
-exploration of the implementation of considerations in Section \ref{sec:disc-general}.
+exploration of the implementation of considerations above regarding
+model uncertainty.
 
-\section{Appendix}
+\appendix
+
+% 1. Tell equations to follow subsections from this point forward
+\numberwithin{equation}{subsection} 
+
+% 2. (Optional) Force the prefix style explicitly if needed:
+% \renewcommand{\theequation}{\thesubsection.\arabic{equation}}
+
+\section{Appendix A}
 \label{sec:appendix}
 
 \subsection{Score test proofs}
@@ -1090,7 +1106,7 @@ consisting of one observation, $Y$. Therefore, $\llSimple$
 represents the $H_1$ log-likelihood. We assume the required
 regularity conditions for score tests hold. 
 
-\subsubsection{$E[\boldsymbol{u}_1(\thetaOneTilde^*)]=0$}
+\subsubsection*{$\boldsymbol{E[\boldsymbol{u}_1(\thetaOneTilde^*)]=0}$}
 \label{sec:exp-zero-proof}
 
 The $H_1$ log-likelihood can be expressed as: $\llSimple
@@ -1120,7 +1136,7 @@ $E[\scoreSimpleTrue]=0$. Similar reasoning holds as the dimension of
 the parameter space and dataset increases, so in general,
 $E[\boldsymbol{u}_1(\thetaOneTilde^*)]=0$. 
 
-\subsubsection{$\text{Var}\lrbr{\scoreU} = \mathcal{I}(\thetaOneTilde)$}
+\subsubsection*{$\boldsymbol{\text{Var}\lrbr{\scoreU} = \mathcal{I}(\thetaOneTilde)}$}
 \label{sec:var-info-equiv-proof}
 
 Below, we will
@@ -1165,7 +1181,7 @@ reasoning holds as model and data dimension increases -- thus,
 generally, $\text{Var}\lrbr{\boldsymbol{u}_1 (\thetaOne)} =
 \mathcal{I}(\thetaOne)$. 
 
-\subsubsection{LRT and S equivalence}
+\subsubsection*{LRT and S equivalence}
 \label{sec:lrt-s-equiv-proof}
 
 Below, we use $\ell(\thetaOneOD)$ in place of $\llSimple$ for
@@ -1220,7 +1236,7 @@ similar reasoning holds as model and data dimension increase.
 \subsection{Score test example}
 \label{sec:score-test-rtmb-ex}
 
-\subsubsection{RTMB implementation}
+\subsubsection*{RTMB implementation}
 \label{sec:rtmb-appendix}
 
 %% Code is from `RCode.R' in 'Score-test-paper' folder :) -- just note
@@ -1278,7 +1294,7 @@ S <- score.null %*% solve(info.null) %*% t(score.null)
 p.val <- 1 - pchisq(S, df=1)
 \end{lstlisting}
 
-\subsubsection{Symbolic differentiation}
+\subsubsection*{Symbolic differentiation}
 \label{sec:symb-diff-appendix}
 
 To find $S$ via symbol differentiation, the few lines of code from above
@@ -1603,9 +1619,11 @@ similar to the one in Section \ref{sec:rtmb-appendix}.
 \subsection{Score test model selection trees}
 \label{sec:model-sel-trees}
 
+\begin{landscape}
+  
 \begin{figure}[htbp!]
   \centering
-  \includegraphics[width=\textwidth, page=1]{TreeDiagrams.pdf}
+  \hspace*{-15mm}\includegraphics[page=1, scale=1]{TreeDiagrams.pdf}
   \caption{A visualisation of applying score test model selection via
     our level-based framework to `Tree 1' for the ovenbird data -- the
     tree without mixture effects. The $H_0$ model at each level is
@@ -1616,16 +1634,20 @@ similar to the one in Section \ref{sec:rtmb-appendix}.
 
 \begin{figure}[htbp!]
   \centering
-  \includegraphics[width=\textwidth, page=2]{TreeDiagrams.pdf}
+  \hspace*{-15mm}\includegraphics[page=2, scale=1]{TreeDiagrams.pdf}
   \caption{As in Figure \ref{fig:tree-1}, a visualisation of `Tree 2'
     for the ovenbird data, the tree where models have a mixture effect
     for $g_0$ and no mixture effect for $\sigma$.} 
   \label{fig:tree-2}
 \end{figure}
 
+\end{landscape}
+
+\begin{landscape}
+
 \begin{figure}[htbp!]
   \centering
-  \includegraphics[width=\textwidth, page=3]{TreeDiagrams.pdf}
+  \includegraphics[page=3, scale=1]{TreeDiagrams.pdf}
   \caption{As in Figure \ref{fig:tree-1}, a visualisation of `Tree 3'
     for the ovenbird data, the tree where models have a mixture effect
     for $\sigma$ and no mixture effect for $g_0$.} 
@@ -1634,16 +1656,18 @@ similar to the one in Section \ref{sec:rtmb-appendix}.
 
 \begin{figure}[htbp!]
   \centering
-  \includegraphics[width=\textwidth, page=4]{TreeDiagrams.pdf}
+  \includegraphics[page=4, scale=1]{TreeDiagrams.pdf}
   \caption{As in Figure \ref{fig:tree-1}, a visualisation of `Tree 4'
     for the ovenbird data, the tree where models have a mixture effect
     for $g_0$ and $\sigma$.} 
 \end{figure}
 
+\end{landscape}
+
 \subsection{AIC results}
 \label{sec:aic-res-app}
 
-\begin{table}[htbp]
+\begin{table}[htbp!]
   \caption{$\Delta$AIC values for all 45 models in the candidate set,
     obtained via standard practices (i.e. without using AD). The
     `Model' column contains model descriptions, `Number of parameters'
@@ -1709,8 +1733,6 @@ similar to the one in Section \ref{sec:rtmb-appendix}.
   \hline
 \end{tabularx}
 \end{table}
-
-\newpage
 
 \printbibliography
 
