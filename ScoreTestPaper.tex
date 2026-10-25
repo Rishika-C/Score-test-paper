@@ -555,10 +555,12 @@ a few models.
 
 When models are non-nested, the $H_0$ model cannot be obtained from
 the $H_1$ model. No $\thetaOneTilde$ vector exists, so a score test
-statistic cannot be calculated. Problems also arise when the
-regularity conditions underlying score tests do not hold. This may occur because 
-$\thetaOneTilde$ lies on the boundary of the parameter space or is
-unidentifiable under the $H_0$ model. The chi-squared distribution no
+statistic cannot be calculated. \textcolor{red}{Problems also arise when the
+regularity conditions underlying score tests do not hold. This may
+occur because the nuisance parameters (i.e., parameters estimated
+under $H_0$) in $\thetaOneTilde$ lie on the boundary of the parameter space, or
+because $\thetaOneTilde$ is 
+unidentifiable under the $H_0$ model.} The chi-squared distribution no
 longer holds for the null distribution, so the distribution must be
 derived explicitly or via simulation. For example,
 \textcite{andrews-2001} derives bespoke null distributions for
@@ -634,8 +636,8 @@ represents a relatively simple SCR likelihood. As described in
 \textcite{borchersEfford2008} the first term in the product, $f(n,
 Da(\boldsymbol{\theta}))$, 
 represents the Poisson probability of observing $n$ animals, where $D$
-represents animal density (assumed to be constant over time and space)
-and $a(\boldsymbol{\theta})$ represents the effective sampling
+is animal density (assumed constant over space and time)
+and $a(\boldsymbol{\theta})$ is the effective sampling
 area. The second term in the product represents the 
 probability of observing the $\boldsymbol{\omega}_i$'s, conditional
 on activity centres and model parameters. As the activity centres
@@ -708,8 +710,8 @@ for further details:
   years. For example, with $D \sim 1$, we have only one
   estimate of $D$ and use it for all years;
 \item `$\sim \text{year}$' means a parameter varies across time ---
-  that is, it has year-specific
-  levels. For example, with $D \sim \text{year}$, we have a separate estimate
+  that is, it has year-specific levels. For example, with $D \sim
+  \text{year}$, we have a separate estimate 
   of $D$ for each year;
 \item `$\sim \text{year.trend}$' represents a trend across
   years. With `$D \sim \text{year.trend}$', we  have $D(y) =
@@ -788,7 +790,8 @@ without AD) takes approximately 24.8 hours. As shown in Table
 15.7\% select the same final model as AIC -- a model with constant $D$ and
 $\sigma$ for all individuals across the survey years, and a behavioural
 response for $g_0$. Furthermore, score tests implemented with a
-threshold of 5\% also select this model.
+threshold of 5\% also select this model, despite this setting being
+less conservative.
 
 For more details, refer to Tables \ref{table:score-table} and
 \ref{table:aic-vals-score-tests}, which contain results for
@@ -1012,8 +1015,8 @@ require extensive time and resources.
 
 \textcite{catchpoleMorgan1996} and
 \textcite{mccreaMorgan2011} explored the benefits afforded by the
-expected information matrix. However, with the advancement of AD, these
-benefits are now outweighed by the convenience of the observed
+expected information matrix. However, with the advancement of AD, we
+believe these benefits are now outweighed by the convenience of the observed
 information matrix. \textcite{catchpoleMorgan1996} reported closer  
 alignment between score and LRT statistics with the expected information
 matrix. As shown in Section \ref{sec:ex-results}, this does not
@@ -1052,21 +1055,48 @@ convenient. The asymptotic equivalence of score and LRT
 statistics means accuracy is likely to be preserved.
 
 \textcolor{red}{Our proposed model selection approach can be
-applied to a wide range of models, the only requirements are those
-underlying score tests. Therefore, applicability only requires
-standard regularity assumptions, similar to those   
-underlying LRTs. However, unlike LRTs, the local nature of score tests
-requires these assumptions only hold in a neighbourhood around
-$\thetaOneTilde$, rather than globally across the $H_1$ parameter
-space. For example, in Section
-\ref{sec:non-nested-and-boundary-consid} we only consider boundary
-estimates and unidentifiability at $\thetaOneTilde$. The applicability
-of our approach is therefore similar to, if not wider than, that of the
-commonly-used LRT.}
+  applied to a wide range of models; the only requirements are those
+  underlying score tests. Therefore, applicability only requires
+  standard regularity assumptions, similar to those underlying
+  LRTs. However, violations of regularity assumptions that 
+  invalidate the chi-squared distribution for LRTs do not necessarily
+  affect score statistics, adding to the convenience of our
+  approach over traditional techniques. LRTs require generally
+  well-behaved likelihoods under the null and alternative hypotheses for
+  chi-squared asymptotics to hold
+  \parencite{vaartAsymptoticStatistics2012}. In contrast, the local  
+  nature of score tests means they only depend on the
+  the behaviour of the $H_1$ likelihood and its 
+  derivatives around
+  $\thetaOneTilde$ \parencite{rao1948}. Therefore, in Section
+  \ref{sec:non-nested-and-boundary-consid} we only consider nuisance
+  parameter boundary estimates and unidentifiability at
+  $\thetaOneTilde$. For example, if we have $H_0$ and $H_1$
+  likelihoods that are locally quadratic about $\thetaZeroMLE$ and $\thetaOneTilde$ but 
+  poorly behaved around the peak of the $H_1$ likelihood, LRT statistics may no longer be
+  chi-squared due to a violation of regularity conditions, whereas
+  score statistics likely remain unaffected. Furthermore,
+  \textcite{rao2005} describes how non-nuisance
+  parameters in $\thetaOneTilde$ lying on the boundary do not affect
+  the distribution of score statistics, unlike
+  LRT statistics. In such cases, elaborate derivations or
+  resource-intensive simulations are likely required to obtain
+  appropriate null distributions for LRT statistics.}
 
-\textcolor{red}{Generally, when performing model selection, it is necessary to take model
-uncertainty into account, e.g. via a bootstrap simulation, so standard
-errors are not underestimated.}
+\textcolor{red}{In Section \ref{sec:ex-results}, the models we consider are selected
+  for comparative purposes, not inferential purposes, and so we do
+  not interpret estimates from our final model. However, when the
+  final model is selected for inferential purposes, taking model
+  uncertainty into account, e.g. via a bootstrap simulation, is recommended
+  so standard errors are not underestimated
+  \parencite{mccreaMorganBreg2012}. As described in
+  \textcite{buckland1997}, this requires repeated resampling from the
+  data and performing model selection on each sample. Through repeated
+  implementation of model selection, time and resource savings from
+  our proposed approach will be amplified. Specifically, the time savings
+  from implementing AD with score tests for model selection instead of
+  traditional measures such as AIC (as considered in Section
+  \ref{sec:ex-results}) will become more pronounced.} 
 
 Harnessing recent software advancements with AD and the local nature
 of score tests, we present an approach that considerably improves the
@@ -1082,9 +1112,7 @@ Further work includes investigation of an alternative method to choose
 the final model when running the level-based framework on multiple
 groups, due to potential bias in AIC when considering mixture
 models. Additionally, there is scope for simulation to confirm the absence of material
-benefit when using the expected information matrix, and further
-exploration of the implementation of considerations above regarding
-model uncertainty.
+benefit when using the expected information matrix.
 
 \appendix
 
