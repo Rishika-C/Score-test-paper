@@ -1107,7 +1107,7 @@ benefit when using the expected information matrix.
 \appendix
 
 % 1. Tell equations to follow subsections from this point forward
-\numberwithin{equation}{subsection} 
+\numberwithin{equation}{section} 
 
 % 2. (Optional) Force the prefix style explicitly if needed:
 % \renewcommand{\theequation}{\thesubsection.\arabic{equation}}
@@ -1170,7 +1170,7 @@ $\text{Var}\lrbr{\scoreSimple} = \mathcal{I}(\thetaOneOD)$.
 Firstly, recall from Section \ref{sec:exp-zero-proof}:
 $E_Y[\scoreSimple] = \intSimple \llSimpleFirstDeriv \pdfSimple
 dy$. Therefore:
-\begin{equation}
+\begin{equation*}
   \label{eq:exp-deriv}
   \begin{split}
   \deltaThetaOneOD E_Y[\scoreSimple] & = \intSimple \deltaThetaOneOD \llSimpleFirstDeriv \pdfSimple
@@ -1179,7 +1179,7 @@ dy$. Therefore:
   \pdfSimple dy \\
   & = E_Y[\llSimpleSecondDeriv] + E_Y[\scoreSimpleCond^2]
   \end{split}
-\end{equation}
+\end{equation*}
 by the product rule of differentiation, and using the fact
 $\llSimpleFirstDeriv = \frac{f'(y;\thetaOneOD)}{\pdfSimple} \implies
 f'(y;\thetaOneOD) = \llSimpleFirstDeriv \pdfSimple$. As in
