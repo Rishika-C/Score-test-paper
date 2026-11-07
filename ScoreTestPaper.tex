@@ -622,7 +622,7 @@ Model selection for SCR is typically done via AIC
 fitted. However, the likelihood involves a product of two-dimensional
 integrals, e.g., 
 
-\begin{equation} \label{eq:scr-lik}
+\begin{equation*} \label{eq:scr-lik}
 L(\boldsymbol{\theta}) = % \frac{\{Da(\boldsymbol{\theta})\}^n \exp
 % \{-Da(\boldsymbol{\theta})\}}{n!}
 f(n, Da(\boldsymbol{\theta}))
@@ -630,7 +630,7 @@ f(n, Da(\boldsymbol{\theta}))
 \prod_{i=1}^n \lrbr{a(\boldsymbol{\theta})}^{-1} \int_{\mathbb{R}^2}
   \mathbb{P}(\boldsymbol{\omega}_i | \boldsymbol{X}; \boldsymbol{\theta}) d
   \boldsymbol{X},
-\end{equation}
+\end{equation*}
 
 represents a relatively simple SCR likelihood. As described in
 \textcite{borchersEfford2008} the first term in the product, $f(n,
@@ -1135,7 +1135,7 @@ $\scoreSimpleCond = \deltaThetaOneOD \log \lrbr{\pdfSimple} =
 Then, if $\thetaOneTildeODTrue$ represents the true parameter vector under
 $H_0$, the expectation of $\scoreSimpleTrue$ -- an expectation
 across datasets -- is given by:
-\begin{equation}
+\begin{equation*}
   \begin{split}
     E_Y\lrsq{\scoreSimpleTrueCond} & = \intSimple \left. \lrsq{\frac{1}{\pdfSimple}
         \deltaThetaOneOD \lrbr{\pdfSimple}} \right|_{\thetaOneTildeODTrue}
@@ -1144,7 +1144,7 @@ across datasets -- is given by:
     \right|_{\thetaOneTildeODTrue} dy = \left. \deltaThetaOneOD \lrbr{\intSimple
         \pdfSimple dy} \right|_{\thetaOneTildeODTrue} \\
   \end{split}
-\end{equation}
+\end{equation*}
 as under the assumed regularity conditions, the order of
 differentiation and integration can be swapped. 
 
@@ -1188,10 +1188,10 @@ allow swapping the order of differentiation and integration.
 
 As $E_Y [\scoreSimple] = 0 \implies \deltaThetaOneOD
 E_Y [\scoreSimple] = 0$, we therefore have:
-\begin{equation}
+\begin{equation*}
   E_Y[\llSimpleSecondDeriv] + E_Y[\scoreSimpleCond^2] = 0
   \iff E_Y[\scoreSimple^2] = -E_Y[\llSimpleSecondDeriv]
-\end{equation}
+\end{equation*}
 
 That is, $\text{Var}\lrbr{\scoreSimple} = \mathcal{I}(\thetaOneOD)$,
 by definition of the Fisher information. Once again, similar
